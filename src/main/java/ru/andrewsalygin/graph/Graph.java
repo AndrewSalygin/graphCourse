@@ -6,7 +6,7 @@ import java.util.HashMap;
  * @author Andrew Salygin
  */
 
-public abstract class AbstractGraph<T> {
+public abstract class Graph<T> {
     HashMap<Node<T>, HashMap<Node<T>, Integer>> graph;
 
     public abstract void addNode(T nodeName);
