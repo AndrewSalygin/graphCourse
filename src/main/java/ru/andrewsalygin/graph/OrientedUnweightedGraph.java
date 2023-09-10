@@ -47,12 +47,10 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
 
     }
 
-    @Override
-    public void addConnection(T nodeName, T otherNodeName, Integer weight) {
+    public final void addArc(T nodeName, T otherNodeName) {
 
     }
 
-    @Override
     public void deleteConnection(T nodeName, T otherNodeName) {
 
     }
