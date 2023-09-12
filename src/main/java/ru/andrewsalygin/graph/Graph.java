@@ -11,7 +11,7 @@ public abstract class Graph<T> {
     protected HashMap<Node<T>, HashMap<Node<T>, Integer>> graph;
 
     public abstract void addNode(T nodeName);
-    public abstract void addNode(T nodeName, List<T> otherNodeNames);
+    public abstract void addNode(T srcNodeName, List<T> destNodeNames);
     public abstract void deleteNode(T nodeName);
     protected abstract boolean isExistNode(Node<T> node);
 }
