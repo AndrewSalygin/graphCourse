@@ -1,5 +1,6 @@
 package ru.andrewsalygin.graph;
 
+import ru.andrewsalygin.graph.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.utils.NodeNotExistException;
 
@@ -62,13 +63,16 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
         graph.remove(nodeToDelete);
     }
 
+    @Override
+    public HashMap<Node<T>, Integer> getConnectedNodes(Integer nameNode) {
+        Node<Integer> tmpNode = new Node<>(nameNode);
+        return graph.get(tmpNode);
+    }
+
     public final void addArc(T srcNodeName, T destNodeName) {
         Node<T> srcNode = new Node<>(srcNodeName);
         Node<T> destNode = new Node<>(destNodeName);
-        if (!isExistNode(srcNode))
-            throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
-        if (!isExistNode(destNode))
-            throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
+        checkExistTwoNodes(srcNode, destNode);
         // получаем список существующих дуг
         HashMap<Node<T>, Integer> tmpHashMap = graph.getOrDefault(srcNode, new HashMap<>());
 
@@ -83,12 +87,30 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
 //        if (isrcNode)
 //    }
 
-    public void deleteConnection(T srcNodeName, T destNodeName) {
+    public final void deleteArc(T srcNodeName, T destNodeName) {
+        Node<T> srcNode = new Node<>(srcNodeName);
+        Node<T> destNode = new Node<>(destNodeName);
+        checkExistTwoNodes(srcNode, destNode);
 
+        // Получаю все ноды, с которыми имеет связь источник
+        HashMap<Node<T>, Integer> connectedNodes = graph.get(srcNode);
+        // Удаляю указанную ноду
+        if (connectedNodes.containsKey(destNode)) {
+            connectedNodes.remove(destNode);
+        } else {
+            throw new ConnectionNotExistException("Данной дуги между нодами не существует.");
+        }
     }
 
     @Override
     protected boolean isExistNode(Node<T> node) {
         return graph.containsKey(node);
+    }
+
+    protected void checkExistTwoNodes(Node<T> srcNode, Node<T> destNode) {
+        if (!isExistNode(srcNode))
+            throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
+        if (!isExistNode(destNode))
+            throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
     }
 }
