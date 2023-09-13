@@ -5,4 +5,5 @@ package ru.andrewsalygin.graph;
  */
 public class OrientedWeightedGraph<T> extends OrientedUnweightedGraph<T> {
     public final void addArc(T srcNodeName, T destNodeName, Integer weight) {}
+    public final void deleteArc(T srcNodeName, T destNodeName, Integer weight) {}
 }
