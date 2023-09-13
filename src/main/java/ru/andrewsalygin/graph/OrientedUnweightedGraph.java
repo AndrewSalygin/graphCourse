@@ -5,6 +5,7 @@ import ru.andrewsalygin.graph.utils.NodeNotExistException;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrew Salygin
@@ -45,7 +46,20 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
 
     @Override
     public void deleteNode(T nodeName) {
-
+        Node<T> nodeToDelete = new Node<>(nodeName);
+        if (!isExistNode(nodeToDelete))
+            throw new NodeNotExistException("Указанного узла не существует.");
+        // Прохожу по всем нодам
+        for (Map.Entry<Node<T>, HashMap<Node<T>, Integer>> entry : graph.entrySet()) {
+            // Получаю список нод к которым имеет связь текущая
+            HashMap<Node<T>, Integer> tmpHMNodes = entry.getValue();
+            // Ищу среди них удаляемую
+            if (tmpHMNodes.containsKey(nodeToDelete)) {
+                tmpHMNodes.remove(nodeToDelete);
+            }
+        }
+        // Удалить саму ноду
+        graph.remove(nodeToDelete);
     }
 
     public final void addArc(T srcNodeName, T destNodeName) {
