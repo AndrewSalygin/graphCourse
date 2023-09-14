@@ -7,7 +7,6 @@ import java.util.Objects;
  */
 public class Node {
     String nodeName;
-    int a = 5;
 
     public Node(String nodeName) {
         this.nodeName = nodeName;
