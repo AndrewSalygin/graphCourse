@@ -1,14 +1,19 @@
 package ru.andrewsalygin.graph;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * @author Andrew Salygin
  */
-public class Node<T> {
+public class Node<T> implements Serializable {
     T inf;
 
-    public Node(T inf) {
+    @JsonCreator
+    public Node(@JsonProperty("inf") T inf) {
         this.inf = inf;
     }
 

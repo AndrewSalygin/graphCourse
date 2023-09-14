@@ -1,5 +1,8 @@
 package ru.andrewsalygin.graph;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,7 +12,8 @@ import java.util.Map;
  * @author Andrew Salygin
  */
 
-public abstract class Graph<T> {
+public abstract class Graph<T> implements Serializable {
+    @JsonProperty("graph")
     protected HashMap<Node<T>, HashMap<Node<T>, Integer>> graph;
 
     public abstract void addNode(T nodeName);

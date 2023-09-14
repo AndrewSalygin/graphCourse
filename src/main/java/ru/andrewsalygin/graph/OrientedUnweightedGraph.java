@@ -1,10 +1,13 @@
 package ru.andrewsalygin.graph;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.utils.NodeNotExistException;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,14 +19,20 @@ import java.util.Map;
 public final void addNode(T srcNodeName, List<T> destNodeNames);
 public final void addArcs(T srcNodeName, List<T> destNodeName);
  */
-public class OrientedUnweightedGraph<T> extends Graph<T> {
+public class OrientedUnweightedGraph<T> extends Graph<T> implements Serializable {
+    // Пустой граф
     public OrientedUnweightedGraph() {
         graph = new HashMap<>();
     }
+    @JsonCreator
+    public OrientedUnweightedGraph(@JsonProperty("graph") HashMap<Node<T>, HashMap<Node<T>, Integer>> graph) {
+        this.graph = graph;
+    }
 
-    // For file
-//    public Graph() {
-//        graph = new HashMap<>();
+    // Json
+//    @JsonCreator
+//    public OrientedUnweightedGraph(@JsonProperty("json") HashMap<Node<T>, HashMap<Node<T>, Integer>> graph) {
+//        this.graph = graph;
 //    }
 
     // For copy
@@ -107,6 +116,10 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
     @Override
     protected HashMap<Node<T>, HashMap<Node<T>, Integer>> getGraph() {
         return graph;
+    }
+
+    public void setGraph(HashMap<Node<T>, HashMap<Node<T>, Integer>> graph) {
+        this.graph = graph;
     }
 
     protected void checkExistTwoNodes(Node<T> srcNode, Node<T> destNode) {
