@@ -13,7 +13,6 @@ import java.util.HashMap;
 public abstract class Graph {
     @JsonProperty("graph")
     protected HashMap<Node, HashMap<Node, Connection>> graph;
-
     public abstract void addNode(String nodeName);
     //  public abstract void addNode(T srcNodeName, List<String> destNodeNames);
     public abstract void deleteNode(String nodeName);
@@ -22,7 +21,8 @@ public abstract class Graph {
     public abstract HashMap<Node, Connection> getConnectedNodes(String nameNode);
     protected abstract boolean isExistNode(Node node);
 
-    public abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
+    protected abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
+    protected abstract void setGraph(OrientedUnweightedGraph graph);
 
     public abstract void saveGraphToFile(String pathFile) throws JsonProcessingException;
 }

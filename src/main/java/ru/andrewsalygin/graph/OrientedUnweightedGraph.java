@@ -1,5 +1,6 @@
 package ru.andrewsalygin.graph;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
@@ -25,6 +26,7 @@ public final void addNode(T srcNodeName, List<String> destNodeNames);
 public final void addArcs(T srcNodeName, List<String> destNodeName);
  */
 public class OrientedUnweightedGraph extends Graph {
+
     // Пустой граф
     public OrientedUnweightedGraph() {
         graph = new HashMap<>();
@@ -55,6 +57,7 @@ public class OrientedUnweightedGraph extends Graph {
             out.println(json);
         } catch (FileNotFoundException e) {}
     }
+
     // Конструктор для копии
     public void OrientedUnweightedGraph(OrientedUnweightedGraph currentGraph) {
 
@@ -136,6 +139,11 @@ public class OrientedUnweightedGraph extends Graph {
     @Override
     public HashMap<Node, HashMap<Node, Connection>> getGraph() {
         return graph;
+    }
+
+    @Override
+    protected void setGraph(OrientedUnweightedGraph graph) {
+
     }
 
     public void setGraph(HashMap<Node, HashMap<Node, Connection>> graph) {
