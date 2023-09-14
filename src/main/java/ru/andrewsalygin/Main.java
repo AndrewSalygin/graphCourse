@@ -2,25 +2,28 @@ package ru.andrewsalygin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.andrewsalygin.graph.Connection;
+import ru.andrewsalygin.graph.Node;
 import ru.andrewsalygin.graph.OrientedUnweightedGraph;
 import ru.andrewsalygin.graph.OrientedWeightedGraph;
+
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.HashMap;
 
 /**
  * @author Andrew Salygin
  */
 public class Main {
     public static void main(String[] args) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        OrientedWeightedGraph graph = new OrientedWeightedGraph();
+        OrientedUnweightedGraph graph = new OrientedUnweightedGraph();
         graph.addNode("5");
-        graph.addNode("7");
-        graph.addConnection("5", "7");
-        String mpJson = mapper.writeValueAsString(graph);
-        OrientedUnweightedGraph mpJsonValue = mapper.readValue(mpJson, OrientedUnweightedGraph.class);
-        System.out.println(mpJson);
+        graph.addNode("33");
+        graph.addConnection("5","33");
+        graph.saveGraphToFile("src/main/resources/file.txt");
+        OrientedUnweightedGraph orientedUnweightedGraph = new OrientedUnweightedGraph("src/main/resources/file.txt");
     }
 }
-
 
 /*
 ObjectMapper mapper = new ObjectMapper();
