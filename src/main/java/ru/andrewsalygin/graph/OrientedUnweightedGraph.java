@@ -1,15 +1,20 @@
 package ru.andrewsalygin.graph;
 
+import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.utils.NodeNotExistException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author Andrew Salygin
+ */
+
+/* TO DO:
+public final void addNode(T srcNodeName, List<T> destNodeNames);
+public final void addArcs(T srcNodeName, List<T> destNodeName);
  */
 public class OrientedUnweightedGraph<T> extends Graph<T> {
     public OrientedUnweightedGraph() {
@@ -27,6 +32,12 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
 //    }
 
     @Override
+    public HashMap<Node<T>, Integer> getConnectedNodes(T nameNode) {
+        Node<T> tmpNode = new Node<>(nameNode);
+        return graph.get(tmpNode);
+    }
+
+    @Override
     public void addNode(T nodeName) {
         Node<T> tmpNode = new Node<>(nodeName);
         // проверка на существование такой ноды
@@ -34,15 +45,6 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
             throw new NodeAlreadyExistException("Такая нода уже существует.");
         }
         graph.put(tmpNode, new HashMap<>());
-    }
-
-    @Override
-    public final void addNode(T srcNodeName, List<T> destNodeNames) {
-     //   Node<T> tmpNode = new Node<>(nodeName);
-        // проверка на существование такой ноды
-        // checkExistNode(nodeName);
-        // проверки на существование уже связей текущих
-     //   graph.put(tmpNode, new HashMap<>());
     }
 
     @Override
@@ -64,15 +66,15 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
     }
 
     @Override
-    public HashMap<Node<T>, Integer> getConnectedNodes(Integer nameNode) {
-        Node<Integer> tmpNode = new Node<>(nameNode);
-        return graph.get(tmpNode);
-    }
-
-    public final void addArc(T srcNodeName, T destNodeName) {
+    public void addConnection(T srcNodeName, T destNodeName) {
         Node<T> srcNode = new Node<>(srcNodeName);
         Node<T> destNode = new Node<>(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
+
+        if (getConnectedNodes(srcNodeName).containsKey(destNode)) {
+            throw new ConnectionAlreadyExistException("Такая дуга уже существует.");
+        }
+
         // получаем список существующих дуг
         HashMap<Node<T>, Integer> tmpHashMap = graph.getOrDefault(srcNode, new HashMap<>());
 
@@ -81,13 +83,8 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
         graph.put(srcNode, tmpHashMap);
     }
 
-//    public final void addArcs(T srcNodeName, List<T> destNodeName) {
-//        Node<T> srcNode = new Node<>(srcNodeName);
-//        Node<T> destNode = new Node<>(destNodeName);
-//        if (isrcNode)
-//    }
-
-    public final void deleteArc(T srcNodeName, T destNodeName) {
+    @Override
+    public  void deleteConnection(T srcNodeName, T destNodeName) {
         Node<T> srcNode = new Node<>(srcNodeName);
         Node<T> destNode = new Node<>(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
@@ -105,6 +102,11 @@ public class OrientedUnweightedGraph<T> extends Graph<T> {
     @Override
     protected boolean isExistNode(Node<T> node) {
         return graph.containsKey(node);
+    }
+
+    @Override
+    protected HashMap<Node<T>, HashMap<Node<T>, Integer>> getGraph() {
+        return graph;
     }
 
     protected void checkExistTwoNodes(Node<T> srcNode, Node<T> destNode) {
