@@ -3,7 +3,7 @@ package ru.andrewsalygin.graph;
 /**
  * @author Andrew Salygin
  */
-public class OrientedWeightedGraph<T> extends OrientedUnweightedGraph<T> {
-    public final void addConnection(T srcNodeName, T destNodeName, Integer weight) {}
-    public final void deleteConnection(T srcNodeName, T destNodeName, Integer weight) {}
+public class OrientedWeightedGraph extends OrientedUnweightedGraph {
+    public final void addConnection(String srcNodeName, String destNodeName, Integer weight) {}
+    public final void deleteConnection(String srcNodeName, String destNodeName, Integer weight) {}
 }

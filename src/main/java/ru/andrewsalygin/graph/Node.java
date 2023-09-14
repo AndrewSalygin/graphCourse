@@ -1,47 +1,41 @@
 package ru.andrewsalygin.graph;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * @author Andrew Salygin
  */
-public class Node<T> implements Serializable {
-    T inf;
+public class Node {
+    String nodeName;
+    int a = 5;
 
-    @JsonCreator
-    public Node(@JsonProperty("inf") T inf) {
-        this.inf = inf;
+    public Node(String nodeName) {
+        this.nodeName = nodeName;
     }
 
-    public T getInf() {
-        return inf;
+    public String getNodeName() {
+        return nodeName;
     }
 
-    public void setInf(T inf) {
-        this.inf = inf;
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Node<?> node = (Node<?>) o;
-        return Objects.equals(getInf(), node.getInf());
+        Node node = (Node) o;
+        return Objects.equals(getNodeName(), node.getNodeName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInf());
+        return Objects.hash(getNodeName());
     }
 
     @Override
     public String toString() {
-        return "Node{" +
-                "inf=" + inf +
-                '}';
+        return nodeName.toString();
     }
 }
