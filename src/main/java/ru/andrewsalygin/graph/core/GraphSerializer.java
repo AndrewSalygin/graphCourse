@@ -1,4 +1,4 @@
-package ru.andrewsalygin.graph;
+package ru.andrewsalygin.graph.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;

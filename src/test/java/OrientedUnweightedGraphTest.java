@@ -1,12 +1,12 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.andrewsalygin.graph.Node;
-import ru.andrewsalygin.graph.OrientedUnweightedGraph;
-import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
-import ru.andrewsalygin.graph.utils.ConnectionNotExistException;
-import ru.andrewsalygin.graph.utils.NodeAlreadyExistException;
-import ru.andrewsalygin.graph.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.core.Node;
+import ru.andrewsalygin.graph.core.OrientedUnweightedGraph;
+import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
+import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
+import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
+import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

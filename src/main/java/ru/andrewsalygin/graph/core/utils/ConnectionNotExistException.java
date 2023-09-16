@@ -1,4 +1,4 @@
-package ru.andrewsalygin.graph.utils;
+package ru.andrewsalygin.graph.core.utils;
 
 /**
  * @author Andrew Salygin

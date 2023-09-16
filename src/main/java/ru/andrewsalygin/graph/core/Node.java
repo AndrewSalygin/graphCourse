@@ -1,4 +1,4 @@
-package ru.andrewsalygin.graph;
+package ru.andrewsalygin.graph.core;
 
 import java.util.Objects;
 
@@ -17,12 +17,7 @@ public class Node {
     }
 
     public void setNodeName(String nodeName) {
-
         this.nodeName = nodeName;
-    }
-
-    public Node copy() {
-        return new Node(nodeName);
     }
     @Override
     public boolean equals(Object o) {

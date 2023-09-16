@@ -1,9 +1,9 @@
-package ru.andrewsalygin.graph;
+package ru.andrewsalygin.graph.core;
 
-import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
-import ru.andrewsalygin.graph.utils.ConnectionNotExistException;
-import ru.andrewsalygin.graph.utils.NodeAlreadyExistException;
-import ru.andrewsalygin.graph.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
+import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
+import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
+import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
 import java.util.HashMap;
 import java.util.Map;

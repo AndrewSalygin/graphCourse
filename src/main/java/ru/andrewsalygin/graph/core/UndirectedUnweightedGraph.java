@@ -1,7 +1,7 @@
-package ru.andrewsalygin.graph;
+package ru.andrewsalygin.graph.core;
 
-import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
-import ru.andrewsalygin.graph.utils.ConnectionNotExistException;
+import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
+import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 
 import java.util.HashMap;
 
