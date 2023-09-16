@@ -96,7 +96,7 @@ public class OrientedUnweightedGraph extends Graph {
     }
 
     @Override
-    public  void deleteConnection(String srcNodeName, String destNodeName) {
+    public void deleteConnection(String srcNodeName, String destNodeName) {
         Node srcNode = new Node(srcNodeName);
         Node destNode = new Node(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
@@ -107,7 +107,7 @@ public class OrientedUnweightedGraph extends Graph {
         if (connectedNodes.containsKey(destNode)) {
             connectedNodes.remove(destNode);
         } else {
-            throw new ConnectionNotExistException("Данной дуги между нодами не существует.");
+            throw new ConnectionNotExistException("Данной дуги между вершинами не существует.");
         }
     }
 
