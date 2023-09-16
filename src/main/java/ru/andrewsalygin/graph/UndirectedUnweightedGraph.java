@@ -1,5 +1,8 @@
 package ru.andrewsalygin.graph;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Andrew Salygin
  */

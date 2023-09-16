@@ -1,21 +1,12 @@
 package ru.andrewsalygin.graph;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.utils.NodeNotExistException;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.File;
 
 /**
  * @author Andrew Salygin
@@ -32,35 +23,24 @@ public class OrientedUnweightedGraph extends Graph {
         graph = new HashMap<>();
     }
 
-    // Конструктор для json
-    public OrientedUnweightedGraph(String pathFile) throws JsonProcessingException {
-        String fileContent = "";
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            fileContent = Files.readString(Paths.get(pathFile));
-        } catch (IOException e) {
-            throw new RuntimeException("Данного файла не существует.");
-        }
-        this.graph = mapper.readValue(fileContent, HashMap.class);
-    }
-
-
-    // Сохранение в json
-    public void saveGraphToFile(String pathFile) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(this.getGraph());
-        File f = new File(pathFile);
-        try {
-            f.createNewFile();
-        } catch (IOException e) {}
-        try (PrintWriter out = new PrintWriter(pathFile)) {
-            out.println(json);
-        } catch (FileNotFoundException e) {}
+    // Конструктор для файла
+    public OrientedUnweightedGraph(String pathFile) {
+        graph = GraphSerializer.openGraphFromFile(pathFile);
     }
 
     // Конструктор для копии
-    public void OrientedUnweightedGraph(OrientedUnweightedGraph currentGraph) {
-
+    public OrientedUnweightedGraph(OrientedUnweightedGraph currentGraph) {
+        graph = new HashMap<>();
+        HashMap<Node, HashMap<Node, Connection>> tmpGraph = new HashMap<>();
+        HashMap<Node, Connection> tmpHashMap;
+        for (Node currentNode : currentGraph.graph.keySet()) {
+            tmpHashMap = new HashMap<>();
+            for (Node currentDest : currentGraph.graph.get(currentNode).keySet()) {
+                tmpHashMap.put(currentDest, currentGraph.graph.get(currentNode).get(currentDest));
+            }
+            tmpGraph.put(currentNode, tmpHashMap);
+        }
+        graph = tmpGraph;
     }
 
     @Override
@@ -111,7 +91,7 @@ public class OrientedUnweightedGraph extends Graph {
         HashMap<Node, Connection> tmpHashMap = graph.getOrDefault(srcNode, new HashMap<>());
 
         // вес дуги 0 по умолчанию
-        tmpHashMap.put(destNode, new Connection("0"));
+        tmpHashMap.put(destNode, new Connection(0));
         graph.put(srcNode, tmpHashMap);
     }
 
@@ -139,15 +119,6 @@ public class OrientedUnweightedGraph extends Graph {
     @Override
     public HashMap<Node, HashMap<Node, Connection>> getGraph() {
         return graph;
-    }
-
-    @Override
-    protected void setGraph(OrientedUnweightedGraph graph) {
-
-    }
-
-    public void setGraph(HashMap<Node, HashMap<Node, Connection>> graph) {
-        this.graph = graph;
     }
 
     protected void checkExistTwoNodes(Node srcNode, Node destNode) {

@@ -17,9 +17,13 @@ public class Node {
     }
 
     public void setNodeName(String nodeName) {
+
         this.nodeName = nodeName;
     }
 
+    public Node copy() {
+        return new Node(nodeName);
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,6 +39,6 @@ public class Node {
 
     @Override
     public String toString() {
-        return nodeName.toString();
+        return nodeName;
     }
 }

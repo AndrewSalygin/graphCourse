@@ -6,17 +6,17 @@ import java.util.Objects;
  * @author Andrew Salygin
  */
 public class Connection {
-    String weight;
+    Integer weight;
 
-    public Connection(String weight) {
+    public Connection(Integer weight) {
         this.weight = weight;
     }
 
-    public String getWeight() {
+    public Integer getWeight() {
         return weight;
     }
 
-    public void setWeight(String weight) {
+    public void setWeight(Integer weight) {
         this.weight = weight;
     }
 
