@@ -1,7 +1,6 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.andrewsalygin.graph.Graph;
 import ru.andrewsalygin.graph.Node;
 import ru.andrewsalygin.graph.OrientedUnweightedGraph;
 import ru.andrewsalygin.graph.utils.ConnectionAlreadyExistException;
@@ -12,8 +11,6 @@ import ru.andrewsalygin.graph.utils.NodeNotExistException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Andrew Salygin
