@@ -19,3 +19,11 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Graph',
+                'Implementation-Version': version,
+                'Main-Class': 'ru.andrewsalygin.Main'
+    }
+}
