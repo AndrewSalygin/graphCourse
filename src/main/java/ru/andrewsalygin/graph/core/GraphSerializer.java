@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * @author Andrew Salygin
+ */
 public class GraphSerializer {
     public static void saveGraphToFile(String pathFile, Graph graph) {
         String result = "";
@@ -25,47 +28,42 @@ public class GraphSerializer {
         }
     }
 
-    public static HashMap<Node, HashMap<Node, Connection>> openGraphFromFile(String pathFile) {
-        try {
-            Scanner scanner = new Scanner(new File(pathFile));
-            String line;
-            Node tmpMainNode;
-            Node tmpNode;
-            int endBracket;
-            HashMap<Node, HashMap<Node, Connection>> tmpMap = new HashMap<>();
-            int semicolon;
-            int startBracket;
-            Connection tmpConnection;
-            HashMap<Node, Connection> tmpNodes;
-            while (scanner.hasNextLine()) {
-                line = scanner.nextLine();
+    public static HashMap<Object, HashMap<Object, Object>> openGraphFromFile(String pathFile) throws FileNotFoundException {
+        Scanner scanner = new Scanner(new File(pathFile));
+        String line;
+        Node tmpMainNode;
+        Node tmpNode;
+        int endBracket;
+        HashMap<Object, HashMap<Object, Object>> tmpMap = new HashMap<>();
+        int semicolon;
+        int startBracket;
+        Connection tmpConnection;
+        HashMap<Object, Object> tmpNodes;
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
 
-                // Здесь если параметров будет много, то в цикле проходить до
-                // каждого следующего параметра через запятую
+            // Здесь если параметров будет много, то в цикле проходить до
+            // каждого следующего параметра через запятую
 
-                endBracket = line.indexOf(')');
-                tmpMainNode = new Node(line.substring(1, endBracket));
+            endBracket = line.indexOf(')');
+            tmpMainNode = new Node(line.substring(1, endBracket));
+            startBracket = line.indexOf('(', endBracket);
+            while (startBracket != -1) {
+                endBracket = line.indexOf(')', startBracket);
+                tmpNode = new Node(line.substring(startBracket + 1, endBracket));
+                startBracket = endBracket + 1;
+                endBracket = line.indexOf(']', startBracket);
+                tmpConnection = new Connection(Integer.parseInt(line.substring(startBracket + 1, endBracket)));
+                tmpNodes = tmpMap.getOrDefault(tmpMainNode, new HashMap<>());
+                tmpNodes.put(tmpNode, tmpConnection);
+                tmpMap.put(tmpMainNode, tmpNodes);
                 startBracket = line.indexOf('(', endBracket);
-                while (startBracket != -1) {
-                    endBracket = line.indexOf(')', startBracket);
-                    tmpNode = new Node(line.substring(startBracket + 1, endBracket));
-                    startBracket = endBracket + 1;
-                    endBracket = line.indexOf(']', startBracket);
-                    tmpConnection = new Connection(Integer.parseInt(line.substring(startBracket + 1, endBracket)));
-                    tmpNodes = tmpMap.getOrDefault(tmpMainNode, new HashMap<>());
-                    tmpNodes.put(tmpNode, tmpConnection);
-                    tmpMap.put(tmpMainNode, tmpNodes);
-                    startBracket = line.indexOf('(', endBracket);
-                }
-                if (!tmpMap.containsKey(tmpMainNode)) {
-                    tmpMap.put(tmpMainNode, new HashMap<>());
-                }
             }
-            scanner.close();
-            return tmpMap;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            if (!tmpMap.containsKey(tmpMainNode)) {
+                tmpMap.put(tmpMainNode, new HashMap<>());
+            }
         }
-        return null;
+        scanner.close();
+        return tmpMap;
     }
 }

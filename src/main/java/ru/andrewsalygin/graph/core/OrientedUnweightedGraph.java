@@ -5,6 +5,7 @@ import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,15 +18,30 @@ public final void addNode(T srcNodeName, List<String> destNodeNames);
 public final void addArcs(T srcNodeName, List<String> destNodeName);
  */
 public class OrientedUnweightedGraph extends Graph {
-
     // Пустой граф
     public OrientedUnweightedGraph() {
         graph = new HashMap<>();
     }
 
+    // Конструктор для переданной мапы
+    public OrientedUnweightedGraph(HashMap<Object, HashMap<Object, Object>> map) {
+        HashMap<Node, HashMap<Node, Connection>> correctMap = new HashMap<>();
+        HashMap<Node, Connection> tmpHashMap;
+        for (Object currentNode : map.keySet()) {
+            tmpHashMap = new HashMap<>();
+            for (Object currentDest : map.get(currentNode).keySet()) {
+                tmpHashMap.put((Node) currentDest, (Connection) map.get(currentNode).get(currentDest));
+            }
+            correctMap.put((Node) currentNode, tmpHashMap);
+        }
+
+        graph = correctMap;
+    }
+
     // Конструктор для файла
-    public OrientedUnweightedGraph(String pathFile) {
-        graph = GraphSerializer.openGraphFromFile(pathFile);
+    public OrientedUnweightedGraph(String pathFile) throws FileNotFoundException {
+        HashMap<Object, HashMap<Object, Object>> map = GraphSerializer.openGraphFromFile(pathFile);
+        graph = new OrientedUnweightedGraph(map).getGraph();
     }
 
     // Конструктор для копии
@@ -114,6 +130,11 @@ public class OrientedUnweightedGraph extends Graph {
     @Override
     protected boolean isExistNode(Node node) {
         return graph.containsKey(node);
+    }
+
+    @Override
+    protected boolean isExistNodeByName(String nodeName) {
+        return isExistNode(new Node(nodeName));
     }
 
     @Override

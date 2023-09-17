@@ -3,6 +3,7 @@ package ru.andrewsalygin.graph.core;
 import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 
 /**
@@ -12,8 +13,11 @@ public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
     public UndirectedUnweightedGraph() {
         super();
     }
-    public UndirectedUnweightedGraph(String pathFile) {
+    public UndirectedUnweightedGraph(String pathFile) throws FileNotFoundException {
         super(pathFile);
+    }
+    public UndirectedUnweightedGraph(HashMap<Object, HashMap<Object, Object>> map) {
+        super(map);
     }
     public UndirectedUnweightedGraph(UndirectedUnweightedGraph currentGraph) {
         super(currentGraph);

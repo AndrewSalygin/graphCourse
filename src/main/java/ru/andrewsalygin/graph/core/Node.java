@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * @author Andrew Salygin
  */
-public class Node {
+class Node {
     String nodeName;
 
     public Node(String nodeName) {
