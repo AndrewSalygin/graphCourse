@@ -1,13 +1,13 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.andrewsalygin.graph.core.Node;
 import ru.andrewsalygin.graph.core.OrientedUnweightedGraph;
 import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -19,9 +19,15 @@ import java.util.HashMap;
 // HM = HashMap
 class OrientedUnweightedGraphTest {
     private OrientedUnweightedGraph graph;
+    Class<?> nodeClass;
+    Constructor<?> constructorNode;
     @BeforeEach
-    void setUp() {
+    void setUp() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         graph = new OrientedUnweightedGraph();
+        nodeClass = Class.forName("ru.andrewsalygin.graph.core.Node");
+        Class<?>[] constructorParameterTypes = { String.class };
+        constructorNode = nodeClass.getDeclaredConstructor(constructorParameterTypes);
+        constructorNode.setAccessible(true);
     }
 
     // ТЕСТЫ ДЛЯ НОД
@@ -29,17 +35,15 @@ class OrientedUnweightedGraphTest {
     // ДОБАВЛЕНИЕ
     // Обычное добавление ноды
     @Test
-    void addNode_withoutExceptions() throws InvocationTargetException, IllegalAccessException {
+    void addNode_withoutExceptions() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
         Assertions.assertDoesNotThrow(() -> graph.addNode("5"));
         Method getGraph = null;
-        try {
-            getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getGraph = graph.getClass().getDeclaredMethod("getGraph");
         getGraph.setAccessible(true);
-        HashMap<Node, HashMap<Node, Integer>> localGraph = (HashMap<Node, HashMap<Node, Integer>>) getGraph.invoke(graph);
-        Assertions.assertEquals(true, localGraph.containsKey(new Node("5")));
+        Object node = constructorNode.newInstance("5");
+
+        HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
+        Assertions.assertEquals(true, localGraph.containsKey(node));
     }
 
     // Уже существование ноды, которая добавляется
@@ -58,17 +62,13 @@ class OrientedUnweightedGraphTest {
 
     // Удаление ноды, которая не связана с другими нодами
     @Test
-    void deleteNode_nodeExistWithoutOthers() throws IllegalAccessException, InvocationTargetException {
+    void deleteNode_nodeExistWithoutOthers() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         graph.addNode("5");
         Assertions.assertDoesNotThrow(() -> graph.deleteNode("5"));
         Method getGraph = null;
-        try {
-            getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getGraph = graph.getClass().getDeclaredMethod("getGraph");
         getGraph.setAccessible(true);
-        HashMap<Node, HashMap<Node, Integer>> localGraph = (HashMap<Node, HashMap<Node, Integer>>) getGraph.invoke(graph);
+        HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
         Assertions.assertEquals(true, localGraph.isEmpty());
     }
 
@@ -97,7 +97,7 @@ class OrientedUnweightedGraphTest {
 
     // В нодах источника есть несколько нод, и удаляется одна из их списка
     @Test
-    void deleteNode_nodeExistWithOneNodeToDeleteAndSeveralNodes() {
+    void deleteNode_nodeExistWithOneNodeToDeleteAndSeveralNodes() throws InvocationTargetException, InstantiationException, IllegalAccessException {
         graph.addNode("5");
         graph.addNode("7");
         graph.addNode("10");
@@ -106,30 +106,29 @@ class OrientedUnweightedGraphTest {
         graph.addConnection("7", "10");
         graph.addConnection("10", "7");
         Assertions.assertDoesNotThrow(() -> graph.deleteNode("5"));
-        HashMap<Node, Integer> tmpNodeList1 = new HashMap<>();
-        HashMap<Node, Integer> tmpNodeList2 = new HashMap<>();
-        tmpNodeList1.put(new Node("7"), 0);
-        tmpNodeList2.put(new Node("10"), 0);
-        Assertions.assertEquals(tmpNodeList2, graph.getConnectedNodes("7"));
-        Assertions.assertEquals(tmpNodeList1, graph.getConnectedNodes("10"));
+        HashMap<Object, Object> tmpNodeList1 = new HashMap<>();
+        HashMap<Object, Object> tmpNodeList2 = new HashMap<>();
+        Object node1 = constructorNode.newInstance("7");
+        Object node2 = constructorNode.newInstance("10");
+        tmpNodeList1.put(node1, 0);
+        tmpNodeList2.put(node2, 0);
+        Assertions.assertTrue(graph.getConnectedNodes("7").containsKey(constructorNode.newInstance("10")));
+        Assertions.assertTrue(graph.getConnectedNodes("10").containsKey(constructorNode.newInstance("7")));
     }
 
     // ТЕСТЫ ДЛЯ ДУГ
 
     // Тест на добавление петли (обычный)
     @Test
-    void addArc_withLoop() throws IllegalAccessException, InvocationTargetException {
+    void addArc_withLoop() throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         graph.addNode("5");
         Assertions.assertDoesNotThrow(() -> graph.addConnection("5", "5"));
         Method getGraph = null;
-        try {
-            getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getGraph = graph.getClass().getDeclaredMethod("getGraph");
         getGraph.setAccessible(true);
-        HashMap<Node, HashMap<Node, Integer>> localGraph = (HashMap<Node, HashMap<Node, Integer>>) getGraph.invoke(graph);
-        Assertions.assertEquals(true, localGraph.get(new Node("5")).containsKey(new Node("5")));
+        Object node = constructorNode.newInstance("5");
+        HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
+        Assertions.assertEquals(true, localGraph.get(node).containsKey(node));
     }
 
     // Тест на проверку добавления петли, которая уже существует
@@ -142,53 +141,45 @@ class OrientedUnweightedGraphTest {
 
     // Тест на удаление петли
     @Test
-    void deleteArc_withLoop() throws InvocationTargetException, IllegalAccessException {
+    void deleteArc_withLoop() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         graph.addNode("5");
         graph.addConnection("5", "5");
         Assertions.assertDoesNotThrow(() -> graph.deleteConnection("5", "5"));
         Method getGraph = null;
-        try {
-            getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getGraph = graph.getClass().getDeclaredMethod("getGraph");
         getGraph.setAccessible(true);
-        HashMap<Node, HashMap<Node, Integer>> localGraph = (HashMap<Node, HashMap<Node, Integer>>) getGraph.invoke(graph);
-        Assertions.assertEquals(true, localGraph.get(new Node("5")).isEmpty());
+        Object node = constructorNode.newInstance("5");
+        HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
+        Assertions.assertEquals(true, localGraph.get(node).isEmpty());
     }
 
     // Тест на удаление ноды с петлёй
     @Test
-    void deleteNode_withLoop() throws InvocationTargetException, IllegalAccessException {
+    void deleteNode_withLoop() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         graph.addNode("5");
         graph.addConnection("5", "5");
         Assertions.assertDoesNotThrow(() -> graph.deleteNode("5"));
         Method getGraph = null;
-        try {
-            getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getGraph = graph.getClass().getDeclaredMethod("getGraph");
         getGraph.setAccessible(true);
-        HashMap<Node, HashMap<Node, Integer>> localGraph = (HashMap<Node, HashMap<Node, Integer>>) getGraph.invoke(graph);
-        Assertions.assertEquals(false, localGraph.containsKey(new Node("5")));
+        Object node = constructorNode.newInstance("5");
+        HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
+        Assertions.assertEquals(false, localGraph.containsKey(node));
     }
 
     // Обычное добавление дуги
     @Test
-    void addArc_withEmptyHMAndTwoNodes() throws InvocationTargetException, IllegalAccessException {
+    void addArc_withEmptyHMAndTwoNodes() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         graph.addNode("5");
         graph.addNode("7");
         Assertions.assertDoesNotThrow(() -> graph.addConnection("5", "7"));
         Method getGraph = null;
-        try {
-            getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getGraph = graph.getClass().getDeclaredMethod("getGraph");
         getGraph.setAccessible(true);
-        HashMap<Node, HashMap<Node, Integer>> localGraph = (HashMap<Node, HashMap<Node, Integer>>) getGraph.invoke(graph);
-        Assertions.assertEquals(true, localGraph.get(new Node("5")).containsKey(new Node("7")));
+        Object node1 = constructorNode.newInstance("5");
+        Object node2 = constructorNode.newInstance("7");
+        HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
+        Assertions.assertEquals(true, localGraph.get(node1).containsKey(node2));
     }
 
     // Добавление дуги, но ноды источника не существует
@@ -238,20 +229,17 @@ class OrientedUnweightedGraphTest {
 
     // Обычное удаление дуги, которая соединяет две ноды
     @Test
-    void deleteArc_betweenTwoNodes() throws InvocationTargetException, IllegalAccessException {
+    void deleteArc_betweenTwoNodes() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         graph.addNode("5");
         graph.addNode("7");
         graph.addConnection("5", "7");
         Assertions.assertDoesNotThrow(() -> graph.deleteConnection("5", "7"));
         Method getGraph = null;
-        try {
-            getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getGraph = graph.getClass().getDeclaredMethod("getGraph");
         getGraph.setAccessible(true);
-        HashMap<Node, HashMap<Node, Integer>> localGraph = (HashMap<Node, HashMap<Node, Integer>>) getGraph.invoke(graph);
-        Assertions.assertEquals(false, localGraph.get(new Node("5")).containsKey(new Node("5")));
+        Object node = constructorNode.newInstance("5");
+        HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
+        Assertions.assertEquals(false, localGraph.get(node).containsKey(node));
     }
 
     // Удаление дуги, которая существует в ту сторону, но не в обратную
@@ -266,37 +254,30 @@ class OrientedUnweightedGraphTest {
     // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
     // Проверка работоспособности метода существования ноды (нода существует)
     @Test
-    void isExistNode_nodeExist() {
+    void isExistNode_nodeExist() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         graph.addNode("5");
-        try {
-            Method isExistMethod = OrientedUnweightedGraph.class.getDeclaredMethod("isExistNode", Node.class);
-            isExistMethod.setAccessible(true);
-            Assertions.assertEquals(true, isExistMethod.invoke(graph, new Node("5")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Method isExistMethod = OrientedUnweightedGraph.class.getDeclaredMethod("isExistNodeByName", String.class);
+        isExistMethod.setAccessible(true);
+        Assertions.assertEquals(true, isExistMethod.invoke(graph, "5"));
     }
 
     // Проверка работоспособности метода существования ноды (нода не существует)
     @Test
-    void isExistNode_nodeNotExist() {
-        try {
-            Method isExistMethod = OrientedUnweightedGraph.class.getDeclaredMethod("isExistNode", Node.class);
-            isExistMethod.setAccessible(true);
-            Assertions.assertEquals(false, isExistMethod.invoke(graph, new Node("5")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    void isExistNode_nodeNotExist() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Method isExistMethod = OrientedUnweightedGraph.class.getDeclaredMethod("isExistNodeByName", String.class);
+        isExistMethod.setAccessible(true);
+        Assertions.assertEquals(false, isExistMethod.invoke(graph, "5"));
     }
 
     // Тест для получения списка нод
     @Test
-    void getConnectedNodes_test() {
+    void getConnectedNodes_test() throws InvocationTargetException, InstantiationException, IllegalAccessException {
         graph.addNode("5");
         graph.addNode("7");
         graph.addConnection("5", "7");
-        HashMap<Node, Integer> connectedNodes = new HashMap<>();
-        connectedNodes.put(new Node("7"), 0);
-        Assertions.assertEquals(connectedNodes, graph.getConnectedNodes("5"));
+        HashMap<Object, Object> connectedNodes = new HashMap<>();
+        Object node = constructorNode.newInstance("7");
+        connectedNodes.put(node, 0);
+        Assertions.assertEquals(true, graph.getConnectedNodes("5").containsKey(constructorNode.newInstance("7")));
     }
 }
