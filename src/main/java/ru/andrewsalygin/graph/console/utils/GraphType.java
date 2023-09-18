@@ -1,4 +1,4 @@
-package ru.andrewsalygin.graph.console;
+package ru.andrewsalygin.graph.console.utils;
 
 public enum GraphType {
     ORIENTED_UNWEIGHTED(2000),
@@ -6,6 +6,5 @@ public enum GraphType {
     UNDIRECTED_UNWEIGHTED(2002),
     UNDIRECTED_WEIGHTED(2003);
 
-    GraphType(int i) {
-    }
+    GraphType(int i) {}
 }

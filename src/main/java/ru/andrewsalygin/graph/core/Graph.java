@@ -16,7 +16,7 @@ public abstract class Graph {
     public abstract void deleteConnection(String srcNodeName, String destNodeName);
     public abstract HashMap<Node, Connection> getConnectedNodes(String nameNode);
     protected abstract boolean isExistNode(Node node);
-    protected abstract boolean isExistNodeByName(String nodeName);
-
+    public abstract boolean isExistNodeByName(String nodeName);
+    public abstract void printAdjacencyList();
     protected abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
 }

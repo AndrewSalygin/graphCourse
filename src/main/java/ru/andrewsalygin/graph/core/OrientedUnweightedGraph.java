@@ -40,7 +40,7 @@ public class OrientedUnweightedGraph extends Graph {
 
     // Конструктор для файла
     public OrientedUnweightedGraph(String pathFile) throws FileNotFoundException {
-        HashMap<Object, HashMap<Object, Object>> map = GraphSerializer.openGraphFromFile(pathFile);
+        HashMap<Object, HashMap<Object, Object>> map = GraphSerializer.openGraphFromFile(pathFile).t1();
         graph = new OrientedUnweightedGraph(map).getGraph();
     }
 
@@ -133,8 +133,15 @@ public class OrientedUnweightedGraph extends Graph {
     }
 
     @Override
-    protected boolean isExistNodeByName(String nodeName) {
+    public boolean isExistNodeByName(String nodeName) {
         return isExistNode(new Node(nodeName));
+    }
+
+    @Override
+    public void printAdjacencyList() {
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            System.out.print(entry.getKey() + ": ");
+        }
     }
 
     @Override
