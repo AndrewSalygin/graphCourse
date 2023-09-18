@@ -27,6 +27,9 @@ public class UndirectedWeightedGraph extends UndirectedUnweightedGraph {
         Node srcNode = new Node(srcNodeName);
         Node destNode = new Node(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
+        if (srcNode.equals(destNode)) {
+            throw new ConnectionNotExistException("Петлей в неориентированном графе быть не может.");
+        }
 
         if (getConnectedNodes(srcNodeName).containsKey(destNode)) {
             throw new ConnectionAlreadyExistException("Такое ребро уже существует.");

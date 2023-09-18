@@ -1,18 +1,14 @@
 package ru.andrewsalygin.graph.console;
 import ru.andrewsalygin.graph.console.utils.*;
 import ru.andrewsalygin.graph.core.*;
-import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
-import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
-import ru.andrewsalygin.graph.core.utils.Pair;
+import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
-import java.util.Optional;
 import java.util.Scanner;
 
-// Внутренние ошибки приложения #1 - #2 никогда не сработают, но в силу того, что компилятор капризный
-// в плане не инициализированных значений, в конце метода я выбрасываю InternalApplicationException
 public class Console {
     private static int printMainMenu() {
         System.out.println("Введите цифру действия, которое хотите выполнить:");
@@ -45,8 +41,8 @@ public class Console {
         System.out.println("Выберите тип графа:");
         System.out.println("1. Ориентированный невзвешенный граф");
         System.out.println("2. Ориентированный взвешенный граф");
-        System.out.println("3. Неориентированный без весовой граф");
-        System.out.println("4. Неориентированный весовой граф");
+        System.out.println("3. Неориентированный невзвешенный граф");
+        System.out.println("4. Неориентированный взвешенный граф");
         System.out.println("5. Вернуться назад");
         System.out.println("6. Выйти из программы");
         option = scanner.nextLine();
@@ -145,6 +141,8 @@ public class Console {
                 continue;
             } catch (ExitProgramException ex) {
                 return;
+            } catch (NumberFormatException ex) {
+                System.out.println("Введите цифру действия");
             }
         } while (true);
     }
@@ -278,7 +276,7 @@ public class Console {
                                 int weight;
                                 do {
                                     try {
-                                        weight = scanner.nextInt();
+                                        weight = Integer.parseInt(scanner.nextLine());
                                         break;
                                     } catch (InputMismatchException ex) {
                                         System.out.println("Ошибка: Введите число.");
@@ -294,7 +292,7 @@ public class Console {
                                 int weight;
                                 do {
                                     try {
-                                        weight = scanner.nextInt();
+                                        weight = Integer.parseInt(scanner.nextLine());
                                         break;
                                     } catch (InputMismatchException ex) {
                                         System.out.println("Ошибка: Введите число.");
@@ -331,6 +329,12 @@ public class Console {
                                 GraphSerializer.saveGraphToFile(path, graph);
                             } catch (FileNotFoundException e) {
                                 System.out.println("Ошибка: указанный файл не найден.");
+                            } catch (IOException e) {
+                                try {
+                                    throw new InternalApplicationException("Внутренняя ошибка приложения #1.");
+                                } catch (InternalApplicationException ex) {
+                                    System.out.println(ex.getMessage());
+                                }
                             }
                         }
                         case "6" -> {
@@ -343,7 +347,9 @@ public class Console {
                 }
             } catch (InputMismatchException|NumberFormatException ex) {
                 System.out.println("Введите цифру пункта меню.");
-                option = scanner.nextLine();
+            } catch (ConnectionAlreadyExistException | ConnectionNotExistException | NodeNotExistException |
+                     NodeAlreadyExistException ex) {
+                System.out.println("Ошибка: " + ex.getMessage());
             }
         } while (true);
     }

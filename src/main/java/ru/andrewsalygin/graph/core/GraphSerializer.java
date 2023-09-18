@@ -4,11 +4,9 @@ import ru.andrewsalygin.graph.core.utils.Pair;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -16,7 +14,28 @@ import java.util.Scanner;
  * @author Andrew Salygin
  */
 public class GraphSerializer {
-    public static void saveGraphToFile(String pathFile, Graph graph) throws FileNotFoundException {
+    public static void saveGraphToFile(String pathFile, Graph graph) throws IOException {
+        int lastIndexSlash;
+        if (pathFile.lastIndexOf("\\") == -1) {
+            lastIndexSlash = pathFile.lastIndexOf("/");
+        } else {
+            lastIndexSlash = pathFile.lastIndexOf("\\");
+        }
+
+        String directoryPath = pathFile.substring(0, lastIndexSlash);
+        File directory = new File(directoryPath);
+
+        // Проверяем, существует ли директория, и создаем ее, если она не существует
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        File file = new File(directory, pathFile.substring(lastIndexSlash + 1));
+
+        if (file.createNewFile()) {
+            System.out.println("Файл успешно создан.");
+        }
+
         StringBuilder result = new StringBuilder();
         String className = graph.getClass().toString();
         int lastDot = className.lastIndexOf('.');

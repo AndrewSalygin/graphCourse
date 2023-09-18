@@ -25,10 +25,10 @@ public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
     public final void addConnection(String srcNodeName, String destNodeName) {
         Node srcNode = new Node(srcNodeName);
         Node destNode = new Node(destNodeName);
+        checkExistTwoNodes(srcNode, destNode);
         if (srcNode.equals(destNode)) {
             throw new ConnectionNotExistException("Петлей в неориентированном графе быть не может.");
         }
-        checkExistTwoNodes(srcNode, destNode);
 
         if (getConnectedNodes(srcNodeName).containsKey(destNode)) {
             throw new ConnectionAlreadyExistException("Такое ребро уже существует.");
