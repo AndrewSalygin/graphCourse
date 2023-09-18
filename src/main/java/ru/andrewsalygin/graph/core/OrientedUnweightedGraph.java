@@ -112,7 +112,7 @@ public class OrientedUnweightedGraph extends Graph {
     }
 
     @Override
-    public void deleteConnection(String srcNodeName, String destNodeName) {
+    public void deleteConnection(String srcNodeName, String destNodeName) throws ConnectionNotExistException {
         Node srcNode = new Node(srcNodeName);
         Node destNode = new Node(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
@@ -140,7 +140,11 @@ public class OrientedUnweightedGraph extends Graph {
     @Override
     public void printAdjacencyList() {
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
-            System.out.print(entry.getKey() + ": ");
+            System.out.print("(" + entry.getKey() + "):");
+            for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
+                System.out.print("(" + innerEntry.getKey() + ");");
+            }
+            System.out.println();
         }
     }
 

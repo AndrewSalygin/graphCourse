@@ -1,6 +1,7 @@
 package ru.andrewsalygin.graph.console;
 import ru.andrewsalygin.graph.console.utils.*;
 import ru.andrewsalygin.graph.core.*;
+import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 import ru.andrewsalygin.graph.core.utils.Pair;
 
@@ -42,8 +43,8 @@ public class Console {
         boolean wrongOption = true;
         String option;
         System.out.println("Выберите тип графа:");
-        System.out.println("1. Ориентированный без весовой граф");
-        System.out.println("2. Ориентированный весовой граф");
+        System.out.println("1. Ориентированный невзвешенный граф");
+        System.out.println("2. Ориентированный взвешенный граф");
         System.out.println("3. Неориентированный без весовой граф");
         System.out.println("4. Неориентированный весовой граф");
         System.out.println("5. Вернуться назад");
@@ -172,7 +173,11 @@ public class Console {
     private static void workWithGraph(Graph graph) {
         Scanner scanner = new Scanner(System.in);
         do {
+            graph.printAdjacencyList();
             System.out.println("Введите цифру действия, которое хотите выполнить:");
+            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
+                System.out.println("0. Обновить вес");
+            }
             System.out.println("1. Добавить вершину");
             System.out.println("2. Удалить вершину");
             if (graph instanceof UndirectedWeightedGraph || graph instanceof UndirectedUnweightedGraph) {
@@ -182,27 +187,52 @@ public class Console {
                 System.out.println("3. Добавить дугу");
                 System.out.println("4. Удалить дугу");
             }
-            System.out.println("5. Обновить вес");
-            System.out.println("6. Проверить существует ли вершина");
-            if (graph instanceof UndirectedWeightedGraph) {
-                System.out.println("7. Проверить существует ли ребро и вывести её вес");
-            } else if (graph instanceof UndirectedUnweightedGraph) {
-                System.out.println("7. Проверить существует ли ребро");
-            } else if (graph instanceof OrientedWeightedGraph) {
-                System.out.println("7. Проверить существует ли дуга и вывести её вес");
-            } else {
-                System.out.println("7. Проверить существует ли дуга");
-            }
-            System.out.println("8. Посмотреть список смежности");
-            System.out.println("9. Сохранить граф в файл");
-            System.out.println("10. Вернуться назад");
-            System.out.println("11. Выйти из программы");
+            System.out.println("5. Сохранить граф в файл");
+            System.out.println("6. Вернуться назад");
+            System.out.println("7. Выйти из программы");
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 1 && Integer.parseInt(option) <= 11) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
                     switch (option) {
+                        case "0" -> {
+                            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
+                                OrientedWeightedGraph tmpGraphOriented = null;
+                                UndirectedWeightedGraph tmpGraphUndirected = null;
+                                if (graph instanceof OrientedWeightedGraph) {
+                                    tmpGraphOriented = (OrientedWeightedGraph) graph;
+                                } else {
+                                    tmpGraphUndirected = (UndirectedWeightedGraph) graph;
+                                }
+
+                                System.out.println("Введите название вершины исхода (или 'выход' для выхода из действия):");
+                                String nodeSrc = scanner.nextLine();
+                                if (nodeSrc.equals("выход")) {
+                                    continue;
+                                }
+
+                                System.out.println("Введите название вершины захода (или 'выход' для выхода из действия):");
+                                String nodeDest = scanner.nextLine();
+                                if (nodeDest.equals("выход")) {
+                                    continue;
+                                }
+
+                                System.out.println("Введите обновлённое значение веса (или 'выход' для выхода из действия):");
+                                String weight = scanner.nextLine();
+                                if (nodeDest.equals("выход")) {
+                                    continue;
+                                }
+
+                                if (tmpGraphOriented != null) {
+                                    tmpGraphOriented.updateWeight(nodeSrc, nodeDest, Integer.parseInt(weight));
+                                } else {
+                                    tmpGraphUndirected.updateWeight(nodeSrc, nodeDest, Integer.parseInt(weight));
+                                }
+                            } else {
+                                System.out.println("Введите одну из цифр пункта меню.");
+                            }
+                        }
                         case "1" -> {
                             System.out.println("Введите название вершины для добавления:");
                             try {
@@ -220,7 +250,7 @@ public class Console {
                             }
                         }
                         case "3" -> {
-                            System.out.println("Введите название вершины источника (или 'выход' для выхода из действия):");
+                            System.out.println("Введите название вершины исхода (или 'выход' для выхода из действия):");
                             String nodeSrc = scanner.nextLine();
                             if (!graph.isExistNodeByName(nodeSrc) || nodeSrc.equals("выход")) {
                                 if (nodeSrc.equals("выход")) {
@@ -231,7 +261,7 @@ public class Console {
                                     }
                                 }
                             }
-                            System.out.println("Введите название вершины приемника (или 'выход' для выхода из действия):");
+                            System.out.println("Введите название вершины захода (или 'выход' для выхода из действия):");
                             String nodeDest = scanner.nextLine();
                             if (!graph.isExistNodeByName(nodeDest) || nodeDest.equals("выход")) {
                                 if (nodeDest.equals("выход")) {
@@ -277,64 +307,24 @@ public class Console {
                             }
                         }
                         case "4" -> {
-                            System.out.println("Введите название вершины источника (или 'выход' для выхода из действия):");
+                            System.out.println("Введите название вершины исхода (или 'выход' для выхода из действия):");
                             String nodeSrc = scanner.nextLine();
-                            if (!graph.isExistNodeByName(nodeSrc) || nodeSrc.equals("выход")) {
-                                if (nodeSrc.equals("выход")) {
-                                    continue;
-                                } else {
-                                    if (nodeError(graph, nodeSrc) == ReturnCode.CONTINUE_WHILE) {
-                                        continue;
-                                    }
-                                }
+                            if (nodeSrc.equals("выход")) {
+                                continue;
                             }
-                            System.out.println("Введите название вершины приемника (или 'выход' для выхода из действия):");
+
+                            System.out.println("Введите название вершины захода (или 'выход' для выхода из действия):");
                             String nodeDest = scanner.nextLine();
-                            if (!graph.isExistNodeByName(nodeDest) || nodeDest.equals("выход")) {
-                                if (nodeDest.equals("выход")) {
-                                    continue;
-                                } else {
-                                    if (nodeError(graph, nodeDest) == ReturnCode.CONTINUE_WHILE) {
-                                        continue;
-                                    }
-                                }
+                            if (nodeDest.equals("выход")) {
+                                continue;
                             }
-                            graph.deleteConnection(nodeSrc, nodeDest);
+                            try {
+                                graph.deleteConnection(nodeSrc, nodeDest);
+                            } catch (ConnectionNotExistException ex) {
+                                System.out.println("Ошибка: " + ex.getMessage());
+                            }
                         }
                         case "5" -> {
-                            System.out.println("Введите название вершины источника (или 'выход' для выхода из действия):");
-                            String nodeSrc = scanner.nextLine();
-                            if (!graph.isExistNodeByName(nodeSrc) || nodeSrc.equals("выход")) {
-                                if (nodeSrc.equals("выход")) {
-                                    continue;
-                                } else {
-                                    if (nodeError(graph, nodeSrc) == ReturnCode.CONTINUE_WHILE) {
-                                        continue;
-                                    }
-                                }
-                            }
-                            System.out.println("Введите название вершины приемника (или 'выход' для выхода из действия):");
-                            String nodeDest = scanner.nextLine();
-                            if (!graph.isExistNodeByName(nodeDest) || nodeDest.equals("выход")) {
-                                if (nodeDest.equals("выход")) {
-                                    continue;
-                                } else {
-                                    if (nodeError(graph, nodeDest) == ReturnCode.CONTINUE_WHILE) {
-                                        continue;
-                                    }
-                                }
-                            }
-                            // СДЕЛАТЬ ПУНКТ ТОЛЬКО ДЛЯ ВЕСОВЫХ ГРАФОВ
-//                            graph.updateWeight();
-                        }
-                        case "6" -> {
-
-                        }
-                        case "7" -> {}
-                        case "8" -> {
-                            // Сделать метод для отображения списка смежности
-                        }
-                        case "9" -> {
                             System.out.println("Введите путь до файла, в который нужно сохранить граф");
                             String path = scanner.nextLine();
                             try {
@@ -343,10 +333,10 @@ public class Console {
                                 System.out.println("Ошибка: указанный файл не найден.");
                             }
                         }
-                        case "10" -> {
+                        case "6" -> {
                             return;
                         }
-                        case "11" -> System.exit(0);
+                        case "7" -> System.exit(0);
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");

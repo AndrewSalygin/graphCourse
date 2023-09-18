@@ -1,9 +1,11 @@
 package ru.andrewsalygin.graph.core;
 
 import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
+import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Andrew Salygin
@@ -39,5 +41,30 @@ public class UndirectedWeightedGraph extends UndirectedUnweightedGraph {
         tmpHashMapDest.put(srcNode, new Connection(weight));
         graph.put(srcNode, tmpHashMapSrc);
         graph.put(destNode, tmpHashMapDest);
+    }
+
+    @Override
+    public void printAdjacencyList() {
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            System.out.print("(" + entry.getKey() + "):");
+            for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
+                System.out.print("(" + innerEntry.getKey() + ")[" + innerEntry.getValue() + "];");
+            }
+            System.out.println();
+        }
+    }
+
+    public void updateWeight(String srcNodeName, String destNodeName, Integer weight) {
+        Node srcNode = new Node(srcNodeName);
+        Node destNode = new Node(destNodeName);
+        checkExistTwoNodes(srcNode, destNode);
+
+        // Получаю все ноды, с которыми имеет связь источник
+        HashMap<Node, Connection> connectedNodes = graph.get(srcNode);
+        if (connectedNodes.containsKey(destNode)) {
+            connectedNodes.put(destNode, new Connection(weight));
+        } else {
+            throw new ConnectionNotExistException("Данного ребра между вершинами не существует.");
+        }
     }
 }
