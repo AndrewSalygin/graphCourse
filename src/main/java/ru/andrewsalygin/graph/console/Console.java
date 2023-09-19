@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+// TO DO: Если ребро уже существует может вы хотите поменять вес?
+// Локализовать (перевести) ошибки и интерфейс в одном файле
+// Файл не указан
+// Добавить быстрое открытие файла или сохранение
 public class Console {
     private static int printMainMenu() {
         System.out.println("Введите цифру действия, которое хотите выполнить:");
@@ -327,7 +332,10 @@ public class Console {
                             String path = scanner.nextLine();
                             try {
                                 GraphSerializer.saveGraphToFile(path, graph);
-                            } catch (FileNotFoundException e) {
+                            } catch (NameFileNotSpecifiedException e) {
+                                System.out.println("Ошибка: " + e.getMessage());
+                            }
+                            catch (FileNotFoundException e) {
                                 System.out.println("Ошибка: указанный файл не найден.");
                             } catch (IOException e) {
                                 try {

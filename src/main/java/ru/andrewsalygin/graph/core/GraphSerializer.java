@@ -1,5 +1,6 @@
 package ru.andrewsalygin.graph.core;
 
+import ru.andrewsalygin.graph.core.utils.NameFileNotSpecifiedException;
 import ru.andrewsalygin.graph.core.utils.Pair;
 
 import java.io.File;
@@ -14,23 +15,30 @@ import java.util.Scanner;
  * @author Andrew Salygin
  */
 public class GraphSerializer {
-    public static void saveGraphToFile(String pathFile, Graph graph) throws IOException {
+    public static void saveGraphToFile(String pathFile, Graph graph) throws IOException, NameFileNotSpecifiedException {
+        if (pathFile == "") {
+            throw new NameFileNotSpecifiedException("Название файла не указано.");
+        }
+
         int lastIndexSlash;
+        File file;
         if (pathFile.lastIndexOf("\\") == -1) {
             lastIndexSlash = pathFile.lastIndexOf("/");
         } else {
             lastIndexSlash = pathFile.lastIndexOf("\\");
         }
+        if (lastIndexSlash != -1) {
+            String directoryPath = pathFile.substring(0, lastIndexSlash);
+            File directory = new File(directoryPath);
 
-        String directoryPath = pathFile.substring(0, lastIndexSlash);
-        File directory = new File(directoryPath);
-
-        // Проверяем, существует ли директория, и создаем ее, если она не существует
-        if (!directory.exists()) {
-            directory.mkdirs();
+            // Проверяем, существует ли директория, и создаем ее, если она не существует
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            file = new File(directory, pathFile.substring(lastIndexSlash + 1));
+        } else {
+            file = new File(pathFile);
         }
-
-        File file = new File(directory, pathFile.substring(lastIndexSlash + 1));
 
         if (file.createNewFile()) {
             System.out.println("Файл успешно создан.");
