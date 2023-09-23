@@ -80,7 +80,7 @@ public class OrientedUnweightedGraph extends Graph {
     public void deleteNode(String nodeName) {
         Node nodeToDelete = getObjectNodeByName(nodeName);
         if (!isExistNode(nodeToDelete))
-            throw new NodeNotExistException("Указанного узла не существует.");
+            throw new NodeNotExistException("Указанной вершины не существует.");
         // Прохожу по всем нодам
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
             // Получаю список нод к которым имеет связь текущая
@@ -128,6 +128,21 @@ public class OrientedUnweightedGraph extends Graph {
         }
     }
 
+    public HashSet<String> getNodeNamesInThemTwoArcs(String nodeNameExistArc, String nodeNameNotExistArc) {
+        HashSet<String> resultSet = new HashSet<>();
+        Node nodeExistArc = getObjectNodeByName(nodeNameExistArc);
+        Node nodeNotExistArc = getObjectNodeByName(nodeNameNotExistArc);
+        checkExistTwoNodes(nodeExistArc, nodeNotExistArc);
+        HashMap<Node, Connection> tmpHMExist = graph.get(nodeExistArc);
+        HashMap<Node, Connection> tmpHMNotExist = graph.get(nodeNotExistArc);
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            if (tmpHMExist.containsKey(entry.getKey()) && !tmpHMNotExist.containsKey(entry.getKey())) {
+                resultSet.add(entry.getKey().nodeName);
+            }
+        }
+        return resultSet;
+    }
+
     @Override
     protected Node getObjectNodeByName(String nodeName) {
         return new Node(nodeName);
@@ -162,9 +177,9 @@ public class OrientedUnweightedGraph extends Graph {
 
     protected void checkExistTwoNodes(Node srcNode, Node destNode) {
         if (!isExistNode(srcNode))
-            throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
+            throw new NodeNotExistException("Вершины источника не существует в текущем графе.");
         if (!isExistNode(destNode))
-            throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
+            throw new NodeNotExistException("Вершины приемника не существует в текущем графе.");
     }
 }
 

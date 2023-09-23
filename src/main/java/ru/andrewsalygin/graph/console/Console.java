@@ -6,6 +6,7 @@ import ru.andrewsalygin.graph.core.utils.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -135,7 +136,7 @@ public class Console {
                         catch (FileNotFoundException e) {
                             System.out.println("Ошибка: указанный файл не найден.");
                         } catch (NotCorrectGraphNameException e) {
-                            System.out.println("Ошибка:" + e.getMessage());
+                            System.out.println("Ошибка: " + e.getMessage());
                         }
                     }
                     case 3 -> {
@@ -164,7 +165,7 @@ public class Console {
                 try {
                     graph.addNode(nodeName);
                 } catch (Exception e) {
-                    System.out.println("Ошибка:" + e.getMessage());
+                    System.out.println("Ошибка: " + e.getMessage());
                 }
             } else {
                 return ReturnCode.CONTINUE_WHILE;
@@ -193,11 +194,14 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            if (!(graph instanceof UndirectedUnweightedGraph)) {
+                System.out.println("8. Существует ли вершина, в которую есть дуга из вершины u, но нет из v");
+            }
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -241,7 +245,7 @@ public class Console {
                             try {
                                 graph.addNode(scanner.nextLine());
                             } catch (Exception ex) {
-                                System.out.println("Ошибка:" + ex.getMessage());
+                                System.out.println("Ошибка: " + ex.getMessage());
                             }
                         }
                         case "2" -> {
@@ -249,7 +253,7 @@ public class Console {
                             try {
                                 graph.deleteNode(scanner.nextLine());
                             } catch (Exception ex) {
-                                System.out.println("Ошибка:" + ex.getMessage());
+                                System.out.println("Ошибка: " + ex.getMessage());
                             }
                         }
                         case "3" -> {
@@ -349,6 +353,26 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            if (!(graph instanceof UndirectedUnweightedGraph)) {
+                                System.out.println("Введите название вершины u:");
+                                String uNode = scanner.nextLine();
+                                System.out.println("Введите название вершины v:");
+                                String vNode = scanner.nextLine();
+                                HashSet<String> nodesSet = graph.getNodeNamesInThemTwoArcs(uNode, vNode);
+                                if (nodesSet.isEmpty()) {
+                                    System.out.println("Таких вершин нет.");
+                                } else {
+                                    for (String node : graph.getNodeNamesInThemTwoArcs(uNode, vNode)) {
+                                        System.out.print(node + " ");
+                                    }
+                                    System.out.println();
+                                }
+                            }
+                            else {
+                                System.out.println("Введите одну из цифр пункта меню.");
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
