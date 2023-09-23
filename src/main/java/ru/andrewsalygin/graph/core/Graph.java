@@ -1,6 +1,7 @@
 package ru.andrewsalygin.graph.core;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * @author Andrew Salygin
@@ -17,4 +18,5 @@ public abstract class Graph {
     public abstract boolean isExistNodeByName(String nodeName);
     public abstract void printAdjacencyList();
     protected abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
+    public abstract HashSet<String> getAllNodesWhereOutDegreeMoreIn();
 }

@@ -7,6 +7,7 @@ import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -70,7 +71,7 @@ public class OrientedUnweightedGraph extends Graph {
         Node tmpNode = new Node(nodeName);
         // проверка на существование такой ноды
         if (isExistNode(tmpNode)) {
-            throw new NodeAlreadyExistException("Такая нода уже существует.");
+            throw new NodeAlreadyExistException("Такой узел уже существует.");
         }
         graph.put(tmpNode, new HashMap<>());
     }
@@ -125,6 +126,37 @@ public class OrientedUnweightedGraph extends Graph {
         } else {
             throw new ConnectionNotExistException("Данной дуги между вершинами не существует.");
         }
+    }
+
+    public int getOutDegreeNode(String nodeName) {
+        if (!isExistNode(new Node(nodeName))) {
+            throw new NodeNotExistException("Указанного узла не существует.");
+        }
+        return getConnectedNodes(nodeName).size();
+    }
+
+    public int getInDegreeNode(String nodeName) {
+        int inDegree = 0;
+        if (!isExistNode(new Node(nodeName))) {
+            throw new NodeNotExistException("Указанного узла не существует.");
+        }
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            if (entry.getValue().containsKey(new Node(nodeName))) {
+                inDegree++;
+            }
+        }
+        return inDegree;
+    }
+
+    @Override
+    public HashSet<String> getAllNodesWhereOutDegreeMoreIn() {
+        HashSet<String> resultSet = new HashSet<>();
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            if (getOutDegreeNode(entry.getKey().nodeName) > getInDegreeNode(entry.getKey().nodeName)) {
+                resultSet.add(entry.getKey().nodeName);
+            }
+        }
+        return resultSet;
     }
 
     @Override
