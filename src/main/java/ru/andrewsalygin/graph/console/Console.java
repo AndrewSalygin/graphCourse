@@ -6,6 +6,7 @@ import ru.andrewsalygin.graph.core.utils.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -193,7 +194,9 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
-            System.out.println("8. Вывести вершины, у которых полустепень исхода больше полустепени захода");
+            if (!(graph instanceof UndirectedUnweightedGraph)) {
+                System.out.println("8. Вывести вершины, у которых полустепень исхода больше полустепени захода");
+            }
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
@@ -351,11 +354,16 @@ public class Console {
                         }
                         case "7" -> System.exit(0);
                         case "8" -> {
-                            if (graph instanceof OrientedWeightedGraph || graph instanceof OrientedUnweightedGraph) {
-                                for (String node : graph.getAllNodesWhereOutDegreeMoreIn()) {
-                                    System.out.print(node + " ");
+                            if (!(graph instanceof UndirectedUnweightedGraph)) {
+                                HashSet<String> nodeNames = graph.getAllNodeNamesWhereOutDegreeMoreIn();
+                                if (!nodeNames.isEmpty()) {
+                                    for (String node : nodeNames) {
+                                        System.out.print(node + " ");
+                                    }
+                                    System.out.println();
+                                } else {
+                                    System.out.println("Таких вершин нет.");
                                 }
-                                System.out.println();
                             }
                             else {
                                 System.out.println("Введите одну из цифр пункта меню.");

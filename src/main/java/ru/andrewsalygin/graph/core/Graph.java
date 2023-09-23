@@ -18,6 +18,6 @@ public abstract class Graph {
     public abstract boolean isExistNodeByName(String nodeName);
     public abstract String getAdjacencyList();
     protected abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
-    public abstract HashSet<String> getAllNodesWhereOutDegreeMoreIn();
+    public abstract HashSet<String> getAllNodeNamesWhereOutDegreeMoreIn();
     protected abstract Node getObjectNodeByName(String nodeName);
 }

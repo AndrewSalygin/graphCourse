@@ -149,7 +149,7 @@ public class OrientedUnweightedGraph extends Graph {
     }
 
     @Override
-    public HashSet<String> getAllNodesWhereOutDegreeMoreIn() {
+    public HashSet<String> getAllNodeNamesWhereOutDegreeMoreIn() {
         HashSet<String> resultSet = new HashSet<>();
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
             if (getOutDegreeNode(entry.getKey().nodeName) > getInDegreeNode(entry.getKey().nodeName)) {
