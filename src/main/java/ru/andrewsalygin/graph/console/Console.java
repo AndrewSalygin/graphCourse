@@ -10,7 +10,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 
-// TO DO: Если ребро уже существует может вы хотите поменять вес?
+// TO DO: Если ребро уже существует: может вы хотите поменять вес?
 // Локализовать (перевести) ошибки и интерфейс в одном файле
 // Файл не указан
 // Добавить быстрое открытие файла или сохранение
@@ -104,7 +104,7 @@ public class Console {
     }
 
     private static Graph inputGraphFromFile(String path) throws BackToPreviousMenuException, ExitProgramException, FileNotFoundException, NotCorrectGraphNameException {
-        Graph graph = null;
+        Graph graph;
         Pair<HashMap<Object, HashMap<Object, Object>>, String> result = GraphSerializer.openGraphFromFile(path);
         graph = switch (result.t2()) {
             case "OrientedWeightedGraph" -> new OrientedWeightedGraph(result.t1());
@@ -183,7 +183,7 @@ public class Console {
             }
             System.out.println("1. Добавить вершину");
             System.out.println("2. Удалить вершину");
-            if (graph instanceof UndirectedWeightedGraph || graph instanceof UndirectedUnweightedGraph) {
+            if (graph instanceof UndirectedUnweightedGraph) {
                 System.out.println("3. Добавить ребро");
                 System.out.println("4. Удалить ребро");
             } else {
@@ -224,7 +224,7 @@ public class Console {
 
                                 System.out.println("Введите обновлённое значение веса (или 'выход' для выхода из действия):");
                                 String weight = scanner.nextLine();
-                                if (nodeDest.equals("выход")) {
+                                if (weight.equals("выход")) {
                                     continue;
                                 }
 

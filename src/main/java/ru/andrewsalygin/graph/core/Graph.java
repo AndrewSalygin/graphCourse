@@ -19,4 +19,5 @@ public abstract class Graph {
     public abstract String getAdjacencyList();
     protected abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
     public abstract HashSet<String> getAllNodesWhereOutDegreeMoreIn();
+    protected abstract Node getObjectNodeByName(String nodeName);
 }

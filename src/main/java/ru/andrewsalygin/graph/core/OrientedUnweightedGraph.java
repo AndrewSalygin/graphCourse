@@ -62,13 +62,13 @@ public class OrientedUnweightedGraph extends Graph {
 
     @Override
     public HashMap<Node, Connection> getConnectedNodes(String nameNode) {
-        Node tmpNode = new Node(nameNode);
+        Node tmpNode = getObjectNodeByName(nameNode);
         return graph.get(tmpNode);
     }
 
     @Override
     public void addNode(String nodeName) {
-        Node tmpNode = new Node(nodeName);
+        Node tmpNode = getObjectNodeByName(nodeName);
         // проверка на существование такой ноды
         if (isExistNode(tmpNode)) {
             throw new NodeAlreadyExistException("Такой узел уже существует.");
@@ -78,7 +78,7 @@ public class OrientedUnweightedGraph extends Graph {
 
     @Override
     public void deleteNode(String nodeName) {
-        Node nodeToDelete = new Node(nodeName);
+        Node nodeToDelete = getObjectNodeByName(nodeName);
         if (!isExistNode(nodeToDelete))
             throw new NodeNotExistException("Указанного узла не существует.");
         // Прохожу по всем нодам
@@ -96,8 +96,8 @@ public class OrientedUnweightedGraph extends Graph {
 
     @Override
     public void addConnection(String srcNodeName, String destNodeName) {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
 
         if (getConnectedNodes(srcNodeName).containsKey(destNode)) {
@@ -114,8 +114,8 @@ public class OrientedUnweightedGraph extends Graph {
 
     @Override
     public void deleteConnection(String srcNodeName, String destNodeName) throws ConnectionNotExistException {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
 
         // Получаю все ноды, с которыми имеет связь источник
@@ -160,13 +160,19 @@ public class OrientedUnweightedGraph extends Graph {
     }
 
     @Override
+    protected Node getObjectNodeByName(String nodeName) {
+        return new Node(nodeName);
+    }
+
+
+    @Override
     protected boolean isExistNode(Node node) {
         return graph.containsKey(node);
     }
 
     @Override
     public boolean isExistNodeByName(String nodeName) {
-        return isExistNode(new Node(nodeName));
+        return isExistNode(getObjectNodeByName(nodeName));
     }
 
     @Override
