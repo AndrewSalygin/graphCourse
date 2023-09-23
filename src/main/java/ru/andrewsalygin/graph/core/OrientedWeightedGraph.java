@@ -42,14 +42,17 @@ public class OrientedWeightedGraph extends OrientedUnweightedGraph {
     }
 
     @Override
-    public void printAdjacencyList() {
+    public String getAdjacencyList() {
+        StringBuilder resultString = new StringBuilder();
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
-            System.out.print("(" + entry.getKey() + "):");
+            resultString.append("(").append(entry.getKey()).append("):");
             for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
-                System.out.print("(" + innerEntry.getKey() + ")[" + innerEntry.getValue() + "];");
+                resultString.append("(").append(innerEntry.getKey()).append(")[").append(innerEntry.getValue()).append("];");
             }
-            System.out.println();
+            resultString.append('\n');
         }
+        return resultString.toString();
+
     }
 
     public void updateWeight(String srcNodeName, String destNodeName, Integer weight) {

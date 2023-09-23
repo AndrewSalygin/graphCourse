@@ -176,7 +176,7 @@ public class Console {
     private static void workWithGraph(Graph graph) {
         Scanner scanner = new Scanner(System.in);
         do {
-            graph.printAdjacencyList();
+            System.out.print(graph.getAdjacencyList());
             System.out.println("Введите цифру действия, которое хотите выполнить:");
             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
                 System.out.println("0. Обновить вес");
