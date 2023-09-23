@@ -16,7 +16,7 @@ public abstract class Graph {
     public abstract HashMap<Node, Connection> getConnectedNodes(String nameNode);
     protected abstract boolean isExistNode(Node node);
     public abstract boolean isExistNodeByName(String nodeName);
-    public abstract void printAdjacencyList();
+    public abstract String getAdjacencyList();
     protected abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
     protected abstract Node getObjectNodeByName(String nodeName);
     public abstract HashSet<String> getNodeNamesInThemTwoArcs(String nodeNameExistArc, String nodeNameNotExistArc);
