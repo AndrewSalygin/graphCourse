@@ -25,8 +25,8 @@ public class OrientedWeightedGraph extends OrientedUnweightedGraph {
         super(currentGraph);
     }
     public final void addConnection(String srcNodeName, String destNodeName, Integer weight) {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
 
         if (getConnectedNodes(srcNodeName).containsKey(destNode)) {
@@ -53,8 +53,8 @@ public class OrientedWeightedGraph extends OrientedUnweightedGraph {
     }
 
     public void updateWeight(String srcNodeName, String destNodeName, Integer weight) {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
 
         // Получаю все ноды, с которыми имеет связь источник

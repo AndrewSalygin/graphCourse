@@ -24,8 +24,8 @@ public class UndirectedWeightedGraph extends UndirectedUnweightedGraph {
         super(currentGraph);
     }
     public final void addConnection(String srcNodeName, String destNodeName, Integer weight) {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
         if (srcNode.equals(destNode)) {
             throw new ConnectionNotExistException("Петлей в неориентированном графе быть не может.");
@@ -58,8 +58,8 @@ public class UndirectedWeightedGraph extends UndirectedUnweightedGraph {
     }
 
     public void updateWeight(String srcNodeName, String destNodeName, Integer weight) {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
 
         // Получаю все ноды, с которыми имеет связь источник

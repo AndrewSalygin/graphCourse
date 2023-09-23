@@ -23,8 +23,8 @@ public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
         super(currentGraph);
     }
     public final void addConnection(String srcNodeName, String destNodeName) {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
         if (srcNode.equals(destNode)) {
             throw new ConnectionNotExistException("Петлей в неориентированном графе быть не может.");
@@ -45,8 +45,8 @@ public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
         graph.put(destNode, tmpHashMapDest);
     }
     public final void deleteConnection(String srcNodeName, String destNodeName) {
-        Node srcNode = new Node(srcNodeName);
-        Node destNode = new Node(destNodeName);
+        Node srcNode = getObjectNodeByName(srcNodeName);
+        Node destNode = getObjectNodeByName(destNodeName);
         checkExistTwoNodes(srcNode, destNode);
 
         // Получаю все ноды, с которыми имеет связь источник
