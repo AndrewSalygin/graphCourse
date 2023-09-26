@@ -1,31 +1,28 @@
 package ru.andrewsalygin.graph.game.visualgraph;
 
+import org.newdawn.slick.Color;
+import org.newdawn.slick.geom.Ellipse;
+
 public class Edge {
-    private int startX;
-    private int startY;
-    private int endX;
-    private int endY;
+    private Ellipse startNode;
+    private Ellipse endNode;
+    private Color color;
 
-    public Edge(int startX, int startY, int endX, int endY) {
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
+    public Edge(Ellipse startNode, Ellipse endNode, Color color) {
+        this.startNode = startNode;
+        this.endNode = endNode;
+        this.color = color;
     }
 
-    public int getStartX() {
-        return startX;
+    public Ellipse getStartNode() {
+        return startNode;
     }
 
-    public int getStartY() {
-        return startY;
+    public Ellipse getEndNode() {
+        return endNode;
     }
 
-    public int getEndX() {
-        return endX;
-    }
-
-    public int getEndY() {
-        return endY;
+    public Color getColor() {
+        return color;
     }
 }

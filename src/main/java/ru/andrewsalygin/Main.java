@@ -15,7 +15,7 @@ public class Main {
 
         try {
             AppGameContainer app = new AppGameContainer(new Game());
-            app.setDisplayMode(800, 600, false);
+            app.setDisplayMode(800, 800, false);
             app.setTargetFrameRate(60); // Устанавливаем желаемый FPS
             app.setVSync(true); // Включаем вертикальную синхронизацию
             app.start();

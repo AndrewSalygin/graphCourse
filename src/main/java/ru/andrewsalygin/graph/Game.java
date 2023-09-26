@@ -3,22 +3,22 @@ package ru.andrewsalygin.graph;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.Ellipse;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+
+import org.newdawn.slick.geom.Vector2f;
 import ru.andrewsalygin.graph.game.visualgraph.Edge;
 
-import java.util.ArrayList;
-
 public class Game extends BasicGame {
-    private int rows = 8;
-    private int cols = 8;
+    private int rows = 12;
+    private int cols = 12;
     private int cellSize; // Размер каждой ячейки
     private Color cellColor1 = Color.white;
     private Color cellColor2 = Color.black;
     private int screenWidth;
     private int screenHeight;
     private Random random = new Random();
-    private List<Ellipse> heathNodes;
+    Image backgroundImage;
+    private List<Ellipse> healthNodes;
     private List<Edge> edges = new ArrayList<>();
     public Game() {
         super("Game");
@@ -28,43 +28,72 @@ public class Game extends BasicGame {
     public void init(GameContainer gc) throws SlickException {
         gc.setShowFPS(false); // Скрыть отображение FPS
 
+        backgroundImage = new Image("/src/main/resources/backgrounds/background1.jpg");
+
         int screenWidth = gc.getWidth();
         int screenHeight = gc.getHeight();
-        cellSize = gc.getHeight() / 10;
-        heathNodes = new ArrayList<>();
+        cellSize = gc.getHeight() / 15;
+        healthNodes = new ArrayList<>();
 
         int gridWidth = cols * cellSize;
         int gridHeight = rows * cellSize;
         int x = (gc.getWidth() - gridWidth) / 2;
         int y = (gc.getHeight() - gridHeight) / 2;
 
-        // Генерируем случайные координаты для 10 красных овалов внутри клеток
-        for (int i = 0; i < 10; i++) {
-            int centerX = x + random.nextInt(cols) * cellSize + cellSize / 2;
-            int centerY = y + random.nextInt(rows) * cellSize + cellSize / 2;
-            int radius = cellSize / 3; // Размер овала
-            Ellipse ellipse = new Ellipse(centerX, centerY, radius, radius);
-            heathNodes.add(ellipse);
-        }
+        // Генерируем случайные координаты для 8 красных овалов внутри клеток
+        for (int i = 0; i < 12; i++) {
+            int centerX, centerY;
+            boolean isValidPosition;
 
-        // Генерируем рёбра между отрисованными вершинами
-        for (int i = 0; i < heathNodes.size(); i++) {
-            int startX, startY, endX, endY;
-
-            Ellipse startOval = heathNodes.get(i);
-            startX = (int) (startOval.getCenterX() - x) / cellSize;
-            startY = (int) (startOval.getCenterY() - y) / cellSize;
-
-            // Генерируем случайные координаты для конечной вершины, исключая текущую
             do {
-                int randomIndex = random.nextInt(heathNodes.size());
-                Ellipse endOval = heathNodes.get(randomIndex);
-                endX = (int) (endOval.getCenterX() - x) / cellSize;
-                endY = (int) (endOval.getCenterY() - y) / cellSize;
-            } while ((startX == endX && startY == endY) || hasEdge(startX, startY, endX, endY));
+                isValidPosition = true;
+                centerX = x + random.nextInt(cols) * cellSize + cellSize / 2;
+                centerY = y + random.nextInt(rows) * cellSize + cellSize / 2;
 
-            edges.add(new Edge(startX, startY, endX, endY));
+                // Проверяем, что новый узел не находится на одной строке или столбце
+                for (Ellipse node : healthNodes) {
+                    if (node.getCenterX() == centerX || node.getCenterY() == centerY) {
+                        isValidPosition = false;
+                        break;
+                    }
+                }
+            } while (!isValidPosition);
+
+            int radius = cellSize / 3; // Размер овала
+            Ellipse healthNode = new Ellipse(centerX, centerY, radius, radius);
+            healthNodes.add(healthNode);
         }
+
+        // Перемешиваем вершины в случайном порядке
+        Collections.shuffle(healthNodes);
+
+        // Генерируем рёбра между вершинами
+        generateEdges();
+    }
+
+    private void generateEdges() {
+        // Создаем список вершин в случайном порядке
+        List<Ellipse> shuffledNodes = new ArrayList<>(healthNodes);
+        Collections.shuffle(shuffledNodes);
+
+        // Создаем рёбра, соединяя вершины в случайном порядке и задаем им цвет
+        Color[] edgeColors = new Color[]{Color.green, Color.cyan, Color.orange, Color.pink, Color.magenta, Color.red, Color.yellow, Color.transparent};
+        int colorIndex = 0;
+
+        // Создаем рёбра, соединяя вершины в случайном порядке
+        for (int i = 0; i < shuffledNodes.size() - 1; i++) {
+            Ellipse startNode = shuffledNodes.get(i);
+            Ellipse endNode = shuffledNodes.get(i + 1);
+            Color edgeColor = edgeColors[colorIndex];
+            edges.add(new Edge(startNode, endNode, edgeColor));
+            colorIndex = (colorIndex + 1) % edgeColors.length;
+        }
+
+        // Соединяем последнюю вершину с первой для создания цикла
+        Ellipse startNode = shuffledNodes.get(shuffledNodes.size() - 1);
+        Ellipse endNode = shuffledNodes.get(0);
+        Color edgeColor = edgeColors[colorIndex];
+        edges.add(new Edge(startNode, endNode, edgeColor));
     }
 
     @Override
@@ -74,55 +103,55 @@ public class Game extends BasicGame {
 
     @Override
     public void render(GameContainer gc, Graphics g) throws SlickException {
-        g.setColor(Color.white);
+        g.drawImage(backgroundImage, 0, 0, gc.getWidth(), gc.getHeight(), 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
 
-        int gridWidth = cols * cellSize;
-        int gridHeight = rows * cellSize;
+//        g.setColor(Color.white);
 
-        // Рассчитываем координаты начала отрисовки, чтобы разместить поле по центру экрана
-        int x = (gc.getWidth() - gridWidth) / 2;
-        int y = (gc.getHeight() - gridHeight) / 2;
-
-        // Рисуем горизонтальные линии
-        for (int row = 0; row <= rows; row++) {
-            int lineY = y + row * cellSize;
-            g.drawLine(x, lineY, x + gridWidth, lineY);
-        }
-
-        // Рисуем вертикальные линии
-        for (int col = 0; col <= cols; col++) {
-            int lineX = x + col * cellSize;
-            g.drawLine(lineX, y, lineX, y + gridHeight);
-        }
+//        int gridWidth = cols * cellSize;
+//        int gridHeight = rows * cellSize;
+//
+//        // Рассчитываем координаты начала отрисовки, чтобы разместить поле по центру экрана
+//        int x = (gc.getWidth() - gridWidth) / 2;
+//        int y = (gc.getHeight() - gridHeight) / 2;
+//
+//        // Рисуем горизонтальные линии
+//        for (int row = 0; row <= rows; row++) {
+//            int lineY = y + row * cellSize;
+//            g.drawLine(x, lineY, x + gridWidth, lineY);
+//        }
+//
+//        // Рисуем вертикальные линии
+//        for (int col = 0; col <= cols; col++) {
+//            int lineX = x + col * cellSize;
+//            g.drawLine(lineX, y, lineX, y + gridHeight);
+//        }
 
         g.setColor(Color.red);
 
         // Рисуем случайные красные овалы
-        for (Ellipse oval : heathNodes) {
-            g.fill(oval);
+        for (Ellipse ellipse : healthNodes) {
+            g.fill(ellipse);
         }
 
-        g.setColor(Color.blue);
         // Устанавливаем толщину линий
         g.setLineWidth(3.0f);
 
-        // Рисуем случайные рёбра
+        // Рисуем рёбра между вершинами
         for (Edge edge : edges) {
-            int startX = x + edge.getStartX() * cellSize + cellSize / 2;
-            int startY = y + edge.getStartY() * cellSize + cellSize / 2;
-            int endX = x + edge.getEndX() * cellSize + cellSize / 2;
-            int endY = y + edge.getEndY() * cellSize + cellSize / 2;
+            g.setColor(edge.getColor());
+            int startX = (int) edge.getStartNode().getCenterX();
+            int startY = (int) edge.getStartNode().getCenterY();
+            int endX = (int) edge.getEndNode().getCenterX();
+            int endY = (int) edge.getEndNode().getCenterY();
             g.drawLine(startX, startY, endX, endY);
         }
     }
 
     // Проверяет, существует ли ребро между заданными вершинами
-    private boolean hasEdge(int startX, int startY, int endX, int endY) {
+    private boolean hasEdge(Ellipse startNode, Ellipse endNode) {
         for (Edge edge : edges) {
-            if ((edge.getStartX() == startX && edge.getStartY() == startY &&
-                    edge.getEndX() == endX && edge.getEndY() == endY) ||
-                    (edge.getStartX() == endX && edge.getStartY() == endY &&
-                            edge.getEndX() == startX && edge.getEndY() == startY)) {
+            if ((edge.getStartNode() == startNode && edge.getEndNode() == endNode) ||
+                    (edge.getStartNode() == endNode && edge.getEndNode() == startNode)) {
                 return true;
             }
         }
