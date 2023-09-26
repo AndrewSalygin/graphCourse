@@ -1,7 +1,8 @@
 package ru.andrewsalygin;
+
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.SlickException;
-import ru.andrewsalygin.graph.game.Game;
+import ru.andrewsalygin.graph.Game;
 
 import java.io.File;
 
@@ -15,6 +16,8 @@ public class Main {
         try {
             AppGameContainer app = new AppGameContainer(new Game());
             app.setDisplayMode(800, 600, false);
+            app.setTargetFrameRate(60); // Устанавливаем желаемый FPS
+            app.setVSync(true); // Включаем вертикальную синхронизацию
             app.start();
         } catch (SlickException e) {
             e.printStackTrace();
