@@ -10,54 +10,36 @@ import org.newdawn.slick.geom.Vector2f;
 import ru.andrewsalygin.graph.game.visualgraph.Edge;
 
 public class Game extends BasicGame {
+    // Размеры таблицы
     private int rows = 15;
     private int cols = 15;
     private static int cellSize; // Размер каждой ячейки
-    private Color cellColor1 = Color.white;
-    private Color cellColor2 = Color.black;
-    private int screenWidth;
-    private int screenHeight;
     private static Random random = new Random();
     Image backgroundImage;
-    private List<Ellipse> healthNodes;
     private List<Component> components = new ArrayList<>();
     private static List<Edge> edges = new ArrayList<>();
-
-    // Создаем рёбра, соединяя вершины в случайном порядке и задаем им цвет
-
-    //Color.yellow};
     Color[] edgeColors = new Color[]{Color.cyan, Color.orange, Color.pink, Color.magenta, Color.black};
+    // итератор по edgeColors
     int colorIndex = 0;
 
     public Game() {
-        super("Game");
+        super("Infection Graph");
     }
 
     @Override
     public void init(GameContainer gc) throws SlickException {
         gc.setShowFPS(false); // Скрыть отображение FPS
-
         backgroundImage = new Image("/src/main/resources/backgrounds/background4.png");
 
-        int screenWidth = gc.getWidth();
-        int screenHeight = gc.getHeight();
-        cellSize = gc.getHeight() / 27;
-        healthNodes = new ArrayList<>();
+        cellSize = gc.getHeight() / 25;
 
         int gridWidth = cols * cellSize;
         int gridHeight = rows * cellSize;
+        // Берём центр экрана
         int x = (gc.getWidth() - gridWidth) / 2;
         int y = (gc.getHeight() - gridHeight) / 2;
 
-        // Распределите компоненты случайным образом по игровому полю
-        for (Component component : components) {
-            int centerX = x + random.nextInt(cols) * cellSize + cellSize / 2;
-            int centerY = y + random.nextInt(rows) * cellSize + cellSize / 2;
-            int radius = cellSize / 3; // Размер овала
-            Ellipse ellipse = new Ellipse(centerX, centerY, radius, radius);
-            component.move(x, y);
-        }
-
+        // Распределяем компоненты случайным образом по игровому полю
         randomizeComponentPlacements(x, y);
 
         // Соедините компоненты связности между собой, добавив рёбра
@@ -65,17 +47,19 @@ public class Game extends BasicGame {
     }
 
     private void randomizeComponentPlacements(int x, int y) {
+        // Магические числа :) На самом деле можно брать любые, взял такие.
         int numComponents = 25; // Количество компонент
-        int minSpacing = cellSize * 2; // Минимальное расстояние между компонентами
         int maxAttempts = 30; // Максимальное количество попыток размещения компонент
 
         for (int i = 0; i < numComponents; i++) {
+            // отвечает за перекрытие друг другом компонент
             boolean overlap;
             int componentX, componentY;
             int attempts = 0;
 
             do {
                 overlap = false;
+                // верхний левый угол будущего прямоугольника
                 componentX = x + random.nextInt(cols - 3) * cellSize + cellSize;
                 componentY = y + random.nextInt(rows - 3) * cellSize + cellSize;
 
@@ -103,15 +87,12 @@ public class Game extends BasicGame {
 
             } while (overlap);
 
-            switch (i % 3) {
-//                case 0 -> components.add(createTemplateComponentSquare(componentX, componentY));
+            switch (i % 2) {
                 case 0 -> components.add(createTemplateComponentCross(componentX, componentY));
                 case 1 -> components.add(createTemplateComponentTree(componentX, componentY));
             }
         }
     }
-
-
 
     private Component createTemplateComponentCross(int x, int y) {
         Component component = new Component();
@@ -140,40 +121,9 @@ public class Game extends BasicGame {
         return component;
     }
 
-//    private Component createTemplateComponentSquare(int x, int y) {
-//        Component component = new Component();
-//
-//        // Создайте вершины и рёбра для заготовки компоненты
-//        Ellipse vertex1 = new Ellipse(x + cellSize, y + cellSize, cellSize / 3, cellSize / 3);
-//        Ellipse vertex2 = new Ellipse(x + cellSize * 2, y + cellSize, cellSize / 3, cellSize / 3);
-//        Ellipse vertex3 = new Ellipse(x + cellSize, y + cellSize * 2, cellSize / 3, cellSize / 3);
-//        Ellipse vertex4 = new Ellipse(x + cellSize * 2, y + cellSize * 2, cellSize / 3, cellSize / 3);
-//
-//        component.addNode(vertex1);
-//        component.addNode(vertex2);
-//        component.addNode(vertex3);
-//        component.addNode(vertex4);
-//
-//        component.addEdge(new Edge(vertex1, vertex2, edgeColors[colorIndex]));
-//        colorIndex = (colorIndex + 1) % edgeColors.length;
-//        component.addEdge(new Edge(vertex2, vertex3, edgeColors[colorIndex]));
-//        colorIndex = (colorIndex + 1) % edgeColors.length;
-//        component.addEdge(new Edge(vertex3, vertex4, edgeColors[colorIndex]));
-//        colorIndex = (colorIndex + 1) % edgeColors.length;
-//        component.addEdge(new Edge(vertex4, vertex1, edgeColors[colorIndex]));
-//        colorIndex = (colorIndex + 1) % edgeColors.length;
-//        component.addEdge(new Edge(vertex2, vertex4, edgeColors[colorIndex]));
-//        colorIndex = (colorIndex + 1) % edgeColors.length;
-//        component.addEdge(new Edge(vertex3, vertex1, edgeColors[colorIndex]));
-//        colorIndex = (colorIndex + 1) % edgeColors.length;
-//
-//        return component;
-//    }
-
     private Component createTemplateComponentTree(int x, int y) {
         Component component = new Component();
 
-        // Создайте вершины и рёбра для заготовки компоненты
         Ellipse vertex1 = new Ellipse(x + cellSize, y + cellSize * 2, cellSize / 3, cellSize / 3);
         Ellipse vertex2 = new Ellipse(x + cellSize * 2, y + cellSize, cellSize / 3, cellSize / 3);
         Ellipse vertex3 = new Ellipse(x + cellSize * 2, y + cellSize * 3, cellSize / 3, cellSize / 3);
@@ -199,15 +149,16 @@ public class Game extends BasicGame {
             return;
         }
 
-        // Создайте копию списка компонент
+        // Создаёт копию списка компонент
         List<Component> remainingComponents = new ArrayList<>(components);
 
+        // Перебирает компоненты, пока в списке не останется одна компонента.
         while (remainingComponents.size() > 1) {
             Component closestA = null;
             Component closestB = null;
             double closestDistance = Double.MAX_VALUE;
 
-            // Найдите ближайшие компоненты
+            // Найдём ближайшие компоненты
             for (int i = 0; i < remainingComponents.size(); i++) {
                 for (int j = i + 1; j < remainingComponents.size(); j++) {
                     Component componentA = remainingComponents.get(i);
@@ -223,7 +174,7 @@ public class Game extends BasicGame {
             }
 
             if (closestA != null && closestB != null) {
-                // Создайте ребро между ближайшими компонентами
+                // Создаём ребро между ближайшими компонентами
                 connectClosestComponents(closestA, closestB);
                 remainingComponents.remove(closestA);
                 remainingComponents.remove(closestB);
@@ -233,12 +184,10 @@ public class Game extends BasicGame {
     }
 
     private double computeDistanceBetweenComponents(Component a, Component b) {
-        // Вычислите расстояние между двумя компонентами.
-        // Можно использовать среднее расстояние между вершинами в двух компонентах или другой подходящий метод.
-        // Верните расстояние в виде числа с плавающей запятой (double).
-        // Пример:
+        // Вычисляет расстояние между двумя компонентами.
         double minDistance = Double.MAX_VALUE;
 
+        // Находится ближайшее расстояние между всеми нодами двух компонент
         for (Ellipse nodeA : a.getNodes()) {
             for (Ellipse nodeB : b.getNodes()) {
                 double dx = nodeA.getCenterX() - nodeB.getCenterX();
@@ -260,7 +209,7 @@ public class Game extends BasicGame {
                 double dy = nodeA.getCenterY() - nodeB.getCenterY();
                 double distance = Math.sqrt(dx * dx + dy * dy);
 
-                // Создайте ребро между ближайшими вершинами
+                // Создаём ребро между ближайшими вершинами
                 if (distance == computeDistanceBetweenComponents(a, b)) {
                     edges.add(new Edge(nodeA, nodeB, edgeColors[colorIndex]));
                     colorIndex = (colorIndex + 1) % edgeColors.length;
@@ -270,7 +219,7 @@ public class Game extends BasicGame {
     }
 
     private Component mergeComponents(Component a, Component b) {
-        // Объедините вершины и рёбра компонент a и b в одну компоненту и верните её.
+        // Объединяем вершины и рёбра компонент a и b в одну компоненту и возвращаем её.
         a.mergeWith(b);
         return a;
     }
@@ -318,6 +267,7 @@ public class Game extends BasicGame {
 
             }
 
+            // Отрисовка рёбер в компонентах
             for (Edge edge : component.getEdges()) {
                 g.setColor(edge.getColor());
                 int startX = (int) edge.getStartNode().getCenterX();
@@ -331,7 +281,7 @@ public class Game extends BasicGame {
         }
 
 
-        // Рисуем рёбра между вершинами
+        // Рисуем рёбра между компонентами
         for (Edge edge : edges) {
             // Устанавливаем толщину линий
             g.setColor(edge.getColor());
