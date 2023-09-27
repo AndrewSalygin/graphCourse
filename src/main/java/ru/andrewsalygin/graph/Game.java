@@ -1,18 +1,23 @@
 package ru.andrewsalygin.graph;
 
 import org.newdawn.slick.*;
-import org.newdawn.slick.geom.Ellipse;
 
+import org.newdawn.slick.geom.Ellipse;
 import ru.andrewsalygin.graph.game.visualgraph.Component;
-import ru.andrewsalygin.graph.game.visualgraph.Edge;
+import ru.andrewsalygin.graph.game.visualgraph.VisualConnection;
 import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
+import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
+
+import java.util.Map;
 
 public class Game extends BasicGame {
     // Размеры таблицы
     public static int cellSize; // Размер каждой ячейки
+    public static int nodeRadius; // Размер каждой ячейки
     private int tableScale;
     Image backgroundImage;
     VisualGraph visualGraph;
+    private VisualNode highlightedNode;
     private Color highlightColor = Color.yellow;
     private boolean isHighlighted = false;
 
@@ -27,6 +32,7 @@ public class Game extends BasicGame {
 
         tableScale = 25;
         cellSize = gc.getHeight() / tableScale;
+        nodeRadius = cellSize / 3;
 
         visualGraph = new VisualGraph();
 
@@ -39,6 +45,8 @@ public class Game extends BasicGame {
 
         // Соедините компоненты связности между собой, добавив рёбра
         visualGraph.connectComponents();
+
+        visualGraph.addNode(new VisualNode(new Ellipse(x, y, 1000, 1000)));
     }
 
 
@@ -49,10 +57,26 @@ public class Game extends BasicGame {
         int mouseX = input.getMouseX();
         int mouseY = input.getMouseY();
 
-        // Нужно иметь HashTable, который будет иметь координаты каждой вершины
-        // и при наведении на какую-то будет рассчитываться расстояние и искаться
-        // в соответсвующей таблице
-
+        highlightedNode = null;
+        boolean stopFlag = false;
+        for (VisualNode node : visualGraph.getNodes()) {
+            if (node.contains(mouseX, mouseY)) {
+                highlightedNode = node;
+                break;
+            }
+        }
+        for (Component component : visualGraph.getComponents()) {
+            for (VisualNode node : component.getNodes()) {
+                if (node.contains(mouseX, mouseY)) {
+                    highlightedNode = node;
+                    stopFlag = true;
+                    break;
+                }
+            }
+            if (stopFlag) {
+                break;
+            }
+        }
 
 
 //        // Проверяем, наведена ли мышь на круг
@@ -93,24 +117,39 @@ public class Game extends BasicGame {
 
         // Отрисовка рёбер
         g.setLineWidth(3.0f);
-        for (Component component : visualGraph.components) {
-            // Отрисовка красных вершин
-            for (Ellipse node : component.getNodes()) {
-                g.setColor(Color.red);
-                g.fill(node);
-                // Добавляем обводку
+        for (Component component : visualGraph.getComponents()) {
+            // Отрисовываем вершины и подсвечиваем вершину, если на неё навели мышкой
+            // в отдельных вершинах
+            for (VisualNode node : visualGraph.getNodes()) {
+                if (node.equals(highlightedNode)) {
+                    g.setColor(Color.yellow); // Цвет подсветки
+                } else {
+                    g.setColor(Color.red);
+                }
+                g.fill(node.getEllipse());
                 g.setColor(Color.black);
-                g.drawOval(node.getCenterX() - cellSize / 3, node.getCenterY() - cellSize / 3, cellSize / 1.5f, cellSize / 1.5f);
+                g.drawOval(node.getEllipse().getCenterX() - nodeRadius, node.getEllipse().getCenterY() - nodeRadius, cellSize / 1.5f, cellSize / 1.5f);
+            }
 
+            // проходимся и проверяем в компонентах
+            for (VisualNode node : component.getNodes()) {
+                if (node.equals(highlightedNode)) {
+                    g.setColor(Color.yellow); // Цвет подсветки
+                } else {
+                    g.setColor(Color.red);
+                }
+                g.fill(node.getEllipse());
+                g.setColor(Color.black);
+                g.drawOval(node.getEllipse().getCenterX() - nodeRadius, node.getEllipse().getCenterY() - nodeRadius, cellSize / 1.5f, cellSize / 1.5f);
             }
 
             // Отрисовка рёбер в компонентах
-            for (Edge edge : component.getEdges()) {
+            for (VisualConnection edge : component.getConnections()) {
                 g.setColor(edge.getColor());
-                int startX = (int) edge.getStartNode().getCenterX();
-                int startY = (int) edge.getStartNode().getCenterY();
-                int endX = (int) edge.getEndNode().getCenterX();
-                int endY = (int) edge.getEndNode().getCenterY();
+                int startX = (int) edge.getStartNode().getEllipse().getCenterX();
+                int startY = (int) edge.getStartNode().getEllipse().getCenterY();
+                int endX = (int) edge.getEndNode().getEllipse().getCenterX();
+                int endY = (int) edge.getEndNode().getEllipse().getCenterY();
                 g.fillOval(startX - 5, startY - 5, 10, 10); // Точка на начале отрезка
                 g.fillOval(endX - 5, endY - 5, 10, 10); // Точка на конце отрезка
                 g.drawLine(startX, startY, endX, endY);
@@ -118,13 +157,13 @@ public class Game extends BasicGame {
         }
 
         // Рисуем рёбра между компонентами
-        for (Edge edge : visualGraph.edges) {
+        for (VisualConnection edge : visualGraph.getConnections()) {
             // Устанавливаем толщину линий
             g.setColor(edge.getColor());
-            int startX = (int) edge.getStartNode().getCenterX();
-            int startY = (int) edge.getStartNode().getCenterY();
-            int endX = (int) edge.getEndNode().getCenterX();
-            int endY = (int) edge.getEndNode().getCenterY();
+            int startX = (int) edge.getStartNode().getEllipse().getCenterX();
+            int startY = (int) edge.getStartNode().getEllipse().getCenterY();
+            int endX = (int) edge.getEndNode().getEllipse().getCenterX();
+            int endY = (int) edge.getEndNode().getEllipse().getCenterY();
             g.drawLine(startX, startY, endX, endY);
         }
     }

@@ -3,6 +3,7 @@ package ru.andrewsalygin.graph.game.visualgraph;
 import org.newdawn.slick.geom.Ellipse;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -11,27 +12,23 @@ import java.util.Random;
  */
 public class Component {
     private static Random random = new Random();
-    private List<Ellipse> nodes = new ArrayList<>();
-    private List<Edge> edges = new ArrayList<>();
+    private List<VisualNode> nodes = new ArrayList<>();
+    private List<VisualConnection> componentConnections = new ArrayList<>();
 
-    public void addNode(Ellipse node) {
+    public void addNode(VisualNode node) {
         nodes.add(node);
     }
 
-    public void addEdge(Edge edge) {
-        edges.add(edge);
+    public void addConnection(VisualConnection connection) {
+        componentConnections.add(connection);
     }
 
-    public List<Ellipse> getNodes() {
+    public List<VisualNode> getNodes() {
         return nodes;
     }
 
-    public List<Edge> getEdges() {
-        return edges;
-    }
-
-    public Ellipse getRandomNode() {
-        return nodes.get(random.nextInt(nodes.size()));
+    public List<VisualConnection> getConnections() {
+        return componentConnections;
     }
 
 //    public void move(int x, int y) {
@@ -64,6 +61,6 @@ public class Component {
 //    }
     public void mergeWith(Component other) {
         nodes.addAll(other.getNodes());
-        edges.addAll(other.getEdges());
+        componentConnections.addAll(other.getConnections());
     }
 }

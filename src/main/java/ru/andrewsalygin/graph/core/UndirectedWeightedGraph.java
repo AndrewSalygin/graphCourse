@@ -40,8 +40,8 @@ public class UndirectedWeightedGraph extends UndirectedUnweightedGraph {
         HashMap<Node, Connection> tmpHashMapDest = graph.getOrDefault(destNode, new HashMap<>());
 
         // вес дуги 0 по умолчанию
-        tmpHashMapSrc.put(destNode, new Connection(weight));
-        tmpHashMapDest.put(srcNode, new Connection(weight));
+        tmpHashMapSrc.put(destNode, new Connection(srcNode, destNode, weight));
+        tmpHashMapDest.put(srcNode, new Connection(destNode, srcNode, weight));
         graph.put(srcNode, tmpHashMapSrc);
         graph.put(destNode, tmpHashMapDest);
     }
@@ -67,7 +67,14 @@ public class UndirectedWeightedGraph extends UndirectedUnweightedGraph {
         // Получаю все ноды, с которыми имеет связь источник
         HashMap<Node, Connection> connectedNodes = graph.get(srcNode);
         if (connectedNodes.containsKey(destNode)) {
-            connectedNodes.put(destNode, new Connection(weight));
+            connectedNodes.put(destNode, new Connection(srcNode, destNode, weight));
+        } else {
+            throw new ConnectionNotExistException("Данного ребра между вершинами не существует.");
+        }
+
+        connectedNodes = graph.get(destNode);
+        if (connectedNodes.containsKey(srcNode)) {
+            connectedNodes.put(destNode, new Connection(destNode, srcNode, weight));
         } else {
             throw new ConnectionNotExistException("Данного ребра между вершинами не существует.");
         }

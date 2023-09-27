@@ -37,7 +37,7 @@ public class OrientedWeightedGraph extends OrientedUnweightedGraph {
         HashMap<Node, Connection> tmpHashMap = graph.getOrDefault(srcNode, new HashMap<>());
 
         // вес дуги 0 по умолчанию
-        tmpHashMap.put(destNode, new Connection(weight));
+        tmpHashMap.put(destNode, new Connection(srcNode, destNode, weight));
         graph.put(srcNode, tmpHashMap);
     }
 
@@ -63,7 +63,7 @@ public class OrientedWeightedGraph extends OrientedUnweightedGraph {
         // Получаю все ноды, с которыми имеет связь источник
         HashMap<Node, Connection> connectedNodes = graph.get(srcNode);
         if (connectedNodes.containsKey(destNode)) {
-            connectedNodes.put(destNode, new Connection(weight));
+            connectedNodes.put(destNode, new Connection(srcNode, destNode, weight));
         } else {
             throw new ConnectionNotExistException("Данной дуги между вершинами не существует.");
         }

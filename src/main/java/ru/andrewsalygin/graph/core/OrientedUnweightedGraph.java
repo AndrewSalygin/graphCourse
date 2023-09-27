@@ -7,7 +7,6 @@ import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -66,6 +65,10 @@ public class OrientedUnweightedGraph extends Graph {
         return graph.get(tmpNode);
     }
 
+    public HashMap<Node, Connection> getConnectedNodes(Node node) {
+        return graph.get(node);
+    }
+
     @Override
     public void addNode(String nodeName) {
         Node tmpNode = getObjectNodeByName(nodeName);
@@ -74,6 +77,14 @@ public class OrientedUnweightedGraph extends Graph {
             throw new NodeAlreadyExistException("Такая нода уже существует.");
         }
         graph.put(tmpNode, new HashMap<>());
+    }
+
+    public void addNode(Node node) {
+        // проверка на существование такой ноды
+        if (isExistNode(node)) {
+            throw new NodeAlreadyExistException("Такая нода уже существует.");
+        }
+        graph.put(node, new HashMap<>());
     }
 
     @Override
@@ -108,7 +119,7 @@ public class OrientedUnweightedGraph extends Graph {
         HashMap<Node, Connection> tmpHashMap = graph.getOrDefault(srcNode, new HashMap<>());
 
         // вес дуги 0 по умолчанию
-        tmpHashMap.put(destNode, new Connection(0));
+        tmpHashMap.put(destNode, new Connection(srcNode, destNode, 0));
         graph.put(srcNode, tmpHashMap);
     }
 

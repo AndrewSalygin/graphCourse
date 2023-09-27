@@ -95,10 +95,10 @@ public class GraphSerializer {
                 if (className.equals("UndirectedWeightedGraph") || className.equals("OrientedWeightedGraph")) {
                     startBracket = endBracket + 1;
                     endBracket = line.indexOf(']', startBracket);
-                    tmpConnection = new Connection(Integer.parseInt(line.substring(startBracket + 1, endBracket)));
+                    tmpConnection = new Connection(tmpMainNode, tmpNode, Integer.parseInt(line.substring(startBracket + 1, endBracket)));
                     tmpNodes.put(tmpNode, tmpConnection);
                 } else {
-                    tmpNodes.put(tmpNode, new Connection(0));
+                    tmpNodes.put(tmpNode, new Connection(tmpMainNode, tmpNode, 0));
                 }
                 tmpMap.put(tmpMainNode, tmpNodes);
                 startBracket = line.indexOf('(', endBracket);

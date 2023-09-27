@@ -6,7 +6,7 @@ import java.util.Objects;
  * @author Andrew Salygin
  */
 public class Node {
-    String nodeName;
+    protected String nodeName;
 
     public Node(String nodeName) {
         this.nodeName = nodeName;

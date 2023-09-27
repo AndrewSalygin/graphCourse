@@ -39,11 +39,12 @@ public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
         HashMap<Node, Connection> tmpHashMapDest = graph.getOrDefault(destNode, new HashMap<>());
 
         // вес дуги 0 по умолчанию
-        tmpHashMapSrc.put(destNode, new Connection(0));
-        tmpHashMapDest.put(srcNode, new Connection(0));
+        tmpHashMapSrc.put(destNode, new Connection(srcNode, destNode,0));
+        tmpHashMapDest.put(srcNode, new Connection(destNode, srcNode, 0));
         graph.put(srcNode, tmpHashMapSrc);
         graph.put(destNode, tmpHashMapDest);
     }
+
     public final void deleteConnection(String srcNodeName, String destNodeName) {
         Node srcNode = getObjectNodeByName(srcNodeName);
         Node destNode = getObjectNodeByName(destNodeName);
