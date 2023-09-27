@@ -1,7 +1,6 @@
 package ru.andrewsalygin.graph.game.visualgraph;
 
 import org.newdawn.slick.Color;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Ellipse;
 import org.newdawn.slick.geom.Rectangle;
 import ru.andrewsalygin.graph.Game;
@@ -15,22 +14,31 @@ import java.util.Random;
  */
 public class VisualGraph {
     // Размеры таблицы
-    private static int rows = 15;
-    private static int cols = 15;
-    public static int sizeTable = 25;
-    private static int cellSize; // Размер каждой ячейки
-    private static Random random = new Random();
-    Image backgroundImage;
+    public int rows;
+    public int cols;
+    public int gridWidth;
+    public int gridHeight;
+    private final Random random;
     public List<Component> components;
     public List<Edge> edges;
-    static Color[] edgeColors = new Color[]{Color.cyan, Color.orange, Color.pink, Color.magenta, Color.black};
+    final Color[] edgeColors = new Color[] {
+            Color.cyan,
+            Color.orange,
+            Color.pink,
+            Color.magenta,
+            Color.black
+    };
     // итератор по edgeColors
-    static int colorIndex = 0;
+    int colorIndex = 0;
 
     public VisualGraph() {
         components = new ArrayList<>();
         edges = new ArrayList<>();
-        cellSize = Game.cellSize;
+        rows = 15;
+        cols = 15;
+        gridWidth = cols * Game.cellSize;
+        gridHeight = rows * Game.cellSize;
+        random = new Random();
     }
     public void randomizeComponentPlacements(int x, int y) {
         // Магические числа :) На самом деле можно брать любые, взял такие.
@@ -46,13 +54,13 @@ public class VisualGraph {
             do {
                 overlap = false;
                 // верхний левый угол будущего прямоугольника
-                componentX = x + random.nextInt(cols - 3) * cellSize + cellSize;
-                componentY = y + random.nextInt(rows - 3) * cellSize + cellSize;
+                componentX = x + random.nextInt(cols - 3) * Game.cellSize + Game.cellSize;
+                componentY = y + random.nextInt(rows - 3) * Game.cellSize + Game.cellSize;
 
                 // Проверяем, не пересекаются ли компоненты
                 for (Component existingComponent : components) {
                     for (Ellipse node : existingComponent.getNodes()) {
-                        if (node.intersects(new Rectangle(componentX, componentY, cellSize * 3, cellSize * 3))) {
+                        if (node.intersects(new Rectangle(componentX, componentY, Game.cellSize * 3, Game.cellSize * 3))) {
                             overlap = true;
                             break;
                         }
@@ -60,8 +68,8 @@ public class VisualGraph {
                 }
 
                 // Проверяем, не выходит ли компонент за границы поля
-                if (componentX < x || componentX + cellSize > x + cols * cellSize ||
-                        componentY < y || componentY + cellSize > y + rows * cellSize) {
+                if (componentX < x || componentX + Game.cellSize > x + cols * Game.cellSize ||
+                        componentY < y || componentY + Game.cellSize > y + rows * Game.cellSize) {
                     overlap = true;
                 }
 
@@ -163,11 +171,11 @@ public class VisualGraph {
     private Component createTemplateComponentCross(int x, int y) {
         Component component = new Component();
 
-        Ellipse centerNode = new Ellipse(x + cellSize * 2, y + cellSize * 2, cellSize / 3, cellSize / 3);
-        Ellipse topNode = new Ellipse(x + cellSize * 2, y + cellSize, cellSize / 3, cellSize / 3);
-        Ellipse bottomNode = new Ellipse(x + cellSize * 2, y + cellSize * 3, cellSize / 3, cellSize / 3);
-        Ellipse leftNode = new Ellipse(x + cellSize, y + cellSize * 2, cellSize / 3, cellSize / 3);
-        Ellipse rightNode = new Ellipse(x + cellSize * 3, y + cellSize * 2, cellSize / 3, cellSize / 3);
+        Ellipse centerNode = new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 2, Game.cellSize / 3, Game.cellSize / 3);
+        Ellipse topNode = new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, Game.cellSize / 3, Game.cellSize / 3);
+        Ellipse bottomNode = new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, Game.cellSize / 3, Game.cellSize / 3);
+        Ellipse leftNode = new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, Game.cellSize / 3, Game.cellSize / 3);
+        Ellipse rightNode = new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, Game.cellSize / 3, Game.cellSize / 3);
 
         component.addNode(centerNode);
         component.addNode(topNode);
@@ -190,10 +198,10 @@ public class VisualGraph {
     private Component createTemplateComponentTree(int x, int y) {
         Component component = new Component();
 
-        Ellipse vertex1 = new Ellipse(x + cellSize, y + cellSize * 2, cellSize / 3, cellSize / 3);
-        Ellipse vertex2 = new Ellipse(x + cellSize * 2, y + cellSize, cellSize / 3, cellSize / 3);
-        Ellipse vertex3 = new Ellipse(x + cellSize * 2, y + cellSize * 3, cellSize / 3, cellSize / 3);
-        Ellipse vertex4 = new Ellipse(x + cellSize * 3, y + cellSize * 2, cellSize / 3, cellSize / 3);
+        Ellipse vertex1 = new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, Game.cellSize / 3, Game.cellSize / 3);
+        Ellipse vertex2 = new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, Game.cellSize / 3, Game.cellSize / 3);
+        Ellipse vertex3 = new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, Game.cellSize / 3, Game.cellSize / 3);
+        Ellipse vertex4 = new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, Game.cellSize / 3, Game.cellSize / 3);
 
         component.addNode(vertex1);
         component.addNode(vertex2);
@@ -208,5 +216,16 @@ public class VisualGraph {
         colorIndex = (colorIndex + 1) % edgeColors.length;
 
         return component;
+    }
+
+    // Проверяет, существует ли ребро между заданными вершинами
+    private boolean hasEdge(Ellipse startNode, Ellipse endNode) {
+        for (Edge edge : edges) {
+            if ((edge.getStartNode() == startNode && edge.getEndNode() == endNode) ||
+                    (edge.getStartNode() == endNode && edge.getEndNode() == startNode)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
