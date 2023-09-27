@@ -2,7 +2,7 @@ package ru.andrewsalygin.graph.core;
 
 import java.util.Objects;
 
-class Connection {
+public class Connection {
     Integer weight;
 
     public Connection(Integer weight) {

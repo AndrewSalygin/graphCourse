@@ -10,9 +10,12 @@ import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
 public class Game extends BasicGame {
     // Размеры таблицы
     public static int cellSize; // Размер каждой ячейки
-    public int tableScale;
+    private int tableScale;
     Image backgroundImage;
     VisualGraph visualGraph;
+    private Color highlightColor = Color.yellow;
+    private boolean isHighlighted = false;
+
     public Game() {
         super("Infection Graph");
     }
@@ -41,7 +44,26 @@ public class Game extends BasicGame {
 
     @Override
     public void update(GameContainer gc, int i) throws SlickException {
+        Input input = gc.getInput();
 
+        int mouseX = input.getMouseX();
+        int mouseY = input.getMouseY();
+
+        // Нужно иметь HashTable, который будет иметь координаты каждой вершины
+        // и при наведении на какую-то будет рассчитываться расстояние и искаться
+        // в соответсвующей таблице
+
+
+
+//        // Проверяем, наведена ли мышь на круг
+//        isHighlighted = (Math.pow(mouseX - circleX, 2) + Math.pow(mouseY - circleY, 2) <= Math.pow(circleRadius, 2));
+//
+//        // Если мышь наведена на круг, меняем цвет
+//        if (isHighlighted) {
+//            circleColor = highlightColor;
+//        } else {
+//            circleColor = Color.blue;
+//        }
     }
 
     @Override

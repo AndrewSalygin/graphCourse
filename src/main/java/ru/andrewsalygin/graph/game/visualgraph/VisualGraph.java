@@ -4,15 +4,17 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Ellipse;
 import org.newdawn.slick.geom.Rectangle;
 import ru.andrewsalygin.graph.Game;
+import ru.andrewsalygin.graph.core.UndirectedUnweightedGraph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 /**
  * @author Andrew Salygin
  */
-public class VisualGraph {
+public class VisualGraph extends UndirectedUnweightedGraph {
     // Размеры таблицы
     public int rows;
     public int cols;
@@ -21,7 +23,7 @@ public class VisualGraph {
     private final Random random;
     public List<Component> components;
     public List<Edge> edges;
-    final Color[] edgeColors = new Color[] {
+    private final Color[] edgeColors = new Color[] {
             Color.cyan,
             Color.orange,
             Color.pink,
@@ -29,7 +31,7 @@ public class VisualGraph {
             Color.black
     };
     // итератор по edgeColors
-    int colorIndex = 0;
+    private int colorIndex = 0;
 
     public VisualGraph() {
         components = new ArrayList<>();
@@ -39,6 +41,7 @@ public class VisualGraph {
         gridWidth = cols * Game.cellSize;
         gridHeight = rows * Game.cellSize;
         random = new Random();
+        graph = new HashMap<>();
     }
     public void randomizeComponentPlacements(int x, int y) {
         // Магические числа :) На самом деле можно брать любые, взял такие.
