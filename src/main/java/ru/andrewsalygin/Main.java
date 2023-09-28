@@ -2,7 +2,7 @@ package ru.andrewsalygin;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.SlickException;
-import ru.andrewsalygin.graph.Game;
+import ru.andrewsalygin.graph.game.Game;
 
 import java.io.File;
 

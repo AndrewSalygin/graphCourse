@@ -1,4 +1,4 @@
-package ru.andrewsalygin.graph;
+package ru.andrewsalygin.graph.game;
 
 import org.newdawn.slick.*;
 

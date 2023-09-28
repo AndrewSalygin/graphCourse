@@ -6,7 +6,7 @@ import ru.andrewsalygin.graph.core.Node;
 
 import java.util.Objects;
 
-import static ru.andrewsalygin.graph.Game.nodeRadius;
+import static ru.andrewsalygin.graph.game.Game.nodeRadius;
 
 public class VisualNode extends Node {
     private static int counterName = 0;

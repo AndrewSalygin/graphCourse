@@ -3,7 +3,7 @@ package ru.andrewsalygin.graph.game.visualgraph;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Ellipse;
 import org.newdawn.slick.geom.Rectangle;
-import ru.andrewsalygin.graph.Game;
+import ru.andrewsalygin.graph.game.Game;
 import ru.andrewsalygin.graph.core.Connection;
 import ru.andrewsalygin.graph.core.Node;
 import ru.andrewsalygin.graph.core.UndirectedUnweightedGraph;
@@ -11,10 +11,11 @@ import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.game.Game;
 
 import java.util.*;
 
-import static ru.andrewsalygin.graph.Game.nodeRadius;
+import static ru.andrewsalygin.graph.game.Game.nodeRadius;
 
 /**
  * @author Andrew Salygin
