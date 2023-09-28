@@ -34,12 +34,12 @@ public class Connection {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Connection that = (Connection) o;
-        return Objects.equals(weight, that.weight);
+        return Objects.equals(srcNode, that.srcNode) && Objects.equals(destNode, that.destNode) && Objects.equals(weight, that.weight);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(weight);
+        return Objects.hash(srcNode, destNode, weight);
     }
 
     @Override

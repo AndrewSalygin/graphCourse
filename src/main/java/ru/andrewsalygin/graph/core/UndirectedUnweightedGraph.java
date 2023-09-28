@@ -53,7 +53,7 @@ public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
         // Получаю все ноды, с которыми имеет связь источник
         HashMap<Node, Connection> connectedNodesSrc = graph.get(srcNode);
         HashMap<Node, Connection> connectedNodesDest = graph.get(destNode);
-        // Удаляю указанную ноду
+        // Удаляю указанную вершину
         if (connectedNodesSrc.containsKey(destNode) && connectedNodesDest.containsKey(srcNode)) {
             connectedNodesSrc.remove(destNode);
             connectedNodesDest.remove(srcNode);

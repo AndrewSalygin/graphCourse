@@ -2,10 +2,8 @@ package ru.andrewsalygin.graph;
 
 import org.newdawn.slick.*;
 
-import org.newdawn.slick.geom.Ellipse;
 import ru.andrewsalygin.graph.core.Connection;
 import ru.andrewsalygin.graph.core.Node;
-import ru.andrewsalygin.graph.game.visualgraph.Component;
 import ru.andrewsalygin.graph.game.visualgraph.VisualConnection;
 import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
 import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
@@ -22,8 +20,6 @@ public class Game extends BasicGame {
     VisualGraph visualGraph;
     private VisualNode highlightedNode;
     private Color highlightColor = Color.yellow;
-    private boolean isHighlighted = false;
-    boolean flag = true;
 
     public Game() {
         super("Infection Graph");
@@ -49,6 +45,9 @@ public class Game extends BasicGame {
 
         // Соедините компоненты связности между собой, добавив рёбра
         visualGraph.connectComponents();
+
+        // Больше отдельные компоненты не нужны
+        visualGraph.setComponents(null);
     }
 
 
@@ -60,45 +59,13 @@ public class Game extends BasicGame {
         int mouseY = input.getMouseY();
 
         highlightedNode = null;
-        boolean stopFlag = false;
-        for (VisualNode node : visualGraph.getNodes()) {
-            if (node.contains(mouseX, mouseY)) {
-                highlightedNode = node;
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
+            VisualNode tmpNode = (VisualNode) entry.getKey();
+            if (tmpNode.contains(mouseX, mouseY)) {
+                highlightedNode = tmpNode;
                 break;
             }
         }
-        for (Component component : visualGraph.getComponents()) {
-            for (VisualNode node : component.getNodes()) {
-                if (node.contains(mouseX, mouseY)) {
-                    highlightedNode = node;
-                    stopFlag = true;
-                    break;
-                }
-            }
-            if (stopFlag) {
-                break;
-            }
-        }
-
-        if (mouseX >= 100 && mouseX <= 500 && flag == true) {
-            VisualNode vs = new VisualNode(new Ellipse(100, 100, 1.5f, 1.5f));
-            visualGraph.addNode(vs);
-            VisualConnection vc = new VisualConnection(vs, (VisualNode) visualGraph.getGraph().keySet().iterator().next(), Color.green);
-            visualGraph.addConnection(vc);
-//            visualGraph.deleteConnection(vs, (VisualNode) visualGraph.getGraph().keySet().iterator().next());
-//            visualGraph.deleteNode(visualGraph.getGraph().keySet().iterator().next());
-            flag = false;
-        }
-
-//        // Проверяем, наведена ли мышь на круг
-//        isHighlighted = (Math.pow(mouseX - circleX, 2) + Math.pow(mouseY - circleY, 2) <= Math.pow(circleRadius, 2));
-//
-//        // Если мышь наведена на круг, меняем цвет
-//        if (isHighlighted) {
-//            circleColor = highlightColor;
-//        } else {
-//            circleColor = Color.blue;
-//        }
     }
 
     @Override
@@ -131,9 +98,9 @@ public class Game extends BasicGame {
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             VisualNode visualNode = (VisualNode) entry.getKey();
             if (visualNode.equals(highlightedNode)) {
-                g.setColor(Color.yellow); // Цвет подсветки
+                g.setColor(highlightColor); // Цвет подсветки
             } else {
-                g.setColor(Color.red);
+                g.setColor(visualNode.getEllipseColor());
             }
             g.fill(visualNode.getEllipse());
             g.setColor(Color.black);
