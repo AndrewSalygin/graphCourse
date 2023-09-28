@@ -1,10 +1,8 @@
 package ru.andrewsalygin.graph.game.visualgraph;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Ellipse;
 import ru.andrewsalygin.graph.core.Node;
 
-import static ru.andrewsalygin.graph.Game.cellSize;
 import static ru.andrewsalygin.graph.Game.nodeRadius;
 
 public class VisualNode extends Node {

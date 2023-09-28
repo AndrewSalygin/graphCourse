@@ -62,25 +62,7 @@ public class VisualGraph extends UndirectedUnweightedGraph {
         graph = new HashMap<>();
         nodes = new ArrayList<>();
     }
-    public void addNodeSeparated(VisualNode node) {
-        addNode(node);
-        nodes.add(node);
-    }
-    public void deleteNodeSeparated(VisualNode node) {
-        deleteNode(node);
-        // Прохожу по всем нодам
-        List<VisualConnection> connectionToDeleteList = new ArrayList<>();
-        // Получаю список нод к которым имеет связь текущая
-        for (VisualConnection connection : connections) {
-            if (connection.getSrcNode().equals(node) || connection.getDestNode().equals(node)) {
-                connectionToDeleteList.add(connection);
-            }
-        }
-        for (VisualConnection connection : connectionToDeleteList) {
-            connections.remove(connection);
-        }
-        nodes.remove(node);
-    }
+
     public final void addConnection(VisualConnection connection) {
         checkExistTwoNodes(connection.getSrcNode(), connection.getDestNode());
         if (connection.getSrcNode().equals(connection.getDestNode())) {
@@ -96,8 +78,8 @@ public class VisualGraph extends UndirectedUnweightedGraph {
         HashMap<Node, Connection> tmpHashMapDest = graph.getOrDefault(connection.getDestNode(), new HashMap<>());
 
         // вес дуги 0 по умолчанию
-        VisualConnection connection1 = new VisualConnection(connection.getSrcNode(), connection.getDestNode(), Color.black);
-        VisualConnection connection2 = new VisualConnection(connection.getDestNode(), connection.getSrcNode(), Color.black);
+        VisualConnection connection1 = new VisualConnection(connection.getSrcNode(), connection.getDestNode(), connection.getColor());
+        VisualConnection connection2 = new VisualConnection(connection.getDestNode(), connection.getSrcNode(), connection.getColor());
         tmpHashMapSrc.put(connection.getDestNode(), connection1);
         tmpHashMapDest.put(connection.getSrcNode(), connection2);
         graph.put(connection.getSrcNode(), tmpHashMapSrc);
