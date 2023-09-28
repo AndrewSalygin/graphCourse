@@ -11,10 +11,7 @@ import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static ru.andrewsalygin.graph.Game.nodeRadius;
 
@@ -65,13 +62,24 @@ public class VisualGraph extends UndirectedUnweightedGraph {
         graph = new HashMap<>();
         nodes = new ArrayList<>();
     }
-    public void addNode(Ellipse ellipse) {
-        VisualNode tmpNode = new VisualNode(ellipse);
-        graph.put(tmpNode, new HashMap<>());
-//        nodes.add(tmpNode);
+    public void addNodeSeparated(VisualNode node) {
+        addNode(node);
+        nodes.add(node);
     }
-    public void deleteNode() {
-
+    public void deleteNodeSeparated(VisualNode node) {
+        deleteNode(node);
+        // Прохожу по всем нодам
+        List<VisualConnection> connectionToDeleteList = new ArrayList<>();
+        // Получаю список нод к которым имеет связь текущая
+        for (VisualConnection connection : connections) {
+            if (connection.getSrcNode().equals(node) || connection.getDestNode().equals(node)) {
+                connectionToDeleteList.add(connection);
+            }
+        }
+        for (VisualConnection connection : connectionToDeleteList) {
+            connections.remove(connection);
+        }
+        nodes.remove(node);
     }
     public final void addConnection(VisualConnection connection) {
         checkExistTwoNodes(connection.getSrcNode(), connection.getDestNode());
@@ -88,27 +96,31 @@ public class VisualGraph extends UndirectedUnweightedGraph {
         HashMap<Node, Connection> tmpHashMapDest = graph.getOrDefault(connection.getDestNode(), new HashMap<>());
 
         // вес дуги 0 по умолчанию
-        tmpHashMapSrc.put(connection.getDestNode(), new Connection(connection.getSrcNode(), connection.getDestNode(),0));
-        tmpHashMapDest.put(connection.getSrcNode(), new Connection(connection.getDestNode(), connection.getSrcNode(), 0));
+        VisualConnection connection1 = new VisualConnection(connection.getSrcNode(), connection.getDestNode(), Color.black);
+        VisualConnection connection2 = new VisualConnection(connection.getDestNode(), connection.getSrcNode(), Color.black);
+        tmpHashMapSrc.put(connection.getDestNode(), connection1);
+        tmpHashMapDest.put(connection.getSrcNode(), connection2);
         graph.put(connection.getSrcNode(), tmpHashMapSrc);
         graph.put(connection.getDestNode(), tmpHashMapDest);
+
+        connections.add(connection);
     }
 
     // Добавить обработку графическую
-//    public void deleteConnection(VisualNode srcNode, VisualNode destNode) {
-//        checkExistTwoNodes(srcNode, destNode);
-//
-//        // Получаю все ноды, с которыми имеет связь источник
-//        HashMap<Node, Connection> connectedNodesSrc = graph.get(srcNode);
-//        HashMap<Node, Connection> connectedNodesDest = graph.get(destNode);
-//        // Удаляю указанную ноду
-//        if (connectedNodesSrc.containsKey(destNode) && connectedNodesDest.containsKey(srcNode)) {
-//            connectedNodesSrc.remove(destNode);
-//            connectedNodesDest.remove(srcNode);
-//        } else {
-//            throw new ConnectionNotExistException("Данного ребра между вершинами не существует.");
-//        }
-//    }
+    public void deleteConnection(VisualNode srcNode, VisualNode destNode) {
+        checkExistTwoNodes(srcNode, destNode);
+
+        // Получаю все ноды, с которыми имеет связь источник
+        HashMap<Node, Connection> connectedNodesSrc = graph.get(srcNode);
+        HashMap<Node, Connection> connectedNodesDest = graph.get(destNode);
+        // Удаляю указанную ноду
+        if (connectedNodesSrc.containsKey(destNode) && connectedNodesDest.containsKey(srcNode)) {
+            connectedNodesSrc.remove(destNode);
+            connectedNodesDest.remove(srcNode);
+        } else {
+            throw new ConnectionNotExistException("Данного ребра между вершинами не существует.");
+        }
+    }
 
     // Добавление компоненты и её удаление
 
@@ -318,8 +330,8 @@ public class VisualGraph extends UndirectedUnweightedGraph {
     // Проверяет, существует ли ребро между заданными вершинами
     private boolean hasEdge(VisualNode startNode, VisualNode endNode) {
         for (VisualConnection edge : connections) {
-            if ((edge.getStartNode() == startNode && edge.getEndNode() == endNode) ||
-                    (edge.getStartNode() == endNode && edge.getEndNode() == startNode)) {
+            if ((edge.getSrcNode() == startNode && edge.getDestNode() == endNode) ||
+                    (edge.getSrcNode() == endNode && edge.getDestNode() == startNode)) {
                 return true;
             }
         }

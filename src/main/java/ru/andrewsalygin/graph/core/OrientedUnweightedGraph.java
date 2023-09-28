@@ -105,6 +105,22 @@ public class OrientedUnweightedGraph extends Graph {
         graph.remove(nodeToDelete);
     }
 
+    public void deleteNode(Node nodeToDelete) {
+        if (!isExistNode(nodeToDelete))
+            throw new NodeNotExistException("Указанного узла не существует.");
+        // Прохожу по всем нодам
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            // Получаю список нод к которым имеет связь текущая
+            HashMap<Node, Connection> tmpHMNodes = entry.getValue();
+            // Ищу среди них удаляемую
+            if (tmpHMNodes.containsKey(nodeToDelete)) {
+                tmpHMNodes.remove(nodeToDelete);
+            }
+        }
+        // Удалить саму ноду
+        graph.remove(nodeToDelete);
+    }
+
     @Override
     public void addConnection(String srcNodeName, String destNodeName) {
         Node srcNode = getObjectNodeByName(srcNodeName);

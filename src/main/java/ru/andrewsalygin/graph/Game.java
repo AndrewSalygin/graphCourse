@@ -8,6 +8,7 @@ import ru.andrewsalygin.graph.game.visualgraph.VisualConnection;
 import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
 import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
 
+import java.util.Iterator;
 import java.util.Map;
 
 public class Game extends BasicGame {
@@ -36,7 +37,7 @@ public class Game extends BasicGame {
 
         visualGraph = new VisualGraph();
 
-        // Берём центр экрана
+        // Берём левый верхний угол клетчатой сетки
         int x = (gc.getWidth() - visualGraph.gridWidth) / 2;
         int y = (gc.getHeight() - visualGraph.gridHeight) / 2;
 
@@ -46,7 +47,20 @@ public class Game extends BasicGame {
         // Соедините компоненты связности между собой, добавив рёбра
         visualGraph.connectComponents();
 
-        visualGraph.addNode(new VisualNode(new Ellipse(x, y, 1000, 1000)));
+        visualGraph.deleteNode(visualGraph.getComponents().get(0).getNodes().get(0));
+        visualGraph.deleteNode(visualGraph.getComponents().get(0).getNodes().get(0));
+        visualGraph.deleteNode(visualGraph.getComponents().get(0).getNodes().get(0));
+        visualGraph.getComponents().get(0).getNodes().remove(0);
+        visualGraph.getComponents().get(0).getNodes().remove(0);
+        visualGraph.getComponents().get(0).getNodes().remove(0);
+//        .remove(0);
+//        visualGraph.getComponents().get(0).getNodes().remove(1);
+//        visualGraph.getComponents().get(0).getNodes().remove(2);
+//        VisualNode node1 = new VisualNode(new Ellipse(x, y, nodeRadius, nodeRadius));
+//        VisualNode node2 = new VisualNode(new Ellipse(x + 50, y + 50, nodeRadius, nodeRadius));
+//       visualGraph.addNodeSeparated(node1);
+//       visualGraph.addNodeSeparated(node2);
+//       visualGraph.addConnection(new VisualConnection(node1, node2, Color.green));
     }
 
 
@@ -130,6 +144,15 @@ public class Game extends BasicGame {
                 g.setColor(Color.black);
                 g.drawOval(node.getEllipse().getCenterX() - nodeRadius, node.getEllipse().getCenterY() - nodeRadius, cellSize / 1.5f, cellSize / 1.5f);
             }
+//            if (visualGraph.getNodes().size() != 0) {
+//                var it = visualGraph.getNodes().iterator().next();
+//                if (visualGraph.getNodes().size() != 0 && highlightedNode == it)
+//                {
+//                    visualGraph.deleteNodeSeparated(it);
+//                    highlightedNode = null;
+//                    visualGraph.deleteNode(visualGraph.getComponents().get(0).getNodes().get(0));
+//                }
+//            }
 
             // проходимся и проверяем в компонентах
             for (VisualNode node : component.getNodes()) {
@@ -146,10 +169,10 @@ public class Game extends BasicGame {
             // Отрисовка рёбер в компонентах
             for (VisualConnection edge : component.getConnections()) {
                 g.setColor(edge.getColor());
-                int startX = (int) edge.getStartNode().getEllipse().getCenterX();
-                int startY = (int) edge.getStartNode().getEllipse().getCenterY();
-                int endX = (int) edge.getEndNode().getEllipse().getCenterX();
-                int endY = (int) edge.getEndNode().getEllipse().getCenterY();
+                int startX = (int) edge.getSrcNode().getEllipse().getCenterX();
+                int startY = (int) edge.getSrcNode().getEllipse().getCenterY();
+                int endX = (int) edge.getDestNode().getEllipse().getCenterX();
+                int endY = (int) edge.getDestNode().getEllipse().getCenterY();
                 g.fillOval(startX - 5, startY - 5, 10, 10); // Точка на начале отрезка
                 g.fillOval(endX - 5, endY - 5, 10, 10); // Точка на конце отрезка
                 g.drawLine(startX, startY, endX, endY);
@@ -160,10 +183,12 @@ public class Game extends BasicGame {
         for (VisualConnection edge : visualGraph.getConnections()) {
             // Устанавливаем толщину линий
             g.setColor(edge.getColor());
-            int startX = (int) edge.getStartNode().getEllipse().getCenterX();
-            int startY = (int) edge.getStartNode().getEllipse().getCenterY();
-            int endX = (int) edge.getEndNode().getEllipse().getCenterX();
-            int endY = (int) edge.getEndNode().getEllipse().getCenterY();
+            int startX = (int) edge.getSrcNode().getEllipse().getCenterX();
+            int startY = (int) edge.getSrcNode().getEllipse().getCenterY();
+            int endX = (int) edge.getDestNode().getEllipse().getCenterX();
+            int endY = (int) edge.getDestNode().getEllipse().getCenterY();
+            g.fillOval(startX - 5, startY - 5, 10, 10); // Точка на начале отрезка
+            g.fillOval(endX - 5, endY - 5, 10, 10); // Точка на конце отрезка
             g.drawLine(startX, startY, endX, endY);
         }
     }

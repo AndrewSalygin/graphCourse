@@ -12,11 +12,11 @@ public class VisualConnection extends Connection {
         this.color = color;
     }
 
-    public VisualNode getStartNode() {
+    public VisualNode getSrcNode() {
         return (VisualNode) srcNode;
     }
 
-    public VisualNode getEndNode() {
+    public VisualNode getDestNode() {
         return (VisualNode) destNode;
     }
 
