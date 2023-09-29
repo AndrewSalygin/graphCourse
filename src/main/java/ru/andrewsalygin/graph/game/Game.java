@@ -2,6 +2,10 @@ package ru.andrewsalygin.graph.game;
 
 import org.newdawn.slick.*;
 
+import org.newdawn.slick.font.effects.ColorEffect;
+import org.newdawn.slick.font.effects.FilterEffect;
+import org.newdawn.slick.font.effects.GradientEffect;
+import org.newdawn.slick.font.effects.OutlineEffect;
 import ru.andrewsalygin.graph.core.Connection;
 import ru.andrewsalygin.graph.core.Node;
 import ru.andrewsalygin.graph.game.visualgraph.VisualConnection;
@@ -21,12 +25,40 @@ public class Game extends BasicGame {
     private VisualNode highlightedNode;
     private Color highlightColor = Color.yellow;
 
+    private UnicodeFont font;
+    private UnicodeFont fontBold;
     public Game() {
         super("Infection Graph");
     }
 
     @Override
     public void init(GameContainer gc) throws SlickException {
+        // Создаем объект шрифта TrueType
+        font = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", 16, false, false);
+
+        // Устанавливаем эффекты для шрифта
+        font.getEffects().add(new ColorEffect(java.awt.Color.black)); // Цвет текста
+
+        // Установка эффекта для сглаживания текста
+        font.getEffects().add(new ColorEffect(java.awt.Color.black));
+
+        // Инициализируем шрифт
+        font.addAsciiGlyphs();
+        font.loadGlyphs();
+
+        // Создаем объект шрифта TrueType
+        fontBold = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", 16, true, false);
+
+        // Устанавливаем эффекты для шрифта
+        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black)); // Цвет текста
+
+        // Установка эффекта для сглаживания текста
+        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
+
+        // Инициализируем шрифт
+        fontBold.addAsciiGlyphs();
+        fontBold.loadGlyphs();
+
         gc.setShowFPS(false); // Скрыть отображение FPS
         backgroundImage = new Image("/src/main/resources/backgrounds/background4.png");
 
@@ -70,7 +102,10 @@ public class Game extends BasicGame {
 
     @Override
     public void render(GameContainer gc, Graphics g) throws SlickException {
-        g.drawImage(backgroundImage, 0, 0, gc.getWidth(), gc.getHeight(), 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+        g.setColor(new Color(76, 96, 133));
+        g.fillRect(0, 0, gc.getWidth(), gc.getHeight());
+
+        g.drawImage(backgroundImage, gc.getWidth() / 3 - 150, 0, gc.getWidth() * 2 / 3 + 150, gc.getHeight(), 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
 
         g.setColor(Color.white);
 
@@ -121,5 +156,38 @@ public class Game extends BasicGame {
                 g.drawLine(startX, startY, endX, endY);
             }
         }
+
+        // Отрисовка UI
+        Image menu = new Image("src/main/resources/UI/menu.png");
+        Image button = new Image("src/main/resources/UI/button.png");
+        g.drawImage(menu, 20, 20);
+        g.drawImage(button, (20 + gc.getWidth() / 3 - 190) / 2 - 100, 230);
+        g.setFont(fontBold);
+        g.drawString("Finish move", (20 + gc.getWidth() / 3 - 190) / 2 - 70, 247);
+
+        g.drawImage(menu, gc.getWidth() - 460, 20);
+        g.drawImage(button, gc.getWidth() - 350, 230);
+        g.drawString("Finish move", gc.getWidth() - 320, 247);
+
+        g.setFont(fontBold);
+        g.drawString("Green virus", 30, 30);
+
+        g.setFont(font);
+        g.drawString("Number of infected vertices: ", 30, 60);
+        g.drawString("Skill points: ", 30, 90);
+        g.drawString("Power: ", 30, 120);
+        g.drawString("Protection: ", 30, 150);
+        g.drawString("Replication: ", 30, 180);
+
+
+        g.setFont(fontBold);
+        g.drawString("Blue virus", gc.getWidth() - 450, 30);
+
+        g.setFont(font);
+        g.drawString("Number of infected vertices: ", gc.getWidth() - 450, 60);
+        g.drawString("Skill points: ", gc.getWidth() - 450, 90);
+        g.drawString("Power: ", gc.getWidth() - 450, 120);
+        g.drawString("Protection: ", gc.getWidth() - 450, 150);
+        g.drawString("Replication: ", gc.getWidth() - 450, 180);
     }
 }
