@@ -12,10 +12,12 @@ public class VisualNode extends Node {
     private static int counterName = 0;
     private Color ellipseColor;
     private Ellipse ellipse;
-    public VisualNode(Color ellipseColor, Ellipse ellipse) {
+    private int hp;
+    public VisualNode(Color ellipseColor, Ellipse ellipse, int hp) {
         super(String.valueOf(counterName));
         this.ellipseColor = ellipseColor;
         this.ellipse = ellipse;
+        this.hp = hp;
         counterName++;
     }
 
@@ -25,6 +27,10 @@ public class VisualNode extends Node {
 
     public Color getEllipseColor() {
         return ellipseColor;
+    }
+
+    public int getHp() {
+        return hp;
     }
 
 

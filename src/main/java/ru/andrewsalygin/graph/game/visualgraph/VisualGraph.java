@@ -248,13 +248,15 @@ public class VisualGraph extends UndirectedUnweightedGraph {
 
     private Component createTemplateComponentCross(int x, int y) {
         Component component = new Component();
+        int maxValueHp = 100;
+        int minValueHp = 50;
 
         Color ellipseColor = Color.red;
-        VisualNode centerNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 2, nodeRadius, nodeRadius));
-        VisualNode topNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, nodeRadius, nodeRadius));
-        VisualNode bottomNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, nodeRadius, nodeRadius));
-        VisualNode leftNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, nodeRadius, nodeRadius));
-        VisualNode rightNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, nodeRadius, nodeRadius));
+        VisualNode centerNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode topNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode bottomNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode leftNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode rightNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
 
         component.addNode(centerNode);
         addNode(centerNode);
@@ -289,12 +291,14 @@ public class VisualGraph extends UndirectedUnweightedGraph {
 
     private Component createTemplateComponentTree(int x, int y) {
         Component component = new Component();
+        int maxValueHp = 100;
+        int minValueHp = 50;
 
         Color ellipseColor = Color.red;
-        VisualNode vertex1 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, nodeRadius, nodeRadius));
-        VisualNode vertex2 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, nodeRadius, nodeRadius));
-        VisualNode vertex3 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, nodeRadius, nodeRadius));
-        VisualNode vertex4 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, nodeRadius, nodeRadius));
+        VisualNode vertex1 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode vertex2 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode vertex3 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode vertex4 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
 
         component.addNode(vertex1);
         addNode(vertex1);
