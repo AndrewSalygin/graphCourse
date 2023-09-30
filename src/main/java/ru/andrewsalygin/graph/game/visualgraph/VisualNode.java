@@ -13,11 +13,13 @@ public class VisualNode extends Node {
     private Color ellipseColor;
     private Ellipse ellipse;
     private int hp;
+    private boolean skillPoint;
     public VisualNode(Color ellipseColor, Ellipse ellipse, int hp) {
         super(String.valueOf(counterName));
         this.ellipseColor = ellipseColor;
         this.ellipse = ellipse;
         this.hp = hp;
+        skillPoint = true;
         counterName++;
     }
 
@@ -29,10 +31,25 @@ public class VisualNode extends Node {
         return ellipseColor;
     }
 
+    public boolean isSkillPoint() {
+        return skillPoint;
+    }
+
+    public void setEllipseColor(Color ellipseColor) {
+        this.ellipseColor = ellipseColor;
+    }
+
     public int getHp() {
         return hp;
     }
 
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public void setSkillPoint(boolean skillPoint) {
+        this.skillPoint = skillPoint;
+    }
 
     public boolean contains(int mouseX, int mouseY) {
         // Проверяем, находится ли точка мыши внутри радиуса вершины

@@ -25,6 +25,10 @@ public class VisualConnection extends Connection {
         return color;
     }
 
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
