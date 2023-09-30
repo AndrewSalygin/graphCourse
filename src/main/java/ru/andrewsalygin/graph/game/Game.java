@@ -315,12 +315,12 @@ public class Game extends BasicGame {
         } else {
             highlightHome = false;
         }
-        if (mouseX >= 500 && mouseX <= 550 && mouseY >= 20 && mouseY <= 70) {
+        if (mouseX >= 520 && mouseX <= 570 && mouseY >= 20 && mouseY <= 70) {
             highlightRepeat = true;
         } else {
             highlightRepeat = false;
         }
-        if (mouseX >= 1350 && mouseX <= 1400 && mouseY >= 920 && mouseY <= 970) {
+        if (mouseX >= 1350 && mouseX <= 1400 && mouseY >= gc.getHeight() - 80 && mouseY <= gc.getHeight() - 30) {
             highlightHelp = true;
         } else {
             highlightHelp = false;
@@ -742,14 +742,14 @@ public class Game extends BasicGame {
             g.drawImage(home, 1350, 20);
         }
         if (highlightRepeat) {
-            g.drawImage(repeatHighlighted, 500, 20);
+            g.drawImage(repeatHighlighted, 520, 20);
         } else {
-            g.drawImage(repeat, 500, 20);
+            g.drawImage(repeat, 520, 20);
         }
         if (highlightHelp) {
-            g.drawImage(helpHighlighted, 1350, 920);
+            g.drawImage(helpHighlighted, 1350, gc.getHeight() - 80);
         } else {
-            g.drawImage(help, 1350, 920);
+            g.drawImage(help, 1350, gc.getHeight() - 80);
         }
 
         if (openHelp) {
