@@ -193,11 +193,12 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            System.out.println("8. Можно ли из текущего графа получить граф из файла, удалив несколько вершин");
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -349,6 +350,31 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            System.out.println("Введите название файла:");
+                            Graph G2;
+                            try {
+                                G2 = inputGraphFromFile(scanner.nextLine());
+                                if (graph.getClass() == G2.getClass()) {
+                                    if (graph.isSubgraph(G2)) {
+                                        System.out.println("YES");
+                                    } else {
+                                        System.out.println("NO");
+                                    }
+                                } else {
+                                    System.out.println("NO");
+                                }
+                            }
+                            catch (FileNotFoundException e) {
+                                System.out.println("Ошибка: указанный файл не найден.");
+                            } catch (NotCorrectGraphNameException e) {
+                                System.out.println("Ошибка:" + e.getMessage());
+                            } catch (BackToPreviousMenuException e) {
+                                throw new RuntimeException(e);
+                            } catch (ExitProgramException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");

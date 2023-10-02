@@ -162,6 +162,23 @@ public class OrientedUnweightedGraph extends Graph {
         return graph;
     }
 
+    public boolean isSubgraph(Graph otherGraph) {
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : otherGraph.graph.entrySet()) {
+            if (!graph.containsKey(entry.getKey())) {
+                return false;
+            }
+            for (Map.Entry<Node, Connection> localEntry : entry.getValue().entrySet()) {
+                 if (!graph.get(entry.getKey()).containsKey(localEntry.getKey())) {
+                    return false;
+                }
+                if (!graph.get(entry.getKey()).get(localEntry.getKey()).equals(localEntry.getValue())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     protected void checkExistTwoNodes(Node srcNode, Node destNode) {
         if (!isExistNode(srcNode))
             throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
