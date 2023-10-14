@@ -6,9 +6,7 @@ import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrew Salygin
@@ -164,9 +162,143 @@ public class OrientedUnweightedGraph extends Graph {
 
     protected void checkExistTwoNodes(Node srcNode, Node destNode) {
         if (!isExistNode(srcNode))
-            throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
+            throw new NodeNotExistException("Исходной вершины не существует в текущем графе.");
         if (!isExistNode(destNode))
-            throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
+            throw new NodeNotExistException("Вершина назначения не существует в текущем графе.");
+    }
+
+    @Override
+    public boolean checkPossibleToDeleteNodeToGetTree() {
+        // Проверяем, что количество непросмотренных вершин не больше одной (компоненты связности)
+        HashMap<Node, Boolean> visitedToCheckGraphConnectivity = toUndirectedGraph().getVisitedToCheckGraphConnectivity();
+        int countOfNotVisited = 0;
+        for (boolean value : visitedToCheckGraphConnectivity.values()) {
+            if (!value) {
+                countOfNotVisited++;
+            }
+        }
+        if (countOfNotVisited > 1) {
+            return false;
+        }
+
+        // Ищем циклы в графе
+        HashSet<HashSet<Node>> cycles = new HashSet<>();
+        HashSet<Node> currentCycle = new HashSet<>();
+
+        // Инициализируем массив посещенных вершин
+        HashMap<Node, Boolean> visited = new HashMap<>(graph.size());
+        for (Node node : graph.keySet()) {
+            visited.put(node, false);
+        }
+
+        // Запускаем рекурсивный DFS
+        for (Node node : graph.keySet()) {
+            dfsRecursiveUtil(node, node, visited, currentCycle, cycles);
+            // Чтобы повторно не считать циклы
+            visited.put(node, true);
+        }
+
+        // Если циклов нет (то это дерево, так как компонента связности одна или существует одна изолированная вершина)
+        if (cycles.size() == 0) {
+            return true;
+        } else {
+            // Ищем пересечение циклов
+            HashSet<Node> intersectionNodes = cycles.iterator().next();
+            for (HashSet<Node> cycle : cycles) {
+                intersectionNodes.retainAll(cycle);
+            }
+            // Если пересечение циклов ровно одна вершина, то нужно проверить не станет ли при её удалении две компоненты
+            // связности
+            OrientedUnweightedGraph localGraph = new OrientedUnweightedGraph(this).toUndirectedGraph();
+            if (intersectionNodes.size() == 1) {
+                // удаляем её из копии графа
+                localGraph.deleteNode(intersectionNodes.iterator().next().nodeName);
+            }
+            visitedToCheckGraphConnectivity = localGraph.getVisitedToCheckGraphConnectivity();
+            countOfNotVisited = 0;
+            for (boolean value : visitedToCheckGraphConnectivity.values()) {
+                if (!value) {
+                    countOfNotVisited++;
+                }
+            }
+            // Все вершины должны быть просмотрены
+            if (countOfNotVisited > 0) {
+                return false;
+            }
+            // Если вершин, которые входят во все циклы несколько, то тем более можно удалить какую-то из них и получить
+            // дерево
+            return intersectionNodes.size() >= 1;
+        }
+    }
+
+    private UndirectedUnweightedGraph toUndirectedGraph() {
+        UndirectedUnweightedGraph localGraph = new UndirectedUnweightedGraph();
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            if (!localGraph.isExistNodeByName(entry.getKey().nodeName)) {
+                localGraph.addNode(entry.getKey().nodeName);
+            }
+
+            for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
+                if (!localGraph.isExistNodeByName(innerEntry.getKey().nodeName)) {
+                    localGraph.addNode(innerEntry.getKey().nodeName);
+                }
+                //if (!graph.get(entry.getKey().nodeName).containsKey(innerEntry.getKey().nodeName)) {
+                try {
+                    localGraph.addConnection(entry.getKey().nodeName, innerEntry.getKey().nodeName);
+                } catch (RuntimeException ex) {}
+            }
+        }
+        return localGraph;
+    }
+
+    // DFS (Нерекурсивный)
+    public HashMap<Node, Boolean> getVisitedToCheckGraphConnectivity() {
+        HashMap<Node, Boolean> visited = new HashMap<>(graph.size());
+        if (graph.size() == 0) {
+            return new HashMap<>();
+        }
+        Iterator<Node> iterator = graph.keySet().iterator();
+        Node currentNode = iterator.next();
+
+        for (var node : graph.keySet()) {
+            visited.put(node, false);
+        }
+
+        LinkedList<Node> stack = new LinkedList<>();
+        stack.addFirst(currentNode);
+        // Просматриваю вершину и добавляю вершину в цикл
+        visited.put(currentNode, true);
+
+        while (!stack.isEmpty()) {
+            currentNode = stack.pop();
+            for (Node adjacentNode : graph.get(currentNode).keySet()) {
+                if (!visited.get(adjacentNode)) {
+                    visited.put(adjacentNode, true);
+                    stack.addFirst(adjacentNode);
+                }
+            }
+        }
+
+        return visited;
+    }
+
+    private void dfsRecursiveUtil(Node startNode, Node currentNode, HashMap<Node, Boolean> visited,
+                         HashSet<Node> currentCycle, HashSet<HashSet<Node>> cycles) {
+        visited.put(currentNode, true);
+        currentCycle.add(currentNode);
+
+        // Прохожусь по всем смежным вершинам текущей
+        for (Node adjacencyNode : graph.get(currentNode).keySet()) {
+            // Запускаюсь от смежной вершины, если она не была просмотрена
+            if (!visited.get(adjacencyNode)) {
+                dfsRecursiveUtil(startNode, adjacencyNode, visited, currentCycle, cycles);
+                // Если она была просмотрена и является стартовой, то тогда добавляем цикл
+            } else if (adjacencyNode.equals(startNode)) {
+                cycles.add(new HashSet<>(currentCycle));
+            }
+        }
+        // Откатываемся на одну ноду назад
+        currentCycle.remove(currentNode);
+        visited.put(currentNode, false);
     }
 }
-

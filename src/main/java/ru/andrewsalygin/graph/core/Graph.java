@@ -18,4 +18,5 @@ public abstract class Graph {
     public abstract String getAdjacencyList();
     protected abstract HashMap<Node, HashMap<Node, Connection>> getGraph();
     protected abstract Node getObjectNodeByName(String nodeName);
+    public abstract boolean checkPossibleToDeleteNodeToGetTree();
 }
