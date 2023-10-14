@@ -193,11 +193,14 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            if (!(graph instanceof UndirectedUnweightedGraph)) {
+                System.out.println("8. Проверить, можно ли из орграфа удалить какую-либо вершину так, чтобы получилось дерево.");
+            }
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -349,6 +352,13 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            if (graph instanceof UndirectedUnweightedGraph) {
+                                System.out.println("Введите одну из цифр пункта меню.");
+                            } else {
+                                System.out.println(graph.checkPossibleToDeleteNodeToGetTree() ? "Можно" : "Нельзя");
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
