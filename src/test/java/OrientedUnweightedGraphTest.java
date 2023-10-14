@@ -164,7 +164,7 @@ class OrientedUnweightedGraphTest {
         getGraph.setAccessible(true);
         Object node = constructorNode.newInstance("5");
         HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
-        Assertions.assertEquals(false, localGraph.containsKey(node));
+        Assertions.assertFalse(localGraph.containsKey(node));
     }
 
     // Обычное добавление дуги
@@ -173,13 +173,11 @@ class OrientedUnweightedGraphTest {
         graph.addNode("5");
         graph.addNode("7");
         Assertions.assertDoesNotThrow(() -> graph.addConnection("5", "7"));
-        Method getGraph = null;
-        getGraph = graph.getClass().getDeclaredMethod("getGraph");
-        getGraph.setAccessible(true);
+        Method getGraph = graph.getClass().getDeclaredMethod("getGraph");
         Object node1 = constructorNode.newInstance("5");
         Object node2 = constructorNode.newInstance("7");
         HashMap<Object, HashMap<Object, Object>> localGraph = (HashMap<Object, HashMap<Object, Object>>) getGraph.invoke(graph);
-        Assertions.assertEquals(true, localGraph.get(node1).containsKey(node2));
+        Assertions.assertTrue(localGraph.get(node1).containsKey(node2));
     }
 
     // Добавление дуги, но ноды источника не существует
