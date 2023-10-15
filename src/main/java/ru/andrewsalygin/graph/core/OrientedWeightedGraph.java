@@ -52,7 +52,6 @@ public class OrientedWeightedGraph extends OrientedUnweightedGraph {
             resultString.append('\n');
         }
         return resultString.toString();
-
     }
 
     public void updateWeight(String srcNodeName, String destNodeName, Integer weight) {

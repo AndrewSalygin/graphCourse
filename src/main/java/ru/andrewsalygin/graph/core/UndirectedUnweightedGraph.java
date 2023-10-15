@@ -5,6 +5,9 @@ import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Andrew Salygin
@@ -59,5 +62,61 @@ public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
         } else {
             throw new ConnectionNotExistException("Данного ребра между вершинами не существует.");
         }
+    }
+
+    private HashMap<Node, Integer> bfsLayers(Node startNode) {
+        HashMap<Node, Integer> nodeLayers = new HashMap<>();
+        HashMap<Node, Boolean> visitedNodes = new HashMap<>(graph.size());
+        // вершины текущего слоя
+        LinkedList<Node> queue = new LinkedList<>();
+        // вершины следующего слоя
+        LinkedList<Node> nextQueue = new LinkedList<>();
+
+        int layerCount = 0;
+        visitedNodes.put(startNode, true);
+        nodeLayers.put(startNode, 0);
+        queue.addLast(startNode);
+
+        layerCount++;
+        while (!queue.isEmpty()) {
+            startNode = queue.removeFirst();
+
+            for (Node node : graph.get(startNode).keySet()) {
+                if (!visitedNodes.containsKey(node)) {
+                    visitedNodes.put(node, true);
+                    nextQueue.addLast(node);
+                    nodeLayers.put(node, layerCount);
+                }
+            }
+            if (queue.size() == 0 && nextQueue.size() != 0) {
+                queue.addAll(nextQueue);
+                nextQueue.clear();
+                layerCount++;
+            }
+        }
+        return nodeLayers;
+    }
+
+    public String findPathWithSameEdges(String uName, String vName) {
+        Node u = getObjectNodeByName(uName);
+        Node v = getObjectNodeByName(vName);
+        checkExistTwoNodes(u, v);
+
+        HashMap<Node, Integer> uLayers = bfsLayers(u);
+        HashMap<Node, Integer> vLayers = bfsLayers(v);
+
+        Integer tmpValue;
+        for (Map.Entry<Node, Integer> entry : uLayers.entrySet()) {
+            tmpValue = vLayers.get(entry.getKey());
+            // Если вершины в разных компонентах связности
+            if (tmpValue == null) {
+                throw new RuntimeException("Такой вершины не существует.");
+            }
+            if (tmpValue.equals(entry.getValue())) {
+                return entry.getKey().nodeName;
+            }
+        }
+
+        throw new RuntimeException("Такой вершины не существует.");
     }
 }

@@ -9,6 +9,9 @@ class Node {
     String nodeName;
 
     public Node(String nodeName) {
+        if (nodeName.equals("")) {
+            throw new RuntimeException("У вершины должно быть имя.");
+        }
         this.nodeName = nodeName;
     }
 

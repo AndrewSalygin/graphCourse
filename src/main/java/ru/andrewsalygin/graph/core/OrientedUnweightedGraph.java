@@ -6,9 +6,7 @@ import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrew Salygin
