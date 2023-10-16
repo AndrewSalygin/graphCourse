@@ -193,11 +193,12 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            System.out.println("8. Алгоритм краскала");
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -349,6 +350,33 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            if (graph instanceof UndirectedWeightedGraph) {
+                                ((UndirectedWeightedGraph) graph).kraskalsAlgorithm();
+                                System.out.println("Сохранить граф в файл? (д/Н)");
+                                String isSave = scanner.nextLine();
+                                if (isSave.equals("д") || isSave.equals("Д")) {
+                                    System.out.println("Введите путь до файла, в который нужно сохранить граф");
+                                    String path = scanner.nextLine();
+                                    try {
+                                        GraphSerializer.saveGraphToFile(path, graph);
+                                    } catch (NameFileNotSpecifiedException e) {
+                                        System.out.println("Ошибка: " + e.getMessage());
+                                    }
+                                    catch (FileNotFoundException e) {
+                                        System.out.println("Ошибка: указанный файл не найден.");
+                                    } catch (IOException e) {
+                                        try {
+                                            throw new InternalApplicationException("Внутренняя ошибка приложения #1.");
+                                        } catch (InternalApplicationException ex) {
+                                            System.out.println(ex.getMessage());
+                                        }
+                                    }
+                                }
+                            } else {
+                                System.out.println("Введите одну из цифр пункта меню.");
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");

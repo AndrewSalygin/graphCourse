@@ -1,8 +1,9 @@
 package ru.andrewsalygin.graph.core;
 
+import java.util.Comparator;
 import java.util.Objects;
 
-class Connection {
+class Connection implements Comparable<Connection> {
     Integer weight;
 
     public Connection(Integer weight) {
@@ -33,5 +34,10 @@ class Connection {
     @Override
     public String toString() {
         return weight.toString();
+    }
+
+    @Override
+    public int compareTo(Connection o) {
+        return Integer.compare(this.weight, o.weight);
     }
 }
