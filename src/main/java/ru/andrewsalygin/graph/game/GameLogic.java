@@ -3,6 +3,7 @@ package ru.andrewsalygin.graph.game;
 import org.newdawn.slick.Color;
 import ru.andrewsalygin.graph.core.Connection;
 import ru.andrewsalygin.graph.core.Node;
+import ru.andrewsalygin.graph.game.utils.Motion;
 import ru.andrewsalygin.graph.game.utils.MotionError;
 import ru.andrewsalygin.graph.game.utils.MoveVirusPart;
 import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
@@ -11,8 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static ru.andrewsalygin.graph.game.Game.maxValueRegenerationHealthNode;
-import static ru.andrewsalygin.graph.game.Game.minValueRegenerationHealthNode;
+import static ru.andrewsalygin.graph.game.Game.*;
 import static ru.andrewsalygin.graph.game.utils.MotionError.*;
 
 /**
@@ -29,7 +29,7 @@ public class GameLogic {
     static int powerDelta;
     static int protectionDelta;
     static int replicationDelta;
-    static String motion;
+    static Motion motion;
     static int day;
     private static final Random random = new Random();
     public static void startGame() {
@@ -41,7 +41,7 @@ public class GameLogic {
         powerDelta = 5;
         protectionDelta = 5;
         replicationDelta = 5;
-        motion = "Green move";
+        motion = Motion.Green;
         day = 1;
         Game.redGraph = new HashMap<>();
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : Game.visualGraph.getGraph().entrySet()) {
@@ -78,7 +78,7 @@ public class GameLogic {
 
         // если это смежная вершина
         if (graph.get(startVirusMove).containsKey(endVirusMove)) {
-            if (motion.equals("Green move")) {
+            if (motion == Motion.Green) {
                 // Цвет одинаковый
                 if (startVirusMove.getEllipseColor() == Color.green) {
                     if (endVirusMove.getEllipseColor() == Color.green) {
@@ -120,7 +120,7 @@ public class GameLogic {
                     } else if (endVirusMove.getEllipseColor() == Color.red ||
                             endVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                         virusAttack = valueToMove * powers[0];
-                        protectionHealthNode = random.nextInt(maxValueRegenerationHealthNode - minValueRegenerationHealthNode + 1) + minValueRegenerationHealthNode;
+                        protectionHealthNode = random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                         healthNodeProtection = endVirusMove.getHp() * protectionHealthNode;
                         firstValue = (virusAttack - healthNodeProtection) / powers[0];
                         secondValue = (healthNodeProtection - virusAttack) / protectionHealthNode;
@@ -152,7 +152,7 @@ public class GameLogic {
                     return NOT_YOUR_MOTION;
                 }
             }
-            else if (motion.equals("Blue move")) {
+            else if (motion == Motion.Blue) {
                  if (startVirusMove.getEllipseColor() == Color.blue) {
                      if (endVirusMove.getEllipseColor() == Color.blue) {
                          if (endVirusMove.getHp() < 300) {
@@ -193,7 +193,7 @@ public class GameLogic {
                      else if (endVirusMove.getEllipseColor() == Color.red ||
                              endVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                          virusAttack = valueToMove * powers[1];
-                         protectionHealthNode = random.nextInt(maxValueRegenerationHealthNode - minValueRegenerationHealthNode + 1) + minValueRegenerationHealthNode;
+                         protectionHealthNode = random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                          healthNodeProtection = endVirusMove.getHp() * protectionHealthNode;
                          firstValue = (virusAttack - healthNodeProtection) / powers[1];
                          secondValue = (healthNodeProtection - virusAttack) / protectionHealthNode;
