@@ -19,19 +19,21 @@ import static ru.andrewsalygin.graph.game.utils.MotionError.*;
  * @author Andrew Salygin
  */
 public class GameLogic {
+    private static final int MAX_VIRUS_HP = 300;
+    private static final Random random = new Random();
     static int[] virusNodes;
     static int[] skillPoints;
     static int[] powers;
     static int[] protections;
-    static int protectionHealthNode;
     static int[] replications;
+    static int protectionHealthNode;
     static int replicationHealthNode;
     static int powerDelta;
     static int protectionDelta;
     static int replicationDelta;
     static Motion motion;
     static int day;
-    private static final Random random = new Random();
+
     public static void startGame() {
         virusNodes = new int[]{0, 0};
         skillPoints = new int[]{0, 0};
@@ -43,6 +45,8 @@ public class GameLogic {
         replicationDelta = 5;
         motion = Motion.Green;
         day = 1;
+
+        // Инициализация здоровых вершин
         Game.redGraph = new HashMap<>();
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : Game.visualGraph.getGraph().entrySet()) {
             VisualNode node = (VisualNode) entry.getKey();
@@ -63,10 +67,12 @@ public class GameLogic {
         int firstValue;
         int secondValue;
 
+        // Пересылка вируса в ту же вершину невозможна
         if (startVirusMove.equals(endVirusMove)) {
             return SAME_NODE;
         }
 
+        // Определяем количество пересылаемого вируса
         if (virusPart == MoveVirusPart.ALL) {
             valueToMove = startVirusMove.getHp();
         }
@@ -76,29 +82,34 @@ public class GameLogic {
             valueToMove = startVirusMove.getHp() / 4;
         }
 
-        // если это смежная вершина
+        // Если конечная вершина смежная
         if (graph.get(startVirusMove).containsKey(endVirusMove)) {
             if (motion == Motion.Green) {
-                // Цвет одинаковый
+                // Конечная вершина тот же вирус
                 if (startVirusMove.getEllipseColor() == Color.green) {
                     if (endVirusMove.getEllipseColor() == Color.green) {
-                        if (endVirusMove.getHp() < 300) {
-                            if (endVirusMove.getHp() + valueToMove <= 300) {
+                        if (endVirusMove.getHp() < MAX_VIRUS_HP) {
+                            // Количество переданного будет меньше максимального
+                            if (endVirusMove.getHp() + valueToMove <= MAX_VIRUS_HP) {
                                 endVirusMove.setHp(endVirusMove.getHp() + valueToMove);
                                 startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                             }
-                            else {
-                                hpToAdd = 300 - endVirusMove.getHp();
-                                endVirusMove.setHp(300);
+                            else { // Больше максимального
+                                hpToAdd = MAX_VIRUS_HP - endVirusMove.getHp();
+                                endVirusMove.setHp(MAX_VIRUS_HP);
                                 startVirusMove.setHp(startVirusMove.getHp() - hpToAdd);
                             }
+                        } else { // Уже максимум
+                            return MAX_VALUE_OF_VIRUS;
                         }
-                        // Цвет другого вируса
+                        // Конечная вершина другой вирус
                     } else if (endVirusMove.getEllipseColor() == Color.blue) {
                         virusAttack = valueToMove * powers[0];
                         virusProtectionOther = endVirusMove.getHp() * protections[1];
                         firstValue = (virusAttack - virusProtectionOther) / powers[0];
                         secondValue = (virusProtectionOther - virusAttack) / protections[1];
+
+                        // Случай, когда вирусы взаимоуничтожают друг друга
                         if (virusAttack == virusProtectionOther) {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                             endVirusMove.setHp(0);
@@ -106,6 +117,7 @@ public class GameLogic {
                             Game.redGraph.put(endVirusMove, Game.blueGraph.get(endVirusMove));
                             Game.blueGraph.remove(endVirusMove);
                         }
+                        // Зелёный сильнее
                         else if (firstValue > 0) {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                             endVirusMove.setHp(firstValue);
@@ -113,10 +125,13 @@ public class GameLogic {
                             Game.greenGraph.put(endVirusMove, Game.blueGraph.get(endVirusMove));
                             Game.blueGraph.remove(endVirusMove);
                         }
+                        // Синий сильнее
                         else if (secondValue > 0) {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                             endVirusMove.setHp(secondValue);
                         }
+
+                        // Конечная вершина здоровая
                     } else if (endVirusMove.getEllipseColor() == Color.red ||
                             endVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                         virusAttack = valueToMove * powers[0];
@@ -124,6 +139,8 @@ public class GameLogic {
                         healthNodeProtection = endVirusMove.getHp() * protectionHealthNode;
                         firstValue = (virusAttack - healthNodeProtection) / powers[0];
                         secondValue = (healthNodeProtection - virusAttack) / protectionHealthNode;
+
+                        // Аналогично ситуациям выше
                         if (virusAttack == healthNodeProtection) {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                             endVirusMove.setHp(0);
@@ -144,33 +161,38 @@ public class GameLogic {
                             endVirusMove.setHp(secondValue);
                         }
                     }
+
+                    // В качестве начальной выбрана здоровая вершина, что недопустимо
                 } else if (startVirusMove.getEllipseColor() == Color.red ||
                         startVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                     return RED_NODE_SELECTED;
                 }
-                else {
+                else { // Текущий ход синих
                     return NOT_YOUR_MOTION;
                 }
             }
-            else if (motion == Motion.Blue) {
+            else if (motion == Motion.Blue) { // Аналогично ситуациям выше, только для синих
                  if (startVirusMove.getEllipseColor() == Color.blue) {
                      if (endVirusMove.getEllipseColor() == Color.blue) {
-                         if (endVirusMove.getHp() < 300) {
-                             if (endVirusMove.getHp() + valueToMove <= 300) {
+                         if (endVirusMove.getHp() < MAX_VIRUS_HP) {
+                             if (endVirusMove.getHp() + valueToMove <= MAX_VIRUS_HP) {
                                  endVirusMove.setHp(endVirusMove.getHp() + valueToMove);
                                  startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                              }
                              else {
-                                 hpToAdd = 300 - endVirusMove.getHp();
-                                 endVirusMove.setHp(300);
+                                 hpToAdd = MAX_VIRUS_HP - endVirusMove.getHp();
+                                 endVirusMove.setHp(MAX_VIRUS_HP);
                                  startVirusMove.setHp(startVirusMove.getHp() - hpToAdd);
                              }
+                         } else {
+                             return MAX_VALUE_OF_VIRUS;
                          }
                      } else if (endVirusMove.getEllipseColor() == Color.green) {
                          virusAttack = valueToMove * powers[0];
                          virusProtectionOther = endVirusMove.getHp() * protections[1];
                          firstValue = (virusAttack - virusProtectionOther) / powers[0];
                          secondValue = (virusProtectionOther - virusAttack) / protections[1];
+
                          if (virusAttack == virusProtectionOther) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                              endVirusMove.setHp(0);
@@ -197,6 +219,7 @@ public class GameLogic {
                          healthNodeProtection = endVirusMove.getHp() * protectionHealthNode;
                          firstValue = (virusAttack - healthNodeProtection) / powers[1];
                          secondValue = (healthNodeProtection - virusAttack) / protectionHealthNode;
+
                          if (virusAttack == healthNodeProtection) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                              endVirusMove.setHp(0);

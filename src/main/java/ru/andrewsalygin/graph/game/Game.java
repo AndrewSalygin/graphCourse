@@ -18,7 +18,6 @@ import static ru.andrewsalygin.graph.game.utils.Menu.*;
 import static ru.andrewsalygin.graph.game.utils.Button.*;
 import static ru.andrewsalygin.graph.game.utils.Flag.*;
 
-// TO DO: ПОДПРАВИТЬ КООРДИНАТЫ ДЛЯ UI
 public class Game extends BasicGame {
     final static int MIN_VALUE_REGENERATION_HEALTH_NODE = 1;
     final static int MAX_VALUE_REGENERATION_HEALTH_NODE = 25;
@@ -96,7 +95,6 @@ public class Game extends BasicGame {
 
         greenGraph = new HashMap<>();
         blueGraph = new HashMap<>();
-        redGraph = new HashMap<>();
 
         visualGraph = new VisualGraph();
 
@@ -508,6 +506,7 @@ public class Game extends BasicGame {
                 case RED_NODE_SELECTED -> g.drawString("Red node cannot be selected!", gc.getWidth() / 2 - 140, 88);
                 case NOT_ADJACENT -> g.drawString("Nodes are not adjacent!", gc.getWidth() / 2 - 140, 88);
                 case SAME_NODE -> g.drawString("This is the same node!", gc.getWidth() / 2 - 140, 88);
+                case MAX_VALUE_OF_VIRUS -> g.drawString("The virus is already maximum!", gc.getWidth() / 2 - 140, 88);
             }
         } else if (flags.get(MOVE_VIRUS_MODE)) { // Отправка вируса в другую вершину
             if (flags.get(HIGHLIGHT_SEND_ALL_VIRUS)) {

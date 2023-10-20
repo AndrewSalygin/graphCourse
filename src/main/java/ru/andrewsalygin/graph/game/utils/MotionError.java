@@ -8,5 +8,6 @@ public enum MotionError {
     RED_NODE_SELECTED,
     NOT_YOUR_MOTION,
     NOT_ADJACENT,
-    SAME_NODE
+    SAME_NODE,
+    MAX_VALUE_OF_VIRUS
 }
