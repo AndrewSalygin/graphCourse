@@ -11,7 +11,6 @@ import java.util.Random;
  * @author Andrew Salygin
  */
 public class Component {
-    private static Random random = new Random();
     private List<VisualNode> nodes = new ArrayList<>();
     private List<VisualConnection> componentConnections = new ArrayList<>();
 
