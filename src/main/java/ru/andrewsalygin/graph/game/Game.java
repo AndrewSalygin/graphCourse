@@ -5,50 +5,33 @@ import org.newdawn.slick.*;
 import org.newdawn.slick.font.effects.ColorEffect;
 import ru.andrewsalygin.graph.core.Connection;
 import ru.andrewsalygin.graph.core.Node;
-import ru.andrewsalygin.graph.game.utils.EndGameWin;
-import ru.andrewsalygin.graph.game.utils.MotionError;
-import ru.andrewsalygin.graph.game.utils.MoveVirusPart;
-import ru.andrewsalygin.graph.game.utils.RestartGame;
+import ru.andrewsalygin.graph.game.utils.*;
 import ru.andrewsalygin.graph.game.visualgraph.VisualConnection;
 import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
 import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
 
 import java.util.*;
 
-import static java.lang.System.arraycopy;
 import static java.lang.System.exit;
 import static ru.andrewsalygin.graph.game.GameLogic.*;
+import static ru.andrewsalygin.graph.game.utils.Menu.*;
+import static ru.andrewsalygin.graph.game.utils.Button.*;
+import static ru.andrewsalygin.graph.game.utils.Flag.*;
 
+// TO DO: ПОДПРАВИТЬ КООРДИНАТЫ ДЛЯ UI
 public class Game extends BasicGame {
     // Размеры таблицы
     public static int cellSize; // Размер каждой ячейки
     public static int nodeRadius; // Размер каждой ячейки
     private int tableScale;
+    private HashMap<Flag, Boolean> flags;
     Image backgroundImage;
     static VisualGraph visualGraph;
     private VisualNode highlightedNode;
-    private Boolean highlightedNodeFlag;
-    private boolean moveVirusFirstFlag;
-    private boolean moveVirusSecondFlag;
-    private boolean highlightButton;
-    private boolean openHelp;
-    private boolean repeatGame;
-    private boolean exitGame;
-    private Color highlightColor = Color.yellow;
-    private boolean highlightPowerButton;
-    private boolean highlightButton12;
-    private boolean highlightButton14;
-    private boolean highlightButtonYes;
-    private boolean highlightButtonNo;
-    private boolean highlightHome;
-    private boolean highlightRepeat;
-    private boolean highlightHelp;
-    private boolean moveVirus;
-    private boolean highlightProtectionButton;
+    private final Color highlightColor = Color.yellow;
     private MotionError errorMotion;
-    final static int minValueRegenerationHealthNode = 5;
-    final static int maxValueRegenerationHealthNode = 30;
-    private boolean highlightReplicationButton;
+    final static int minValueRegenerationHealthNode = 1;
+    final static int maxValueRegenerationHealthNode = 25;
     private UnicodeFont font;
     private UnicodeFont fontMessage;
     private UnicodeFont fontBold;
@@ -60,27 +43,6 @@ public class Game extends BasicGame {
     private static final Random random = new Random();
     EndGameWin endGameWin;
     RestartGame restartGame;
-    private Image plusPower;
-    private Image plusPowerHighlighted;
-    private Image plusProtection;
-    private Image plusProtectionHighlighted;
-    private Image plusReplication;
-    private Image plusReplicationHighlighted;
-    private Image yesButton;
-    private Image yesButtonHighlighted;
-    private Image noButton;
-    private Image buttonLong;
-    private Image oneButton;
-    private Image oneButtonHighlighted;
-    private boolean highlightButton1;
-    private Image noButtonHighlighted;
-    private Image infoMenuBig;
-    private Image help;
-    private Image helpHighlighted;
-    private Image home;
-    private Image homeHighlighted;
-    private Image repeat;
-    private Image repeatHighlighted;
 
     public Game() {
         super("Infection Graph");
@@ -88,49 +50,16 @@ public class Game extends BasicGame {
 
     @Override
     public void init(GameContainer gc) throws SlickException {
+        flags = new HashMap<>();
+        for (Flag flag : Flag.values()) {
+            flags.put(flag, false);
+        }
         startVirusMove = null;
         endVirusMove = null;
-        highlightButton = false;
-        highlightPowerButton = false;
-        highlightProtectionButton = false;
-        highlightReplicationButton = false;
-        highlightedNodeFlag = false;
         highlightedNode = null;
-        highlightButton12 = false;
-        highlightButton14 = false;
-        moveVirusFirstFlag = false;
-        moveVirusSecondFlag = false;
-        moveVirus = false;
-        highlightHelp = false;
-        highlightHome = false;
-        highlightRepeat = false;
-        repeatGame = false;
-        exitGame = false;
-        highlightButton1 = false;
 
         endGameWin = EndGameWin.NONE;
         restartGame = RestartGame.NONE;
-
-        plusPower = new Image("src/main/resources/UI/plus.png");
-        plusPowerHighlighted = new Image("src/main/resources/UI/plusHighlighted.png");
-        plusProtection = new Image("src/main/resources/UI/plus.png");
-        plusProtectionHighlighted = new Image("src/main/resources/UI/plusHighlighted.png");
-        plusReplication = new Image("src/main/resources/UI/plus.png");
-        plusReplicationHighlighted = new Image("src/main/resources/UI/plusHighlighted.png");
-        yesButton = new Image("src/main/resources/UI/yesButton.png");
-        yesButtonHighlighted = new Image("src/main/resources/UI/yesButtonHighlighted.png");
-        noButton = new Image("src/main/resources/UI/noButton.png");
-        noButtonHighlighted = new Image("src/main/resources/UI/noButtonHighlighted.png");
-        infoMenuBig = new Image("src/main/resources/UI/infoMenuBig.png");
-        help = new Image("src/main/resources/UI/help.png");
-        helpHighlighted = new Image("src/main/resources/UI/helpHighlighted.png");
-        home = new Image("src/main/resources/UI/home.png");
-        homeHighlighted = new Image("src/main/resources/UI/homeHighlighted.png");
-        repeat = new Image("src/main/resources/UI/repeat.png");
-        repeatHighlighted = new Image("src/main/resources/UI/repeatHighlighted.png");
-        buttonLong = new Image("src/main/resources/UI/buttonLong.png");
-        oneButton = new Image("src/main/resources/UI/oneButton.png");
-        oneButtonHighlighted = new Image("src/main/resources/UI/oneButtonHighlighted.png");
 
         greenGraph = new HashMap<>();
         blueGraph = new HashMap<>();
@@ -192,12 +121,12 @@ public class Game extends BasicGame {
         int mouseY = input.getMouseY();
 
         highlightedNode = null;
-        highlightedNodeFlag = false;
+        flags.put(HIGHLIGHT_NODE, false);
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             VisualNode tmpNode = (VisualNode) entry.getKey();
             if (tmpNode.contains(mouseX, mouseY)) {
                 highlightedNode = tmpNode;
-                highlightedNodeFlag = true;
+                flags.put(HIGHLIGHT_NODE, true);
                 break;
             }
         }
@@ -205,99 +134,82 @@ public class Game extends BasicGame {
             if (motion.equals("Green move")) {
                 if (mouseX >= (20 + gc.getWidth() / 3 - 190) / 2 - 100 && mouseX <= (20 + gc.getWidth() / 3 - 190) / 2 - 100 + 200 &&
                         mouseY >= 230 && mouseY <= 280 && greenGraph.size() != 0) {
-                    highlightButton = true;
+                    flags.put(HIGHLIGHT_BUTTON, true);
                 } else {
-                    highlightButton = false;
+                    flags.put(HIGHLIGHT_BUTTON, false);
                 }
                 if (mouseX >= 430 && mouseX <= 446 && mouseY >= 119 && mouseY <= 135 && skillPoints[0] > 0) {
-                    highlightPowerButton = true;
+                    flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, true);
                 } else {
-                    highlightPowerButton = false;
+                    flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, false);
                 }
                 if (mouseX >= 430 && mouseX <= 446 && mouseY >= 149 && mouseY <= 165 && skillPoints[0] > 0) {
-                    highlightProtectionButton = true;
+                    flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, true);
                 } else {
-                    highlightProtectionButton = false;
+                    flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, false);
                 }
                 if (mouseX >= 430 && mouseX <= 446 && mouseY >= 179 && mouseY <= 195 && skillPoints[0] > 0) {
-                    highlightReplicationButton = true;
+                    flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, true);
                 } else {
-                    highlightReplicationButton = false;
+                    flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, false);
                 }
             } else if (motion.equals("Blue move")) {
                 if (mouseX >= gc.getWidth() - 350 && mouseX <= gc.getWidth() - 350 + 200 &&
                         mouseY >= 230 && mouseY <= 280 && blueGraph.size() != 0) {
-                    highlightButton = true;
+                    flags.put(HIGHLIGHT_BUTTON, true);
                 } else {
-                    highlightButton = false;
+                    flags.put(HIGHLIGHT_BUTTON, false);
                 }
                 if (mouseX >= gc.getWidth() - 50 && mouseX <= gc.getWidth() - 34 && mouseY >= 119 && mouseY <= 135
                         && skillPoints[1] > 0) {
-                    highlightPowerButton = true;
+                    flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, true);
                 } else {
-                    highlightPowerButton = false;
+                    flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, false);
                 }
                 if (mouseX >= gc.getWidth() - 50 && mouseX <= gc.getWidth() - 34 && mouseY >= 149 && mouseY <= 165
                         && skillPoints[1] > 0) {
-                    highlightProtectionButton = true;
+                    flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, true);
                 } else {
-                    highlightProtectionButton = false;
+                    flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, false);
                 }
                 if (mouseX >= gc.getWidth() - 50 && mouseX <= gc.getWidth() - 34 && mouseY >= 179 && mouseY <= 195
                         && skillPoints[1] > 0) {
-                    highlightReplicationButton = true;
+                    flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, true);
                 } else {
-                    highlightReplicationButton = false;
+                    flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, false);
                 }
             }
 
-            if (moveVirusSecondFlag && mouseX >= gc.getWidth() / 2 - 115 && mouseX <= gc.getWidth() / 2 - 40 &&
+            if (flags.get(SELECTED_NODE_TO_MOVE_VIRUS) && mouseX >= gc.getWidth() / 2 - 115 && mouseX <= gc.getWidth() / 2 - 40 &&
                     mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
-                highlightButton1 = true;
+                flags.put(HIGHLIGHT_SEND_ALL_VIRUS, true);
             } else {
-                highlightButton1 = false;
+                flags.put(HIGHLIGHT_SEND_ALL_VIRUS, false);
             }
-            if (moveVirusSecondFlag && mouseX >= gc.getWidth() / 2 - 38 && mouseX <= gc.getWidth() / 2 + 37 &&
+            if (flags.get(SELECTED_NODE_TO_MOVE_VIRUS) && mouseX >= gc.getWidth() / 2 - 38 && mouseX <= gc.getWidth() / 2 + 37 &&
                     mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
-                highlightButton12 = true;
+                flags.put(HIGHLIGHT_SEND_HALF_VIRUS, true);
             } else {
-                highlightButton12 = false;
+                flags.put(HIGHLIGHT_SEND_HALF_VIRUS, false);
             }
-            if (moveVirusSecondFlag && mouseX >= gc.getWidth() / 2 + 39 && mouseX <= gc.getWidth() / 2 + 114 &&
+            if (flags.get(SELECTED_NODE_TO_MOVE_VIRUS) && mouseX >= gc.getWidth() / 2 + 39 && mouseX <= gc.getWidth() / 2 + 114 &&
                     mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
-                highlightButton14 = true;
+                flags.put(HIGHLIGHT_SEND_QUARTER_VIRUS, true);
             } else {
-                highlightButton14 = false;
+                flags.put(HIGHLIGHT_SEND_QUARTER_VIRUS, false);
             }
-
-//            g.drawImage(buttonLong, gc.getWidth() / 2 - 150, gc.getHeight() / 2 - 25);
-//            if (highlightButton1) {
-//                g.drawImage(oneButtonHighlighted, gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
-//            } else {
-//                g.drawImage(oneButton, gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
-//            }
-//            if (highlightButton12) {
-//                g.drawImage(innerButtonHighlighted12, gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
-//            } else {
-//                g.drawImage(innerButton12, gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
-//            }
-//            if (highlightButton14) {
-//                g.drawImage(innerButtonHighlighted14, gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
-//            } else {
-//                g.drawImage(innerButton14, gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
-//            }
         } else {
             if (mouseX >= gc.getWidth() / 2 - 79 && mouseX <= gc.getWidth() / 2 - 4 &&
                     mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
-                highlightButtonYes = true;
+                flags.put(HIGHLIGHT_YES_BUTTON, true);
             } else {
-                highlightButtonYes = false;
+                flags.put(HIGHLIGHT_YES_BUTTON, false);
             }
             if (mouseX >= gc.getWidth() / 2 + 1 && mouseX <= gc.getWidth() / 2 + 76 &&
                     mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
-                highlightButtonNo = true;
+                flags.put(HIGHLIGHT_NO_BUTTON, true);
             } else {
-                highlightButtonNo = false;
+                flags.put(HIGHLIGHT_NO_BUTTON, false);
             }
         }
         // Конец игры
@@ -311,26 +223,26 @@ public class Game extends BasicGame {
             }
         }
         if (mouseX >= 1350 && mouseX <= 1400 && mouseY >= 20 && mouseY <= 70) {
-            highlightHome = true;
+            flags.put(HIGHLIGHT_HOME_BUTTON, true);
         } else {
-            highlightHome = false;
+            flags.put(HIGHLIGHT_HOME_BUTTON, false);
         }
         if (mouseX >= 520 && mouseX <= 570 && mouseY >= 20 && mouseY <= 70) {
-            highlightRepeat = true;
+            flags.put(HIGHLIGHT_REPEAT_BUTTON, true);
         } else {
-            highlightRepeat = false;
+            flags.put(HIGHLIGHT_REPEAT_BUTTON, false);
         }
         if (mouseX >= 1350 && mouseX <= 1400 && mouseY >= gc.getHeight() - 80 && mouseY <= gc.getHeight() - 30) {
-            highlightHelp = true;
+            flags.put(HIGHLIGHT_HELP_BUTTON, true);
         } else {
-            highlightHelp = false;
+            flags.put(HIGHLIGHT_HELP_BUTTON, false);
         }
     }
 
     @Override
     public void mousePressed(int button, int x, int y) {
         if (endGameWin == EndGameWin.NONE) {
-            if (button == Input.MOUSE_LEFT_BUTTON && highlightButton) {
+            if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_BUTTON)) {
                 if (motion.equals("Green move")) {
                     motion = "Blue move";
                 } else {
@@ -382,8 +294,7 @@ public class Game extends BasicGame {
                         }
                     }
                 }
-            }
-            else if (day == 1 && button == Input.MOUSE_LEFT_BUTTON && highlightedNodeFlag) {
+            } else if (day == 1 && button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_NODE)) {
                 if (motion.equals("Green move") && greenGraph.size() == 0) {
                     highlightedNode.setEllipseColor(Color.green);
                     greenGraph.put(highlightedNode, visualGraph.getGraph().get(highlightedNode));
@@ -399,19 +310,15 @@ public class Game extends BasicGame {
                     highlightedNode.setHp(100);
                     highlightedNode.setSkillPoint(false);
                 }
-            }
-            else if (button == Input.MOUSE_LEFT_BUTTON && (highlightButton1 || highlightButton12 || highlightButton14)) {
-                moveVirus = true;
-            }
-            else if (highlightedNodeFlag && moveVirusFirstFlag && button == Input.MOUSE_LEFT_BUTTON) {
-                moveVirusSecondFlag = true;
+            } else if (button == Input.MOUSE_LEFT_BUTTON && (flags.get(HIGHLIGHT_SEND_ALL_VIRUS) || flags.get(HIGHLIGHT_SEND_HALF_VIRUS) || flags.get(HIGHLIGHT_SEND_QUARTER_VIRUS))) {
+                flags.put(MOVE_VIRUS_MODE, true);
+            } else if (flags.get(HIGHLIGHT_NODE) && flags.get(SELECTED_NODE_FROM_MOVE_VIRUS) && button == Input.MOUSE_LEFT_BUTTON) {
+                flags.put(SELECTED_NODE_TO_MOVE_VIRUS, true);
                 endVirusMove = highlightedNode;
-            }
-            else if (button == Input.MOUSE_LEFT_BUTTON && highlightedNodeFlag) {
-                moveVirusFirstFlag = true;
+            } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_NODE)) {
+                flags.put(SELECTED_NODE_FROM_MOVE_VIRUS, true);
                 startVirusMove = highlightedNode;
-            }
-            else if (button == Input.MOUSE_LEFT_BUTTON && highlightPowerButton) {
+            } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
                 if (motion.equals("Green move")) {
                     GameLogic.powers[0] += powerDelta;
                     skillPoints[0]--;
@@ -419,8 +326,7 @@ public class Game extends BasicGame {
                     GameLogic.powers[1] += powerDelta;
                     skillPoints[1]--;
                 }
-            }
-            else if (button == Input.MOUSE_LEFT_BUTTON && highlightProtectionButton) {
+            } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
                 if (motion.equals("Green move")) {
                     GameLogic.protections[0] += protectionDelta;
                     skillPoints[0]--;
@@ -428,8 +334,7 @@ public class Game extends BasicGame {
                     GameLogic.protections[1] += protectionDelta;
                     skillPoints[1]--;
                 }
-            }
-            else if (button == Input.MOUSE_LEFT_BUTTON && highlightReplicationButton) {
+            } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
                 if (motion.equals("Green move")) {
                     GameLogic.replications[0] += replicationDelta;
                     skillPoints[0]--;
@@ -440,25 +345,25 @@ public class Game extends BasicGame {
             }
         } else {
             if (button == Input.MOUSE_LEFT_BUTTON) {
-                if (highlightButtonYes) {
+                if (flags.get(HIGHLIGHT_YES_BUTTON)) {
                     restartGame = RestartGame.YES;
-                } else if (highlightButtonNo) {
+                } else if (flags.get(HIGHLIGHT_NO_BUTTON)) {
                     restartGame = RestartGame.NO;
                 }
             }
         }
-        if (highlightHelp && button == Input.MOUSE_LEFT_BUTTON) {
-            if (openHelp) {
-                openHelp = false;
+        if (flags.get(HIGHLIGHT_HELP_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
+            if (flags.get(OPEN_HELP_MENU)) {
+                flags.put(OPEN_HELP_MENU, false);
             } else {
-                openHelp = true;
+                flags.put(OPEN_HELP_MENU, true);
             }
         }
-        if (highlightRepeat && button == Input.MOUSE_LEFT_BUTTON) {
-            repeatGame = true;
+        if (flags.get(HIGHLIGHT_REPEAT_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
+            flags.put(REPEAT_GAME, true);
         }
-        if (highlightHome && button == Input.MOUSE_LEFT_BUTTON) {
-            exitGame = true;
+        if (flags.get(HIGHLIGHT_HOME_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
+            flags.put(EXIT_GAME, true);
         }
     }
 
@@ -522,95 +427,76 @@ public class Game extends BasicGame {
         }
 
         // Отрисовка UI
-        Image menu = new Image("src/main/resources/UI/menu.png");
-        Image infoMenu = new Image("src/main/resources/UI/infoMenu.png");
-        Image button = new Image("src/main/resources/UI/button.png");
-        Image buttonHighlighted = new Image("src/main/resources/UI/buttonHighlighted.png");
-        Image messageCloud = new Image("src/main/resources/UI/message.png");
-        Image innerButton12 = new Image("src/main/resources/UI/innerButton12.png");
-        Image innerButtonHighlighted12 = new Image("src/main/resources/UI/innerButtonHighlighted12.png");
-        Image innerButton14 = new Image("src/main/resources/UI/innerButton14.png");
-        Image innerButtonHighlighted14 = new Image("src/main/resources/UI/innerButtonHighlighted14.png");
-        g.drawImage(menu, 20, 20);
-        g.drawImage(menu, gc.getWidth() - 460, 20);
-        g.drawImage(infoMenu, 20, gc.getHeight() - 150);
-        g.drawImage(infoMenu, gc.getWidth() - 460, gc.getHeight() - 150);
+        g.drawImage(BASIC_INFO_MENU.getImage(), 20, 20);
+        g.drawImage(BASIC_INFO_MENU.getImage(), gc.getWidth() - 460, 20);
+        g.drawImage(INFO_MENU.getImage(), 20, gc.getHeight() - 150);
+        g.drawImage(INFO_MENU.getImage(), gc.getWidth() - 460, gc.getHeight() - 150);
         g.setFont(fontBold);
 
         // Дни
-        g.drawImage(buttonHighlighted, gc.getWidth() / 2 - 100, 20);
+        g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), gc.getWidth() / 2 - 100, 20);
         g.drawString("Day " + GameLogic.day, gc.getWidth() / 2 - 35, 37);
 
         // Сообщение
         g.setFont(fontMessage);
-        if (day == 1 && greenGraph.size() == 0 && motion.equals("Green move")) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString("Select the initial node to infect", gc.getWidth() / 2 - 140, 88);
-        }
-        else if (day == 1 && greenGraph.size() == 1 && motion.equals("Green move")) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString("Finish the move", gc.getWidth() / 2 - 140, 88);
-        }
-        else if (day == 1 && blueGraph.size() == 0 && motion.equals("Blue move")) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString("Select the initial node to infect", gc.getWidth() / 2 - 140, 88);
-        }
-        else if (day == 1 && greenGraph.size() == 1 && motion.equals("Blue move")) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString("Finish the move", gc.getWidth() / 2 - 140, 88);
-        }
-        else if (moveVirusFirstFlag && !moveVirusSecondFlag) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
+        if (day == 1) {
+            g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
+            if (motion.equals("Green move")) {
+                switch (greenGraph.size()) {
+                    case 0 -> g.drawString("Select the initial node to infect", gc.getWidth() / 2 - 140, 88);
+                    case 1 -> g.drawString("Finish the move", gc.getWidth() / 2 - 140, 88);
+                }
+            } else {
+                switch (blueGraph.size()) {
+                    case 0 -> g.drawString("Select the initial node to infect", gc.getWidth() / 2 - 140, 88);
+                    case 1 -> g.drawString("Finish the move", gc.getWidth() / 2 - 140, 88);
+                }
+            }
+        } else if (flags.get(SELECTED_NODE_FROM_MOVE_VIRUS) && !flags.get(SELECTED_NODE_TO_MOVE_VIRUS)) {
+            g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
             g.drawString("Select second node to transfer virus", gc.getWidth() / 2 - 140, 88);
             errorMotion = MotionError.OK;
-        } else if (errorMotion == MotionError.NOT_YOUR_MOTION) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString(motion + " now!", gc.getWidth() / 2 - 140, 88);
-        } else if (errorMotion == MotionError.RED_NODE_SELECTED) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString("Red node cannot be selected!", gc.getWidth() / 2 - 140, 88);
-        } else if (errorMotion == MotionError.NOT_ADJACENT) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString("Nodes are not adjacent!", gc.getWidth() / 2 - 140, 88);
-        } else if (errorMotion == MotionError.SAME_NODE) {
-            g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
-            g.drawString("This is the same node!", gc.getWidth() / 2 - 140, 88);
-        }
-        else if (moveVirus) {
-            if (highlightButton1) {
+        } else if (errorMotion != null && errorMotion != MotionError.OK) {
+            g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
+            switch (errorMotion) {
+                case NOT_YOUR_MOTION -> g.drawString(motion + " now!", gc.getWidth() / 2 - 140, 88);
+                case RED_NODE_SELECTED -> g.drawString("Red node cannot be selected!", gc.getWidth() / 2 - 140, 88);
+                case NOT_ADJACENT -> g.drawString("Nodes are not adjacent!", gc.getWidth() / 2 - 140, 88);
+                case SAME_NODE -> g.drawString("This is the same node!", gc.getWidth() / 2 - 140, 88);
+            }
+        } else if (flags.get(MOVE_VIRUS_MODE)) {
+            if (flags.get(HIGHLIGHT_SEND_ALL_VIRUS)) {
                 errorMotion = GameLogic.moveVirus(startVirusMove, endVirusMove, MoveVirusPart.ALL);
-                moveVirusFirstFlag = false;
-                moveVirusSecondFlag = false;
-                moveVirus = false;
-            }
-            else if (highlightButton12) {
+                flags.put(SELECTED_NODE_FROM_MOVE_VIRUS, false);
+                flags.put(SELECTED_NODE_TO_MOVE_VIRUS, false);
+                flags.put(MOVE_VIRUS_MODE, false);
+            } else if (flags.get(HIGHLIGHT_SEND_HALF_VIRUS)) {
                 errorMotion = GameLogic.moveVirus(startVirusMove, endVirusMove, MoveVirusPart.HALF);
-                moveVirusFirstFlag = false;
-                moveVirusSecondFlag = false;
-                moveVirus = false;
-            } else if (highlightButton14) {
+                flags.put(SELECTED_NODE_FROM_MOVE_VIRUS, false);
+                flags.put(SELECTED_NODE_TO_MOVE_VIRUS, false);
+                flags.put(MOVE_VIRUS_MODE, false);
+            } else if (flags.get(HIGHLIGHT_SEND_QUARTER_VIRUS)) {
                 errorMotion = GameLogic.moveVirus(startVirusMove, endVirusMove, MoveVirusPart.QUARTER);
-                moveVirusFirstFlag = false;
-                moveVirusSecondFlag = false;
-                moveVirus = false;
+                flags.put(SELECTED_NODE_FROM_MOVE_VIRUS, false);
+                flags.put(SELECTED_NODE_TO_MOVE_VIRUS, false);
+                flags.put(MOVE_VIRUS_MODE, false);
             }
-        }
-        else if (moveVirusSecondFlag) {
-            g.drawImage(buttonLong, gc.getWidth() / 2 - 150, gc.getHeight() / 2 - 25);
-            if (highlightButton1) {
-                g.drawImage(oneButtonHighlighted, gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
+        } else if (flags.get(SELECTED_NODE_TO_MOVE_VIRUS)) {
+            g.drawImage(LONG_MENU.getImage(), gc.getWidth() / 2 - 150, gc.getHeight() / 2 - 25);
+            if (flags.get(HIGHLIGHT_SEND_ALL_VIRUS)) {
+                g.drawImage(BUTTON_ALL_VIRUS_MOVE_HOVERED.getImage(), gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
             } else {
-                g.drawImage(oneButton, gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_ALL_VIRUS_MOVE.getImage(), gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
             }
-            if (highlightButton12) {
-                g.drawImage(innerButtonHighlighted12, gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
+            if (flags.get(HIGHLIGHT_SEND_HALF_VIRUS)) {
+                g.drawImage(BUTTON_HALF_VIRUS_MOVE_HOVERED.getImage(), gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
             } else {
-                g.drawImage(innerButton12, gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_HALF_VIRUS_MOVE.getImage(), gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
             }
-            if (highlightButton14) {
-                g.drawImage(innerButtonHighlighted14, gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
+            if (flags.get(HIGHLIGHT_SEND_QUARTER_VIRUS)) {
+                g.drawImage(BUTTON_QUARTER_VIRUS_MOVE_HOVERED.getImage(), gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
             } else {
-                g.drawImage(innerButton14, gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_QUARTER_VIRUS_MOVE.getImage(), gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
             }
         }
 
@@ -618,39 +504,37 @@ public class Game extends BasicGame {
         // Кнопка закончить ход
         if (endGameWin == EndGameWin.NONE) {
             if (motion.equals("Green move") && greenGraph.size() != 0) {
-                if (!highlightButton) {
-                    g.drawImage(button, (20 + gc.getWidth() / 3 - 190) / 2 - 100, 230);
+                if (flags.get(HIGHLIGHT_BUTTON)) {
+                    g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), (20 + gc.getWidth() / 3 - 190) / 2 - 100, 230);
                 } else {
-                    g.drawImage(buttonHighlighted, (20 + gc.getWidth() / 3 - 190) / 2 - 100, 230);
+                    g.drawImage(REGULAR_BUTTON.getImage(), (20 + gc.getWidth() / 3 - 190) / 2 - 100, 230);
                 }
                 g.drawString("Finish move", (20 + gc.getWidth() / 3 - 190) / 2 - 70, 247);
             } else if (motion.equals("Blue move") && blueGraph.size() != 0) {
-                if (!highlightButton) {
-                    g.drawImage(button, gc.getWidth() - 350, 230);
+                if (flags.get(HIGHLIGHT_BUTTON)) {
+                    g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), gc.getWidth() - 350, 230);
                 } else {
-                    g.drawImage(buttonHighlighted, gc.getWidth() - 350, 230);
+                    g.drawImage(REGULAR_BUTTON.getImage(), gc.getWidth() - 350, 230);
                 }
                 g.drawString("Finish move", gc.getWidth() - 320, 247);
             }
         } else {
             g.setFont(fontMessage);
             if (endGameWin == EndGameWin.RED) {
-                g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
+                g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
                 g.drawString("Red wins! Restart Game?", gc.getWidth() / 2 - 140, 88);
-            }
-            else if (endGameWin == EndGameWin.GREEN) {
-                g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
+            } else if (endGameWin == EndGameWin.GREEN) {
+                g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
                 g.drawString("Green wins! Restart Game?", gc.getWidth() / 2 - 140, 88);
-            }
-            else if (endGameWin == EndGameWin.BLUE) {
-                g.drawImage(messageCloud, gc.getWidth() / 2 - 150, 80);
+            } else if (endGameWin == EndGameWin.BLUE) {
+                g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
                 g.drawString("Blue wins! Restart Game?", gc.getWidth() / 2 - 140, 88);
             }
         }
 
         g.setFont(fontBold);
         // Отображение очередности хода
-        g.drawImage(button, gc.getWidth() / 2 - 100, gc.getHeight() - 80);
+        g.drawImage(REGULAR_BUTTON.getImage(), gc.getWidth() / 2 - 100, gc.getHeight() - 80);
         g.drawString(motion, gc.getWidth() / 2 - 65, gc.getHeight() - 63);
 
         // Основная информация
@@ -685,49 +569,49 @@ public class Game extends BasicGame {
         // Отрисовка улучшений навыков
         if (endGameWin == EndGameWin.NONE) {
             if (motion.equals("Green move") && greenGraph.size() != 0 && GameLogic.skillPoints[0] > 0) {
-                if (highlightPowerButton) {
-                    g.drawImage(plusPowerHighlighted, 430, 119);
+                if (flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
+                    g.drawImage(PLUS_HOVERED.getImage(), 430, 119);
                 } else {
-                    g.drawImage(plusPower, 430, 119);
+                    g.drawImage(PLUS.getImage(), 430, 119);
                 }
-                if (highlightProtectionButton) {
-                    g.drawImage(plusProtectionHighlighted, 430, 149);
+                if (flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
+                    g.drawImage(PLUS_HOVERED.getImage(), 430, 149);
                 } else {
-                    g.drawImage(plusProtection, 430, 149);
+                    g.drawImage(PLUS.getImage(), 430, 149);
                 }
-                if (highlightReplicationButton) {
-                    g.drawImage(plusReplicationHighlighted, 430, 179);
+                if (flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
+                    g.drawImage(PLUS_HOVERED.getImage(), 430, 179);
                 } else {
-                    g.drawImage(plusReplication, 430, 179);
+                    g.drawImage(PLUS.getImage(), 430, 179);
                 }
             } else if (motion.equals("Blue move") && blueGraph.size() != 0 && GameLogic.skillPoints[1] > 0) {
-                if (highlightPowerButton) {
-                    g.drawImage(plusPowerHighlighted, gc.getWidth() - 50, 119);
+                if (flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - 50, 119);
                 } else {
-                    g.drawImage(plusPower, gc.getWidth() - 50, 119);
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - 50, 119);
                 }
-                if (highlightProtectionButton) {
-                    g.drawImage(plusProtectionHighlighted, gc.getWidth() - 50, 149);
+                if (flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - 50, 149);
                 } else {
-                    g.drawImage(plusProtection, gc.getWidth() - 50, 149);
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - 50, 149);
                 }
-                if (highlightReplicationButton) {
-                    g.drawImage(plusReplicationHighlighted, gc.getWidth() - 50, 179);
+                if (flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - 50, 179);
                 } else {
-                    g.drawImage(plusReplication, gc.getWidth() - 50, 179);
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - 50, 179);
                 }
             }
         } else {
-            g.drawImage(button, gc.getWidth() / 2 - 100, gc.getHeight() / 2 - 25);
-            if (highlightButtonYes) {
-                g.drawImage(yesButton, gc.getWidth() / 2 - 79, gc.getHeight() / 2 - 15);
+            g.drawImage(REGULAR_BUTTON.getImage(), gc.getWidth() / 2 - 100, gc.getHeight() / 2 - 25);
+            if (flags.get(HIGHLIGHT_YES_BUTTON)) {
+                g.drawImage(YES_BUTTON.getImage(), gc.getWidth() / 2 - 79, gc.getHeight() / 2 - 15);
             } else {
-                g.drawImage(yesButtonHighlighted, gc.getWidth() / 2 - 79, gc.getHeight() / 2 - 15);
+                g.drawImage(YES_BUTTON_HOVERED.getImage(), gc.getWidth() / 2 - 79, gc.getHeight() / 2 - 15);
             }
-            if (highlightButtonNo) {
-                g.drawImage(noButton, gc.getWidth() / 2 + 1, gc.getHeight() / 2 - 15);
+            if (flags.get(HIGHLIGHT_NO_BUTTON)) {
+                g.drawImage(NO_BUTTON.getImage(), gc.getWidth() / 2 + 1, gc.getHeight() / 2 - 15);
             } else {
-                g.drawImage(noButtonHighlighted, gc.getWidth() / 2 + 1, gc.getHeight() / 2 - 15);
+                g.drawImage(NO_BUTTON_HOVERED.getImage(), gc.getWidth() / 2 + 1, gc.getHeight() / 2 - 15);
             }
             if (restartGame == RestartGame.YES) {
                 init(gc);
@@ -736,63 +620,63 @@ public class Game extends BasicGame {
             }
         }
 
-        if (highlightHome) {
-            g.drawImage(homeHighlighted, 1350, 20);
+        if (flags.get(HIGHLIGHT_HOME_BUTTON)) {
+            g.drawImage(HOME_BUTTON_HOVERED.getImage(), 1350, 20);
         } else {
-            g.drawImage(home, 1350, 20);
+            g.drawImage(HOME_BUTTON.getImage(), 1350, 20);
         }
-        if (highlightRepeat) {
-            g.drawImage(repeatHighlighted, 520, 20);
+        if (flags.get(HIGHLIGHT_REPEAT_BUTTON)) {
+            g.drawImage(REPEAT_BUTTON_HOVERED.getImage(), 520, 20);
         } else {
-            g.drawImage(repeat, 520, 20);
+            g.drawImage(REPEAT_BUTTON.getImage(), 520, 20);
         }
-        if (highlightHelp) {
-            g.drawImage(helpHighlighted, 1350, gc.getHeight() - 80);
+        if (flags.get(HIGHLIGHT_HELP_BUTTON)) {
+            g.drawImage(HELP_BUTTON_HOVERED.getImage(), 1350, gc.getHeight() - 80);
         } else {
-            g.drawImage(help, 1350, gc.getHeight() - 80);
+            g.drawImage(HELP_BUTTON.getImage(), 1350, gc.getHeight() - 80);
         }
 
-        if (openHelp) {
-            g.drawImage(infoMenuBig, 550, 100);
+        if (flags.get(OPEN_HELP_MENU)) {
+            g.drawImage(RULES_MENU.getImage(), 550, 100);
             String rules = """
-                                            RULES
+                                                RULES
 
-                The main goal of the game is to destroy the opposite virus and
-                prevent the disappearance of your virus. Players control
-                viruses, aiming to infect cells and develop their viruses to
-                achieve this goal.
+                    The main goal of the game is to destroy the opposite virus and
+                    prevent the disappearance of your virus. Players control
+                    viruses, aiming to infect cells and develop their viruses to
+                    achieve this goal.
 
-                All red vertices can heal themselves and try to get rid of the
-                virus (each time the number of regenerated cells is different).
+                    All red vertices can heal themselves and try to get rid of the
+                    virus (each time the number of regenerated cells is different).
 
-                Viruses can neutralize each other. For each successful
-                infection of a previously uninfected red node, the player
-                receives skill points that can be used to improve the
-                qualities of the virus.
+                    Viruses can neutralize each other. For each successful
+                    infection of a previously uninfected red node, the player
+                    receives skill points that can be used to improve the
+                    qualities of the virus.
 
-                Power is used when attacking a healthy or infected vertex.
-                Protection is used when attacking your infected node with
-                another virus.
-                Replication is used to increase the number of infected cells.
+                    Power is used when attacking a healthy or infected vertex.
+                    Protection is used when attacking your infected node with
+                    another virus.
+                    Replication is used to increase the number of infected cells.
 
-                To counteract the immunity of a healthy cell, both protection
-                and replication of the virus are used.
+                    To counteract the immunity of a healthy cell, both protection
+                    and replication of the virus are used.
 
-                Victory is achieved when one of the players destroys the
-                opposite virus and does not let his virus disappear.
+                    Victory is achieved when one of the players destroys the
+                    opposite virus and does not let his virus disappear.
 
-                Players can use virus development strategies as well as
-                attack and defense tactics to achieve this goal.
-                """;
+                    Players can use virus development strategies as well as
+                    attack and defense tactics to achieve this goal.
+                    """;
             g.drawString(rules, 580, 130);
         }
 
-        if (repeatGame) {
+        if (flags.get(REPEAT_GAME)) {
             init(gc);
-            repeatGame = false;
+            flags.put(REPEAT_GAME, false);
         }
 
-        if (exitGame) {
+        if (flags.get(EXIT_GAME)) {
             exit(0);
         }
     }
