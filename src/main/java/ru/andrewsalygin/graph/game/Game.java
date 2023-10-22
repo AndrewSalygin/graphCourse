@@ -34,7 +34,6 @@ public class Game extends BasicGame {
     private int yLeftCorner;
     private RestartGame restartGame;
     private EndGameWin endGameWin;
-    private int tableScale; // Размеры таблицы
     public static int cellSize; // Размер каждой ячейки
     public static int nodeRadius; // Размер каждой ячейки
     static float screenResolutionX;
@@ -64,7 +63,8 @@ public class Game extends BasicGame {
         restartGame = RestartGame.NONE;
         endGameWin = EndGameWin.NONE;
 
-        tableScale = 25;
+        // Размеры таблицы
+        int tableScale = 25;
         cellSize = gc.getHeight() / tableScale;
         nodeRadius = cellSize / 3;
 
@@ -153,49 +153,73 @@ public class Game extends BasicGame {
 
         if (endGameWin == EndGameWin.NONE) {
             if (motion == Motion.Green) { // Подсветка кнопок зелёных (меню слева)
-                if (mouseX >= (20 + gc.getWidth() / 3 - 190) / 2 - 100
-                        && mouseX <= (20 + gc.getWidth() / 3 - 190) / 2 - 100 + 200
-                        && mouseY >= 230 && mouseY <= 280 && greenGraph.size() != 0) {
+                unit.setY1(255);
+                unit.setX2(200);
+                unit.setY2(25);
+                if (Math.abs(mouseX - (float) gc.getWidth() / 14 - unit.getX2() / 2) <= unit.getX2() / 2
+                        && Math.abs(mouseY - unit.getY1()) <= unit.getY2() && greenGraph.size() != 0) {
                     flags.put(HIGHLIGHT_BUTTON, true);
                 } else {
                     flags.put(HIGHLIGHT_BUTTON, false);
                 }
                 if (skillPoints[0] > 0) {
-                    if (Math.abs(mouseX - 438) <= 8 && Math.abs(mouseY - 127) <= 8) {
+                    unit.setX1(438);
+                    unit.setX2(8);
+                    unit.setY1(123);
+                    unit.setY2(8);
+                    if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                            && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
                         flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, true);
                     } else {
                         flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, false);
                     }
-                    if (Math.abs(mouseX - 438) <= 8 && Math.abs(mouseY - 157) <= 8) {
+                    unit.setY1(153);
+                    if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                            && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
                         flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, true);
                     } else {
                         flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, false);
                     }
-                    if (Math.abs(mouseX - 438) <= 8 && Math.abs(mouseY - 187) <= 8) {
+                    unit.setY1(183);
+                    if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                            && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
                         flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, true);
                     } else {
                         flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, false);
                     }
                 }
             } else if (motion == Motion.Blue) { // Подсветка кнопок синих (меню справа)
-                if (mouseX >= gc.getWidth() - 350 && mouseX <= gc.getWidth() - 350 + 200 &&
-                        mouseY >= 230 && mouseY <= 280 && blueGraph.size() != 0) {
+                unit.setX1(350);
+                unit.setX2(150);
+                unit.setY1(230);
+                unit.setY2(280);
+                if (mouseX >= gc.getWidth() - unit.getX1() && mouseX <= gc.getWidth() - unit.getX2() &&
+                        mouseY >= unit.getY1() && mouseY <= unit.getY2() && blueGraph.size() != 0) {
                     flags.put(HIGHLIGHT_BUTTON, true);
                 } else {
                     flags.put(HIGHLIGHT_BUTTON, false);
                 }
                 if (skillPoints[1] > 0) {
-                    if (mouseX >= gc.getWidth() - 50 && mouseX <= gc.getWidth() - 34 && Math.abs(mouseY - 127) <= 8) {
+                    unit.setX1(60);
+                    unit.setX2(44);
+                    unit.setY1(123);
+                    unit.setY2(8);
+                    if (mouseX >= gc.getWidth() - unit.getX1() && mouseX <= gc.getWidth() - unit.getX2()
+                            && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
                         flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, true);
                     } else {
                         flags.put(HIGHLIGHT_POWER_INCREASE_BUTTON, false);
                     }
-                    if (mouseX >= gc.getWidth() - 50 && mouseX <= gc.getWidth() - 34 && Math.abs(mouseY - 157) <= 8) {
+                    unit.setY1(153);
+                    if (mouseX >= gc.getWidth() - unit.getX1() && mouseX <= gc.getWidth() - unit.getX2()
+                            && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
                         flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, true);
                     } else {
                         flags.put(HIGHLIGHT_PROTECTION_INCREASE_BUTTON, false);
                     }
-                    if (mouseX >= gc.getWidth() - 50 && mouseX <= gc.getWidth() - 34 && Math.abs(mouseY - 187) <= 8) {
+                    unit.setY1(183);
+                    if (mouseX >= gc.getWidth() - unit.getX1() && mouseX <= gc.getWidth() - unit.getX2()
+                            && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
                         flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, true);
                     } else {
                         flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, false);
@@ -205,21 +229,35 @@ public class Game extends BasicGame {
 
             // Подсветка кнопок, отвечающих за количество передаваемого вируса
             if (flags.get(SELECTED_NODE_TO_MOVE_VIRUS)) {
-                if (mouseX >= gc.getWidth() / 2 - 115 && mouseX <= gc.getWidth() / 2 - 40 &&
-                        mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
+                unit.setX1(115);
+                unit.setX2(40);
+                unit.setY1(15);
+                unit.setY2(15);
+                if (mouseX >= (float) gc.getWidth() / 2 - unit.getX1()
+                        && mouseX <= (float) gc.getWidth() / 2 - unit.getX2()
+                        && mouseY >= (float) gc.getHeight() / 2 -  unit.getY1()
+                        && mouseY <= (float) gc.getHeight() / 2 + unit.getY2()) {
                     flags.put(HIGHLIGHT_SEND_ALL_VIRUS, true);
                 }
                 else {
                     flags.put(HIGHLIGHT_SEND_ALL_VIRUS, false);
                 }
-                if (mouseX >= gc.getWidth() / 2 - 38 && mouseX <= gc.getWidth() / 2 + 37 &&
-                        mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
+                unit.setX1(38);
+                unit.setX2(37);
+                if (mouseX >= (float) gc.getWidth() / 2 - unit.getX1()
+                        && mouseX <= (float) gc.getWidth() / 2 + unit.getX2()
+                        && mouseY >= (float) gc.getHeight() / 2 - unit.getY1()
+                        && mouseY <= (float) gc.getHeight() / 2 + unit.getY2()) {
                     flags.put(HIGHLIGHT_SEND_HALF_VIRUS, true);
                 } else {
                     flags.put(HIGHLIGHT_SEND_HALF_VIRUS, false);
                 }
-                if (mouseX >= gc.getWidth() / 2 + 39 && mouseX <= gc.getWidth() / 2 + 114 &&
-                        mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
+                unit.setX1(39);
+                unit.setX2(114);
+                if (mouseX >= (float) gc.getWidth() / 2 + unit.getX1()
+                        && mouseX <= (float) gc.getWidth() / 2 + unit.getX2()
+                        && mouseY >= (float) gc.getHeight() / 2 - unit.getY1()
+                        && mouseY <= (float) gc.getHeight() / 2 + unit.getY2()) {
                     flags.put(HIGHLIGHT_SEND_QUARTER_VIRUS, true);
                 } else {
                     flags.put(HIGHLIGHT_SEND_QUARTER_VIRUS, false);
@@ -230,14 +268,24 @@ public class Game extends BasicGame {
                 flags.put(HIGHLIGHT_SEND_QUARTER_VIRUS, false);
             }
         } else { // Игра закончена, вывод кнопок перезапуска игры
-            if (mouseX >= gc.getWidth() / 2 - 79 && mouseX <= gc.getWidth() / 2 - 4 &&
-                    mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
+            unit.setX1(79);
+            unit.setX2(4);
+            unit.setY1(15);
+            unit.setY2(15);
+            if (mouseX >= (float) gc.getWidth() / 2 - unit.getX1()
+                    && mouseX <= (float) gc.getWidth() / 2 - unit.getX2()
+                    && mouseY >= (float) gc.getHeight() / 2 - unit.getY1()
+                    && mouseY <= (float) gc.getHeight() / 2 + unit.getY2()) {
                 flags.put(HIGHLIGHT_YES_BUTTON, true);
             } else {
                 flags.put(HIGHLIGHT_YES_BUTTON, false);
             }
-            if (mouseX >= gc.getWidth() / 2 + 1 && mouseX <= gc.getWidth() / 2 + 76 &&
-                    mouseY >= gc.getHeight() / 2 - 15 && mouseY <= gc.getHeight() / 2 + 15) {
+            unit.setX1(1);
+            unit.setX2(76);
+            if (mouseX >= (float) gc.getWidth() / 2 + unit.getX1()
+                    && mouseX <= (float) gc.getWidth() / 2 + unit.getX2()
+                    && mouseY >= (float) gc.getHeight() / 2 - unit.getY1()
+                    && mouseY <= (float) gc.getHeight() / 2 + unit.getY2()) {
                 flags.put(HIGHLIGHT_NO_BUTTON, true);
             } else {
                 flags.put(HIGHLIGHT_NO_BUTTON, false);
@@ -256,20 +304,29 @@ public class Game extends BasicGame {
         }
 
         // Определение подсветки кнопок меню на основе позиции мыши
-        if (Math.abs(mouseX - 1375 * screenResolutionX) <= screenResolutionX * 25
-                && Math.abs(mouseY - 45 * screenResolutionY) <= screenResolutionY * 25) {
+        unit.setX1(1375);
+        unit.setX2(25);
+        unit.setY1(45);
+        unit.setY2(25);
+        if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
             flags.put(HIGHLIGHT_HOME_BUTTON, true);
         } else {
             flags.put(HIGHLIGHT_HOME_BUTTON, false);
         }
-        if (Math.abs(mouseX - 545 * screenResolutionX) <= 25
-                && Math.abs(mouseY - 45 * screenResolutionY) <= screenResolutionY * 25) {
+        unit.setX1(545);
+        if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                && Math.abs(mouseY - unit.getY1()) <= unit.getY2()) {
             flags.put(HIGHLIGHT_REPEAT_BUTTON, true);
         } else {
             flags.put(HIGHLIGHT_REPEAT_BUTTON, false);
         }
-        if (Math.abs(mouseX - 1375 * screenResolutionX) <= screenResolutionX * 25
-                && Math.abs(mouseY - (gc.getHeight() - 55 * screenResolutionY)) <= screenResolutionY * 25) {
+        unit.setX1(1375);
+        unit.setY1(80);
+        unit.setY2(30);
+        if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                && mouseY >= gc.getHeight() - unit.getY1()
+                && mouseY <= gc.getHeight() - unit.getY2()) {
             flags.put(HIGHLIGHT_HELP_BUTTON, true);
         } else {
             flags.put(HIGHLIGHT_HELP_BUTTON, false);
@@ -485,14 +542,18 @@ public class Game extends BasicGame {
         unit.setY1(5);
         unit.setWidth(10);
         unit.setHeight(10);
+        int startX;
+        int startY;
+        int endX;
+        int endY;
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             for (Map.Entry<Node, Connection> localEntry : entry.getValue().entrySet()) {
                 VisualConnection vc = (VisualConnection) localEntry.getValue();
                 g.setColor(vc.getColor());
-                int startX = (int) vc.getSrcNode().getEllipse().getCenterX();
-                int startY = (int) vc.getSrcNode().getEllipse().getCenterY();
-                int endX = (int) vc.getDestNode().getEllipse().getCenterX();
-                int endY = (int) vc.getDestNode().getEllipse().getCenterY();
+                startX = (int) vc.getSrcNode().getEllipse().getCenterX();
+                startY = (int) vc.getSrcNode().getEllipse().getCenterY();
+                endX = (int) vc.getDestNode().getEllipse().getCenterX();
+                endY = (int) vc.getDestNode().getEllipse().getCenterY();
                 g.fillOval(startX - unit.getX1(), startY - unit.getY1(),
                         unit.getWidth(), unit.getHeight()); // Точка на начале отрезка
                 g.fillOval(endX - unit.getX1(), endY - unit.getY1(),
@@ -818,42 +879,68 @@ public class Game extends BasicGame {
             if (motion == Motion.Green && greenGraph.size() != 0 && GameLogic.skillPoints[0] > 0) {
                 unit.setX1(430);
                 unit.setY1(119);
+                unit.setX2(446);
+                unit.setY2(135);
                 if (flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(),
+                            0, 0, PLUS_HOVERED.getImage().getWidth(), PLUS_HOVERED.getImage().getHeight());
                 } else {
-                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(),
+                            0, 0, PLUS.getImage().getWidth(), PLUS.getImage().getHeight());
                 }
                 unit.setY1(149);
+                unit.setY2(165);
                 if (flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(),
+                            0, 0, PLUS_HOVERED.getImage().getWidth(), PLUS_HOVERED.getImage().getHeight());
                 } else {
-                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(),
+                            0, 0, PLUS.getImage().getWidth(), PLUS.getImage().getHeight());
                 }
                 unit.setY1(179);
+                unit.setY2(195);
                 if (flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(),
+                            0, 0, PLUS_HOVERED.getImage().getWidth(), PLUS_HOVERED.getImage().getHeight());
                 } else {
-                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(),
+                            0, 0, PLUS.getImage().getWidth(), PLUS.getImage().getHeight());
                 }
             } else if (motion == Motion.Blue && blueGraph.size() != 0 && GameLogic.skillPoints[1] > 0) {
                 unit.setX1(60);
                 unit.setY1(119);
+                unit.setX2(44);
+                unit.setY2(135);
                 if (flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX2(), unit.getY2(), 0, 0,
+                            PLUS_HOVERED.getImage().getWidth(), PLUS_HOVERED.getImage().getHeight());
                 } else {
-                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX2(), unit.getY2(), 0, 0,
+                            PLUS.getImage().getWidth(), PLUS.getImage().getHeight());
                 }
                 unit.setY1(149);
+                unit.setY2(165);
                 if (flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX2(), unit.getY2(), 0, 0,
+                            PLUS_HOVERED.getImage().getWidth(), PLUS_HOVERED.getImage().getHeight());
                 } else {
-                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX2(), unit.getY2(), 0, 0,
+                            PLUS.getImage().getWidth(), PLUS.getImage().getHeight());
                 }
                 unit.setY1(179);
+                unit.setY2(195);
                 if (flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX2(), unit.getY2(), 0, 0,
+                            PLUS_HOVERED.getImage().getWidth(), PLUS_HOVERED.getImage().getHeight());
                 } else {
-                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX2(), unit.getY2(), 0, 0,
+                            PLUS.getImage().getWidth(), PLUS.getImage().getHeight());
                 }
             }
         } else { // Отрисовка меню завершения игры
