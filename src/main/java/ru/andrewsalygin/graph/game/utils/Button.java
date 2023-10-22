@@ -3,26 +3,26 @@ package ru.andrewsalygin.graph.game.utils;
 import org.newdawn.slick.SlickException;
 
 public enum Button {
-    PLUS("src/main/resources/UI/plus.png"),
-    PLUS_HOVERED("src/main/resources/UI/plusHighlighted.png"),
-    YES_BUTTON("src/main/resources/UI/yesButton.png"),
-    YES_BUTTON_HOVERED("src/main/resources/UI/yesButtonHighlighted.png"),
-    NO_BUTTON("src/main/resources/UI/noButton.png"),
-    NO_BUTTON_HOVERED("src/main/resources/UI/noButtonHighlighted.png"),
-    HELP_BUTTON("src/main/resources/UI/help.png"),
-    HELP_BUTTON_HOVERED("src/main/resources/UI/helpHighlighted.png"),
-    HOME_BUTTON("src/main/resources/UI/home.png"),
-    HOME_BUTTON_HOVERED("src/main/resources/UI/homeHighlighted.png"),
-    REPEAT_BUTTON("src/main/resources/UI/repeat.png"),
-    REPEAT_BUTTON_HOVERED("src/main/resources/UI/repeatHighlighted.png"),
-    REGULAR_BUTTON("src/main/resources/UI/button.png"), // 200x50
-    REGULAR_BUTTON_HOVERED("src/main/resources/UI/buttonHighlighted.png"),
-    BUTTON_ALL_VIRUS_MOVE("src/main/resources/UI/oneButton.png"),
-    BUTTON_ALL_VIRUS_MOVE_HOVERED("src/main/resources/UI/oneButtonHighlighted.png"),
-    BUTTON_HALF_VIRUS_MOVE("src/main/resources/UI/innerButton12.png"),
-    BUTTON_HALF_VIRUS_MOVE_HOVERED("src/main/resources/UI/innerButtonHighlighted12.png"),
-    BUTTON_QUARTER_VIRUS_MOVE("src/main/resources/UI/innerButton14.png"),
-    BUTTON_QUARTER_VIRUS_MOVE_HOVERED("src/main/resources/UI/innerButtonHighlighted14.png");
+    PLUS("src/main/resources/UI/PLUS.png"),
+    PLUS_HOVERED("src/main/resources/UI/PLUS_HOVERED.png"),
+    YES_BUTTON("src/main/resources/UI/YES_BUTTON.png"),
+    YES_BUTTON_HOVERED("src/main/resources/UI/YES_BUTTON_HOVERED.png"),
+    NO_BUTTON("src/main/resources/UI/NO_BUTTON.png"),
+    NO_BUTTON_HOVERED("src/main/resources/UI/NO_BUTTON_HOVERED.png"),
+    HELP_BUTTON("src/main/resources/UI/HELP_BUTTON.png"),
+    HELP_BUTTON_HOVERED("src/main/resources/UI/HELP_BUTTON_HOVERED.png"),
+    HOME_BUTTON("src/main/resources/UI/HOME_BUTTON.png"),
+    HOME_BUTTON_HOVERED("src/main/resources/UI/HOME_BUTTON_HOVERED.png"),
+    REPEAT_BUTTON("src/main/resources/UI/REPEAT_BUTTON.png"),
+    REPEAT_BUTTON_HOVERED("src/main/resources/UI/REPEAT_BUTTON_HOVERED.png"),
+    REGULAR_BUTTON("src/main/resources/UI/REGULAR_BUTTON.png"), // 200x50
+    REGULAR_BUTTON_HOVERED("src/main/resources/UI/REGULAR_BUTTON_HOVERED.png"),
+    BUTTON_ALL_VIRUS_MOVE("src/main/resources/UI/BUTTON_ALL_VIRUS_MOVE.png"),
+    BUTTON_ALL_VIRUS_MOVE_HOVERED("src/main/resources/UI/BUTTON_ALL_VIRUS_MOVE_HOVERED.png"),
+    BUTTON_HALF_VIRUS_MOVE("src/main/resources/UI/BUTTON_HALF_VIRUS_MOVE.png"),
+    BUTTON_HALF_VIRUS_MOVE_HOVERED("src/main/resources/UI/BUTTON_HALF_VIRUS_MOVE_HOVERED.png"),
+    BUTTON_QUARTER_VIRUS_MOVE("src/main/resources/UI/BUTTON_QUARTER_VIRUS_MOVE.png"),
+    BUTTON_QUARTER_VIRUS_MOVE_HOVERED("src/main/resources/UI/BUTTON_QUARTER_VIRUS_MOVE_HOVERED.png");
     private org.newdawn.slick.Image image;
 
     public org.newdawn.slick.Image getImage() {
