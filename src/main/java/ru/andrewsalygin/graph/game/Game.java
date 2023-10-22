@@ -32,12 +32,14 @@ public class Game extends BasicGame {
     private int gridHeight;
     private int xLeftCorner;
     private int yLeftCorner;
-
     private RestartGame restartGame;
     private EndGameWin endGameWin;
     private int tableScale; // Размеры таблицы
     public static int cellSize; // Размер каждой ячейки
     public static int nodeRadius; // Размер каждой ячейки
+    static float screenResolutionX;
+    static float screenResolutionY;
+    private MeasureUnit unit;
     private HashMap<Flag, Boolean> flags;
     static HashMap<VisualNode, HashMap<Node, Connection>> greenGraph;
     static HashMap<VisualNode, HashMap<Node, Connection>> blueGraph;
@@ -56,28 +58,6 @@ public class Game extends BasicGame {
     @Override
     public void init(GameContainer gc) throws SlickException {
         gc.setShowFPS(false); // Скрыть отображение FPS
-
-        font = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", 16, false, false);
-        fontMessage = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", 10, false, false);
-        fontBold = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", 16, true, false);
-
-        // Устанавливаем эффекты для шрифта
-        font.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
-
-        // Установка эффекта для сглаживания текста
-        font.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
-
-        // Инициализируем шрифт
-        font.addAsciiGlyphs();
-        font.loadGlyphs();
-        fontMessage.addAsciiGlyphs();
-        fontMessage.loadGlyphs();
-        fontBold.addAsciiGlyphs();
-        fontBold.loadGlyphs();
 
         backgroundImage = new Image("/src/main/resources/backgrounds/background4.png");
 
@@ -101,6 +81,37 @@ public class Game extends BasicGame {
         // Берём левый верхний угол клетчатой сетки
         int x = (gc.getWidth() - visualGraph.gridWidth) / 2;
         int y = (gc.getHeight() - visualGraph.gridHeight) / 2;
+
+        screenResolutionX = (float) gc.getWidth() / 1920;
+        screenResolutionY = (float) gc.getWidth() / 1920;
+
+        // Единица измерения для правильного отображения на любых разрешениях экрана
+        unit = new MeasureUnit(0, 0, 0, 0, 0, 0, 0, 0, screenResolutionX, screenResolutionY);
+
+        unit.setSize1(16);
+        unit.setSize2(10);
+        font = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", unit.getSize1(), false, false);
+        fontMessage = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", unit.getSize2(), false,
+                false);
+        fontBold = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", unit.getSize1(), true, false);
+
+        // Устанавливаем эффекты для шрифта
+        font.getEffects().add(new ColorEffect(java.awt.Color.black));
+        fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
+        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
+
+        // Установка эффекта для сглаживания текста
+        font.getEffects().add(new ColorEffect(java.awt.Color.black));
+        fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
+        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
+
+        // Инициализируем шрифт
+        font.addAsciiGlyphs();
+        font.loadGlyphs();
+        fontMessage.addAsciiGlyphs();
+        fontMessage.loadGlyphs();
+        fontBold.addAsciiGlyphs();
+        fontBold.loadGlyphs();
 
         // Распределяем компоненты случайным образом по игровому полю
         visualGraph.randomizeComponentPlacements(x, y);
@@ -142,8 +153,9 @@ public class Game extends BasicGame {
 
         if (endGameWin == EndGameWin.NONE) {
             if (motion == Motion.Green) { // Подсветка кнопок зелёных (меню слева)
-                if (mouseX >= (20 + gc.getWidth() / 3 - 190) / 2 - 100 && mouseX <= (20 + gc.getWidth() / 3 - 190) / 2 - 100 + 200 &&
-                        mouseY >= 230 && mouseY <= 280 && greenGraph.size() != 0) {
+                if (mouseX >= (20 + gc.getWidth() / 3 - 190) / 2 - 100
+                        && mouseX <= (20 + gc.getWidth() / 3 - 190) / 2 - 100 + 200
+                        && mouseY >= 230 && mouseY <= 280 && greenGraph.size() != 0) {
                     flags.put(HIGHLIGHT_BUTTON, true);
                 } else {
                     flags.put(HIGHLIGHT_BUTTON, false);
@@ -244,17 +256,20 @@ public class Game extends BasicGame {
         }
 
         // Определение подсветки кнопок меню на основе позиции мыши
-        if (mouseX >= 1350 && mouseX <= 1400 && mouseY >= 20 && mouseY <= 70) {
+        if (Math.abs(mouseX - 1375 * screenResolutionX) <= screenResolutionX * 25
+                && Math.abs(mouseY - 45 * screenResolutionY) <= screenResolutionY * 25) {
             flags.put(HIGHLIGHT_HOME_BUTTON, true);
         } else {
             flags.put(HIGHLIGHT_HOME_BUTTON, false);
         }
-        if (mouseX >= 520 && mouseX <= 570 && mouseY >= 20 && mouseY <= 70) {
+        if (Math.abs(mouseX - 545 * screenResolutionX) <= 25
+                && Math.abs(mouseY - 45 * screenResolutionY) <= screenResolutionY * 25) {
             flags.put(HIGHLIGHT_REPEAT_BUTTON, true);
         } else {
             flags.put(HIGHLIGHT_REPEAT_BUTTON, false);
         }
-        if (mouseX >= 1350 && mouseX <= 1400 && mouseY >= gc.getHeight() - 80 && mouseY <= gc.getHeight() - 30) {
+        if (Math.abs(mouseX - 1375 * screenResolutionX) <= screenResolutionX * 25
+                && Math.abs(mouseY - (gc.getHeight() - 55 * screenResolutionY)) <= screenResolutionY * 25) {
             flags.put(HIGHLIGHT_HELP_BUTTON, true);
         } else {
             flags.put(HIGHLIGHT_HELP_BUTTON, false);
@@ -278,7 +293,9 @@ public class Game extends BasicGame {
                     List<VisualNode> nodesToDelete = new ArrayList<>();
                     // Красные вершины активируют иммунитет и пытаются убить зелёный вирус
                     for (Map.Entry<VisualNode, HashMap<Node, Connection>> entry : greenGraph.entrySet()) {
-                        protectionHealthNode = random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
+                        protectionHealthNode =
+                                random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE
+                                        - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                         int prev_hp = entry.getKey().getHp();
                         int new_hp = prev_hp + replications[0] + protections[0] - protectionHealthNode;
                         if (new_hp > 0 && new_hp <= 300) {
@@ -297,7 +314,9 @@ public class Game extends BasicGame {
                     // Красные вершины активируют иммунитет и пытаются убить синий вирус
                     nodesToDelete = new ArrayList<>();
                     for (Map.Entry<VisualNode, HashMap<Node, Connection>> entry : blueGraph.entrySet()) {
-                        protectionHealthNode = random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
+                        protectionHealthNode =
+                                random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE
+                                        - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                         int prev_hp = entry.getKey().getHp();
                         int new_hp = prev_hp + replications[1] + protections[1] - protectionHealthNode;
                         if (new_hp > 0 && new_hp <= 300) {
@@ -315,7 +334,9 @@ public class Game extends BasicGame {
 
                     // Регенерация хп у здоровых вершин
                     for (Map.Entry<Node, HashMap<Node, Connection>> entry : redGraph.entrySet()) {
-                        replicationHealthNode = random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
+                        replicationHealthNode =
+                                random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE
+                                        - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                         VisualNode node = (VisualNode) entry.getKey();
                         int prev_hp = node.getHp();
                         int new_hp = prev_hp + replicationHealthNode;
@@ -353,9 +374,11 @@ public class Game extends BasicGame {
                 }
                 // Процесс перекидывания вируса с вершин на вершины
                 // Важно: else if должны быть именно в таком порядке
-            } else if (button == Input.MOUSE_LEFT_BUTTON && (flags.get(HIGHLIGHT_SEND_ALL_VIRUS) || flags.get(HIGHLIGHT_SEND_HALF_VIRUS) || flags.get(HIGHLIGHT_SEND_QUARTER_VIRUS))) {
+            } else if (button == Input.MOUSE_LEFT_BUTTON && (flags.get(HIGHLIGHT_SEND_ALL_VIRUS)
+                    || flags.get(HIGHLIGHT_SEND_HALF_VIRUS) || flags.get(HIGHLIGHT_SEND_QUARTER_VIRUS))) {
                 flags.put(MOVE_VIRUS_MODE, true);
-            } else if (flags.get(HIGHLIGHT_NODE) && flags.get(SELECTED_NODE_FROM_MOVE_VIRUS) && button == Input.MOUSE_LEFT_BUTTON) {
+            } else if (flags.get(HIGHLIGHT_NODE) && flags.get(SELECTED_NODE_FROM_MOVE_VIRUS)
+                    && button == Input.MOUSE_LEFT_BUTTON) {
                 flags.put(SELECTED_NODE_TO_MOVE_VIRUS, true);
                 endVirusMove = highlightedNode;
             } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_NODE)) {
@@ -418,7 +441,10 @@ public class Game extends BasicGame {
         g.setColor(new Color(76, 96, 133));
         g.fillRect(0, 0, gc.getWidth(), gc.getHeight());
 
-        g.drawImage(backgroundImage, gc.getWidth() / 3 - 150, 0, gc.getWidth() * 2 / 3 + 150, gc.getHeight(), 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+        unit.setX1(150);
+        g.drawImage(backgroundImage, (float) gc.getWidth() / 3 - unit.getX1(), 0,
+                (float) (gc.getWidth() * 2) / 3 + unit.getX1(),
+                gc.getHeight(), 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
 
         g.setColor(Color.white);
 
@@ -436,21 +462,29 @@ public class Game extends BasicGame {
 
         // Отрисовка вершин
         g.setLineWidth(3.0f);
+        unit.setY1(35);
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             VisualNode visualNode = (VisualNode) entry.getKey();
             if (visualNode.equals(highlightedNode)) {
                 g.setColor(HIGHLIGHT_NODE_COLOR); // Цвет подсветки
-                g.drawString(String.valueOf(visualNode.getHp()), visualNode.getEllipse().getCenterX(), visualNode.getEllipse().getCenterY() - 30);
+                g.drawString(String.valueOf(visualNode.getHp()), visualNode.getEllipse().getCenterX(),
+                        visualNode.getEllipse().getCenterY() - unit.getY1());
             } else {
                 g.setColor(visualNode.getEllipseColor());
-                g.drawString(String.valueOf(visualNode.getHp()), visualNode.getEllipse().getCenterX(), visualNode.getEllipse().getCenterY() - 30);
+                g.drawString(String.valueOf(visualNode.getHp()), visualNode.getEllipse().getCenterX(),
+                        visualNode.getEllipse().getCenterY() - unit.getY1());
             }
             g.fill(visualNode.getEllipse());
             g.setColor(Color.black);
-            g.drawOval(visualNode.getEllipse().getCenterX() - nodeRadius, visualNode.getEllipse().getCenterY() - nodeRadius, cellSize / 1.5f, cellSize / 1.5f);
+            g.drawOval(visualNode.getEllipse().getCenterX() - nodeRadius,
+                    visualNode.getEllipse().getCenterY() - nodeRadius, cellSize / 1.5f, cellSize / 1.5f);
         }
 
         // Отрисовка рёбер в компонентах
+        unit.setX1(5);
+        unit.setY1(5);
+        unit.setWidth(10);
+        unit.setHeight(10);
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             for (Map.Entry<Node, Connection> localEntry : entry.getValue().entrySet()) {
                 VisualConnection vc = (VisualConnection) localEntry.getValue();
@@ -459,54 +493,112 @@ public class Game extends BasicGame {
                 int startY = (int) vc.getSrcNode().getEllipse().getCenterY();
                 int endX = (int) vc.getDestNode().getEllipse().getCenterX();
                 int endY = (int) vc.getDestNode().getEllipse().getCenterY();
-                g.fillOval(startX - 5, startY - 5, 10, 10); // Точка на начале отрезка
-                g.fillOval(endX - 5, endY - 5, 10, 10); // Точка на конце отрезка
+                g.fillOval(startX - unit.getX1(), startY - unit.getY1(),
+                        unit.getWidth(), unit.getHeight()); // Точка на начале отрезка
+                g.fillOval(endX - unit.getX1(), endY - unit.getY1(),
+                        unit.getWidth(), unit.getHeight()); // Точка на конце отрезка
                 g.drawLine(startX, startY, endX, endY);
             }
         }
 
         // Отрисовка UI
-        g.drawImage(BASIC_INFO_MENU.getImage(), 20, 20);
-        g.drawImage(BASIC_INFO_MENU.getImage(), gc.getWidth() - 460, 20);
-        g.drawImage(INFO_MENU.getImage(), 20, gc.getHeight() - 150);
-        g.drawImage(INFO_MENU.getImage(), gc.getWidth() - 460, gc.getHeight() - 150);
+        unit.setX1(470);
+        unit.setY1(10);
+        unit.setX2(20);
+        unit.setY2(215);
+        g.drawImage(BASIC_INFO_MENU.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(), 0, 0,
+                BASIC_INFO_MENU.getImage().getWidth(), BASIC_INFO_MENU.getImage().getHeight());
+        g.drawImage(BASIC_INFO_MENU.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                gc.getWidth() - unit.getX2(), unit.getY2(), 0, 0,
+                BASIC_INFO_MENU.getImage().getWidth(), BASIC_INFO_MENU.getImage().getHeight());
+        unit.setX1(20);
+        unit.setY1(150);
+        unit.setX2(470);
+        unit.setY2(35);
+        g.drawImage(INFO_MENU.getImage(), unit.getX1(), gc.getHeight() - unit.getY1(), unit.getX2(),
+                gc.getHeight() - unit.getY2(), 0, 0, INFO_MENU.getImage().getWidth(), INFO_MENU.getImage().getHeight());
+        unit.setX1(470);
+        unit.setX2(20);
+        g.drawImage(INFO_MENU.getImage(), gc.getWidth() - unit.getX1(), gc.getHeight() - unit.getY1(),
+                gc.getWidth() - unit.getX2(), gc.getHeight() - unit.getY2(), 0, 0, INFO_MENU.getImage().getWidth(),
+                INFO_MENU.getImage().getHeight());
         g.setFont(fontBold);
 
         // Дни
-        g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), gc.getWidth() / 2 - 100, 20);
-        g.drawString("Day " + GameLogic.day, gc.getWidth() / 2 - 35, 37);
+        unit.setX1(100);
+        unit.setY1(20);
+        unit.setY2(70);
+        g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
+                (float) gc.getWidth() / 2 + unit.getX1(),
+                unit.getY2(), 0, 0, REGULAR_BUTTON_HOVERED.getImage().getWidth(),
+                REGULAR_BUTTON_HOVERED.getImage().getHeight());
+        unit.setX1(35);
+        unit.setY1(37);
+        g.drawString("Day " + GameLogic.day, (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
 
         // Сообщение
         g.setFont(fontMessage);
         if (day == 1) {
-            g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
+            unit.setX1(150);
+            unit.setY1(80);
+            unit.setY2(105);
+            g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
+                    (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
+                    0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
+            unit.setX1(140);
+            unit.setY1(88);
             if (flags.get(ERROR_INIT_VIRUS)) {
-                g.drawString("Impossible to infect in day 1", gc.getWidth() / 2 - 140, 88);
+                g.drawString("Impossible to infect in day 1", (float) gc.getWidth() / 2 - unit.getX1(),
+                        unit.getY1());
             } else {
                 if (motion == Motion.Green) {
                     switch (greenGraph.size()) {
-                        case 0 -> g.drawString("Select the initial node to infect", gc.getWidth() / 2 - 140, 88);
-                        case 1 -> g.drawString("Finish the move", gc.getWidth() / 2 - 140, 88);
+                        case 0 -> g.drawString("Select the initial node to infect",
+                                (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
+                        case 1 -> g.drawString("Finish the move", (float) gc.getWidth() / 2 - unit.getX1(),
+                                unit.getY1());
                     }
                 } else {
                     switch (blueGraph.size()) {
-                        case 0 -> g.drawString("Select the initial node to infect", gc.getWidth() / 2 - 140, 88);
-                        case 1 -> g.drawString("Finish the move", gc.getWidth() / 2 - 140, 88);
+                        case 0 -> g.drawString("Select the initial node to infect",
+                                (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
+                        case 1 -> g.drawString("Finish the move", (float) gc.getWidth() / 2 - unit.getX1(),
+                                unit.getY1());
                     }
                 }
             }
         } else if (flags.get(SELECTED_NODE_FROM_MOVE_VIRUS) && !flags.get(SELECTED_NODE_TO_MOVE_VIRUS)) {
-            g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
-            g.drawString("Select second node to transfer virus", gc.getWidth() / 2 - 140, 88);
+            unit.setX1(150);
+            unit.setY1(80);
+            unit.setY2(105);
+            g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
+                    (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
+                    0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
+            unit.setX1(140);
+            unit.setY1(88);
+            g.drawString("Select second node to transfer virus", (float) gc.getWidth() / 2 - unit.getX1(),
+                    unit.getY1());
             errorMotion = MotionError.OK;
         } else if (errorMotion != null && errorMotion != MotionError.OK) {
-            g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
+            unit.setX1(150);
+            unit.setY1(80);
+            unit.setY2(105);
+            g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
+                    (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
+                    0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
+            unit.setX1(140);
+            unit.setY1(88);
             switch (errorMotion) {
-                case NOT_YOUR_MOTION -> g.drawString(motion + " now!", gc.getWidth() / 2 - 140, 88);
-                case RED_NODE_SELECTED -> g.drawString("Red node cannot be selected!", gc.getWidth() / 2 - 140, 88);
-                case NOT_ADJACENT -> g.drawString("Nodes are not adjacent!", gc.getWidth() / 2 - 140, 88);
-                case SAME_NODE -> g.drawString("This is the same node!", gc.getWidth() / 2 - 140, 88);
-                case MAX_VALUE_OF_VIRUS -> g.drawString("The virus is already maximum!", gc.getWidth() / 2 - 140, 88);
+                case NOT_YOUR_MOTION -> g.drawString(motion + " now!", (float) gc.getWidth() / 2 - unit.getX1(),
+                        unit.getY1());
+                case RED_NODE_SELECTED -> g.drawString("Red node cannot be selected!",
+                        (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
+                case NOT_ADJACENT -> g.drawString("Nodes are not adjacent!",
+                        (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
+                case SAME_NODE -> g.drawString("This is the same node!",
+                        (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
+                case MAX_VALUE_OF_VIRUS -> g.drawString("The virus is already maximum!",
+                        (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
             }
         } else if (flags.get(MOVE_VIRUS_MODE)) { // Отправка вируса в другую вершину
             if (flags.get(HIGHLIGHT_SEND_ALL_VIRUS)) {
@@ -528,21 +620,61 @@ public class Game extends BasicGame {
                 flags.put(MOVE_VIRUS_DONE, false);
             }
         } else if (flags.get(SELECTED_NODE_TO_MOVE_VIRUS)) { // Показывает меню для выбора кол-ва пересылки вируса
-            g.drawImage(LONG_MENU.getImage(), gc.getWidth() / 2 - 150, gc.getHeight() / 2 - 25);
+            unit.setX1(150);
+            unit.setY1(25);
+            g.drawImage(LONG_MENU.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                    (float) gc.getHeight() / 2 - unit.getY1(), (float) gc.getWidth() / 2 + unit.getX1(),
+                    (float) gc.getHeight() / 2 + unit.getY1(), 0, 0, LONG_MENU.getImage().getWidth(),
+                    LONG_MENU.getImage().getHeight());
+            unit.setX1(115);
+            unit.setY1(15);
+            unit.setX2(75);
             if (flags.get(HIGHLIGHT_SEND_ALL_VIRUS)) {
-                g.drawImage(BUTTON_ALL_VIRUS_MOVE_HOVERED.getImage(), gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_ALL_VIRUS_MOVE_HOVERED.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        BUTTON_ALL_VIRUS_MOVE_HOVERED.getImage().getWidth(),
+                        BUTTON_ALL_VIRUS_MOVE_HOVERED.getImage().getHeight());
             } else {
-                g.drawImage(BUTTON_ALL_VIRUS_MOVE.getImage(), gc.getWidth() / 2 - 115, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_ALL_VIRUS_MOVE.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        BUTTON_ALL_VIRUS_MOVE.getImage().getWidth(),
+                        BUTTON_ALL_VIRUS_MOVE.getImage().getHeight());
             }
+            unit.setX1(38);
             if (flags.get(HIGHLIGHT_SEND_HALF_VIRUS)) {
-                g.drawImage(BUTTON_HALF_VIRUS_MOVE_HOVERED.getImage(), gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_HALF_VIRUS_MOVE_HOVERED.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        BUTTON_HALF_VIRUS_MOVE_HOVERED.getImage().getWidth(),
+                        BUTTON_HALF_VIRUS_MOVE_HOVERED.getImage().getHeight());
             } else {
-                g.drawImage(BUTTON_HALF_VIRUS_MOVE.getImage(), gc.getWidth() / 2 - 38, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_HALF_VIRUS_MOVE.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        BUTTON_HALF_VIRUS_MOVE.getImage().getWidth(),
+                        BUTTON_HALF_VIRUS_MOVE.getImage().getHeight());
             }
+            unit.setX1(39);
             if (flags.get(HIGHLIGHT_SEND_QUARTER_VIRUS)) {
-                g.drawImage(BUTTON_QUARTER_VIRUS_MOVE_HOVERED.getImage(), gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_QUARTER_VIRUS_MOVE_HOVERED.getImage(), (float) gc.getWidth() / 2 + unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 + unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        BUTTON_QUARTER_VIRUS_MOVE_HOVERED.getImage().getWidth(),
+                        BUTTON_QUARTER_VIRUS_MOVE_HOVERED.getImage().getHeight());
             } else {
-                g.drawImage(BUTTON_QUARTER_VIRUS_MOVE.getImage(), gc.getWidth() / 2 + 39, gc.getHeight() / 2 - 15);
+                g.drawImage(BUTTON_QUARTER_VIRUS_MOVE.getImage(), (float) gc.getWidth() / 2 + unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 + unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        BUTTON_QUARTER_VIRUS_MOVE.getImage().getWidth(),
+                        BUTTON_QUARTER_VIRUS_MOVE.getImage().getHeight());
             }
         }
 
@@ -550,114 +682,216 @@ public class Game extends BasicGame {
         // Отрисовка кнопки завершения хода
         if (endGameWin == EndGameWin.NONE) {
             if (motion == Motion.Green && greenGraph.size() != 0) {
+                unit.setY1(230);
+                unit.setX2(200);
+                unit.setY2(280);
                 if (flags.get(HIGHLIGHT_BUTTON)) {
-                    g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), (20 + gc.getWidth() / 3 - 190) / 2 - 100, 230);
+                    g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), (float) gc.getWidth() / 14,
+                            unit.getY1(), (float) gc.getWidth() / 14 + unit.getX2(), unit.getY2(), 0, 0,
+                            REGULAR_BUTTON_HOVERED.getImage().getWidth(), REGULAR_BUTTON_HOVERED.getImage().getHeight());
                 } else {
-                    g.drawImage(REGULAR_BUTTON.getImage(), (20 + gc.getWidth() / 3 - 190) / 2 - 100, 230);
+                    g.drawImage(REGULAR_BUTTON.getImage(), (float) gc.getWidth() / 14,
+                            unit.getY1(), (float) gc.getWidth() / 14 + unit.getX2(), unit.getY2(), 0, 0,
+                            REGULAR_BUTTON.getImage().getWidth(), REGULAR_BUTTON.getImage().getHeight());
                 }
-                g.drawString("Finish move", (20 + gc.getWidth() / 3 - 190) / 2 - 70, 247);
+                unit.setX1(31);
+                unit.setY1(247);
+                g.drawString("Finish move", (float) gc.getWidth() / 14 + unit.getX1(), unit.getY1());
             } else if (motion == Motion.Blue && blueGraph.size() != 0) {
+                unit.setX1(350);
+                unit.setX2(200);
+                unit.setY1(230);
+                unit.setY2(280);
                 if (flags.get(HIGHLIGHT_BUTTON)) {
-                    g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), gc.getWidth() - 350, 230);
+                    g.drawImage(REGULAR_BUTTON_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX1() + unit.getX2(), unit.getY2(), 0, 0,
+                            REGULAR_BUTTON.getImage().getWidth(), REGULAR_BUTTON.getImage().getHeight());
                 } else {
-                    g.drawImage(REGULAR_BUTTON.getImage(), gc.getWidth() - 350, 230);
+                    g.drawImage(REGULAR_BUTTON.getImage(), gc.getWidth() - unit.getX1(), unit.getY1(),
+                            gc.getWidth() - unit.getX1() + unit.getX2(), unit.getY2(), 0, 0,
+                            REGULAR_BUTTON.getImage().getWidth(), REGULAR_BUTTON.getImage().getHeight());
                 }
-                g.drawString("Finish move", gc.getWidth() - 320, 247);
+                unit.setX2(318);
+                unit.setY2(247);
+                g.drawString("Finish move", gc.getWidth() - unit.getX2(), unit.getY2());
             }
         } else { // Отрисовка сообщения о победе
+            unit.setX1(150);
+            unit.setY1(80);
+            unit.setY2(105);
             g.setFont(fontMessage);
             if (endGameWin == EndGameWin.RED) {
-                g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
-                g.drawString("Red wins! Restart Game?", gc.getWidth() / 2 - 140, 88);
+                g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
+                        (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
+                        0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
+                unit.setX1(140);
+                unit.setY1(88);
+                g.drawString("Red wins! Restart Game?", (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
             } else if (endGameWin == EndGameWin.GREEN) {
-                g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
-                g.drawString("Green wins! Restart Game?", gc.getWidth() / 2 - 140, 88);
+                g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
+                        (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
+                        0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
+                unit.setX1(140);
+                unit.setY1(88);
+                g.drawString("Green wins! Restart Game?", (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
             } else if (endGameWin == EndGameWin.BLUE) {
-                g.drawImage(MESSAGE_CLOUD.getImage(), gc.getWidth() / 2 - 150, 80);
-                g.drawString("Blue wins! Restart Game?", gc.getWidth() / 2 - 140, 88);
+                g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
+                        (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
+                        0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
+                unit.setX1(140);
+                unit.setY1(88);
+                g.drawString("Blue wins! Restart Game?", (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
             }
         }
 
         g.setFont(fontBold);
+        unit.setX1(100);
+        unit.setY1(80);
+        unit.setX2(200);
+        unit.setY2(30);
         // Отображение очередности хода
-        g.drawImage(REGULAR_BUTTON.getImage(), gc.getWidth() / 2 - 100, gc.getHeight() - 80);
-        g.drawString(motion.getStringMotion(), gc.getWidth() / 2 - 65, gc.getHeight() - 63);
+        g.drawImage(REGULAR_BUTTON.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                gc.getHeight() - unit.getY1(), (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                gc.getHeight() - unit.getY2(), 0, 0,
+                REGULAR_BUTTON.getImage().getWidth(), REGULAR_BUTTON.getImage().getHeight());
+        unit.setX1(65);
+        unit.setY1(63);
+        g.drawString(motion.getStringMotion(), (float) gc.getWidth() / 2 - unit.getX1(),
+                gc.getHeight() - unit.getY1());
 
         // Основная информация
-        g.drawString("Green virus", 40, 30);
+        unit.setX1(40);
+        unit.setY1(30);
+        g.drawString("Green virus", unit.getX1(), unit.getY1());
 
         g.setFont(font);
-        g.drawString("Number of infected vertices: " + GameLogic.virusNodes[0], 40, 60);
-        g.drawString("Skill points: " + GameLogic.skillPoints[0], 40, 90);
-        g.drawString("Power: " + GameLogic.powers[0], 40, 120);
-        g.drawString("Protection: " + GameLogic.protections[0], 40, 150);
-        g.drawString("Replication: " + GameLogic.replications[0], 40, 180);
+        unit.setY1(60);
+        g.drawString("Number of infected vertices: " + GameLogic.virusNodes[0], unit.getX1(), unit.getY1());
+        unit.setY1(90);
+        g.drawString("Skill points: " + GameLogic.skillPoints[0], unit.getX1(), unit.getY1());
+        unit.setY1(120);
+        g.drawString("Power: " + GameLogic.powers[0], unit.getX1(), unit.getY1());
+        unit.setY1(150);
+        g.drawString("Protection: " + GameLogic.protections[0], unit.getX1(), unit.getY1());
+        unit.setY1(180);
+        g.drawString("Replication: " + GameLogic.replications[0], unit.getX1(), unit.getY1());
 
+        unit.setY1(130);
+        g.drawString("Next power: " + (powers[0] + powerDelta), unit.getX1(), gc.getHeight() - unit.getY1());
+        unit.setY1(100);
+        g.drawString("Next protection: " + (protections[0] + protectionDelta), unit.getX1(),
+                gc.getHeight() - unit.getY1());
+        unit.setY1(70);
+        g.drawString("Next replication: " + (replications[0] + replicationDelta), unit.getX1(),
+                gc.getHeight() - unit.getY1());
 
         g.setFont(fontBold);
-        g.drawString("Blue virus", gc.getWidth() - 440, 30);
+        unit.setX1(450);
+        unit.setY1(30);
+        g.drawString("Blue virus", gc.getWidth() - unit.getX1(), unit.getY1());
 
         g.setFont(font);
-        g.drawString("Number of infected vertices: " + GameLogic.virusNodes[1], gc.getWidth() - 440, 60);
-        g.drawString("Skill points: " + GameLogic.skillPoints[1], gc.getWidth() - 440, 90);
-        g.drawString("Power: " + GameLogic.powers[1], gc.getWidth() - 440, 120);
-        g.drawString("Protection: " + GameLogic.protections[1], gc.getWidth() - 440, 150);
-        g.drawString("Replication: " + GameLogic.replications[1], gc.getWidth() - 440, 180);
+        unit.setY1(60);
+        g.drawString("Number of infected vertices: " + GameLogic.virusNodes[1], gc.getWidth() - unit.getX1(),
+                unit.getY1());
+        unit.setY1(90);
+        g.drawString("Skill points: " + GameLogic.skillPoints[1], gc.getWidth() - unit.getX1(), unit.getY1());
+        unit.setY1(120);
+        g.drawString("Power: " + GameLogic.powers[1], gc.getWidth() - unit.getX1(), unit.getY1());
+        unit.setY1(150);
+        g.drawString("Protection: " + GameLogic.protections[1], gc.getWidth() - unit.getX1(), unit.getY1());
+        unit.setY1(180);
+        g.drawString("Replication: " + GameLogic.replications[1], gc.getWidth() - unit.getX1(), unit.getY1());
 
-        g.drawString("Next power: " + (powers[0] + powerDelta), 40, gc.getHeight() - 130);
-        g.drawString("Next protection: " + (protections[0] + protectionDelta), 40, gc.getHeight() - 100);
-        g.drawString("Next replication: " + (replications[0] + replicationDelta), 40, gc.getHeight() - 70);
-
-        g.drawString("Next power: " + (powers[1] + powerDelta), gc.getWidth() - 440, gc.getHeight() - 130);
-        g.drawString("Next protection: " + (protections[1] + protectionDelta), gc.getWidth() - 440, gc.getHeight() - 100);
-        g.drawString("Next replication: " + (replications[1] + replicationDelta), gc.getWidth() - 440, gc.getHeight() - 70);
+        unit.setY1(130);
+        g.drawString("Next power: " + (powers[1] + powerDelta), gc.getWidth() - unit.getX1(),
+                gc.getHeight() - unit.getY1());
+        unit.setY1(100);
+        g.drawString("Next protection: " + (protections[1] + protectionDelta), gc.getWidth() - unit.getX1(),
+                gc.getHeight() - unit.getY1());
+        unit.setY1(70);
+        g.drawString("Next replication: " + (replications[1] + replicationDelta), gc.getWidth() - unit.getX1(),
+                gc.getHeight() - unit.getY1());
 
         // Отрисовка кнопок улучшений навыков (плюсики)
         if (endGameWin == EndGameWin.NONE) {
             if (motion == Motion.Green && greenGraph.size() != 0 && GameLogic.skillPoints[0] > 0) {
+                unit.setX1(430);
+                unit.setY1(119);
                 if (flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), 430, 119);
+                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1());
                 } else {
-                    g.drawImage(PLUS.getImage(), 430, 119);
+                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1());
                 }
+                unit.setY1(149);
                 if (flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), 430, 149);
+                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1());
                 } else {
-                    g.drawImage(PLUS.getImage(), 430, 149);
+                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1());
                 }
+                unit.setY1(179);
                 if (flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), 430, 179);
+                    g.drawImage(PLUS_HOVERED.getImage(), unit.getX1(), unit.getY1());
                 } else {
-                    g.drawImage(PLUS.getImage(), 430, 179);
+                    g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1());
                 }
             } else if (motion == Motion.Blue && blueGraph.size() != 0 && GameLogic.skillPoints[1] > 0) {
+                unit.setX1(60);
+                unit.setY1(119);
                 if (flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - 50, 119);
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
                 } else {
-                    g.drawImage(PLUS.getImage(), gc.getWidth() - 50, 119);
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
                 }
+                unit.setY1(149);
                 if (flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - 50, 149);
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
                 } else {
-                    g.drawImage(PLUS.getImage(), gc.getWidth() - 50, 149);
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
                 }
+                unit.setY1(179);
                 if (flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
-                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - 50, 179);
+                    g.drawImage(PLUS_HOVERED.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
                 } else {
-                    g.drawImage(PLUS.getImage(), gc.getWidth() - 50, 179);
+                    g.drawImage(PLUS.getImage(), gc.getWidth() - unit.getX1(), unit.getY1());
                 }
             }
         } else { // Отрисовка меню завершения игры
-            g.drawImage(REGULAR_BUTTON.getImage(), gc.getWidth() / 2 - 100, gc.getHeight() / 2 - 25);
+            unit.setX1(100);
+            unit.setY1(25);
+            g.drawImage(REGULAR_BUTTON.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                    (float) gc.getHeight() / 2 - unit.getY1(), (float) gc.getWidth() / 2 + unit.getX1(),
+                    (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                    REGULAR_BUTTON.getImage().getWidth(), REGULAR_BUTTON.getImage().getHeight());
+            unit.setX1(79);
+            unit.setY1(15);
+            unit.setX2(75);
             if (flags.get(HIGHLIGHT_YES_BUTTON)) {
-                g.drawImage(YES_BUTTON.getImage(), gc.getWidth() / 2 - 79, gc.getHeight() / 2 - 15);
+                g.drawImage(YES_BUTTON.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        YES_BUTTON.getImage().getWidth(), YES_BUTTON.getImage().getHeight());
             } else {
-                g.drawImage(YES_BUTTON_HOVERED.getImage(), gc.getWidth() / 2 - 79, gc.getHeight() / 2 - 15);
+                g.drawImage(YES_BUTTON_HOVERED.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        YES_BUTTON_HOVERED.getImage().getWidth(), YES_BUTTON_HOVERED.getImage().getHeight());
             }
+            unit.setX1(1);
             if (flags.get(HIGHLIGHT_NO_BUTTON)) {
-                g.drawImage(NO_BUTTON.getImage(), gc.getWidth() / 2 + 1, gc.getHeight() / 2 - 15);
+                g.drawImage(NO_BUTTON.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        NO_BUTTON.getImage().getWidth(), NO_BUTTON.getImage().getHeight());
             } else {
-                g.drawImage(NO_BUTTON_HOVERED.getImage(), gc.getWidth() / 2 + 1, gc.getHeight() / 2 - 15);
+                g.drawImage(NO_BUTTON_HOVERED.getImage(), (float) gc.getWidth() / 2 - unit.getX1(),
+                        (float) gc.getHeight() / 2 - unit.getY1(),
+                        (float) gc.getWidth() / 2 - unit.getX1() + unit.getX2(),
+                        (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
+                        NO_BUTTON_HOVERED.getImage().getWidth(), NO_BUTTON_HOVERED.getImage().getHeight());
             }
             if (restartGame == RestartGame.YES) {
                 init(gc);
@@ -667,25 +901,48 @@ public class Game extends BasicGame {
         }
 
         // Отрисовка основных кнопок меню
+        unit.setX1(1350);
+        unit.setY1(20);
+        unit.setX2(1400);
+        unit.setY2(70);
         if (flags.get(HIGHLIGHT_HOME_BUTTON)) {
-            g.drawImage(HOME_BUTTON_HOVERED.getImage(), 1350, 20);
+            g.drawImage(HOME_BUTTON_HOVERED.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(), 0,
+                    0, HOME_BUTTON_HOVERED.getImage().getWidth(), HOME_BUTTON_HOVERED.getImage().getHeight());
         } else {
-            g.drawImage(HOME_BUTTON.getImage(), 1350, 20);
+            g.drawImage(HOME_BUTTON.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(), 0, 0,
+                    HOME_BUTTON.getImage().getWidth(), HOME_BUTTON.getImage().getHeight());
         }
+        unit.setX1(520);
+        unit.setX2(570);
         if (flags.get(HIGHLIGHT_REPEAT_BUTTON)) {
-            g.drawImage(REPEAT_BUTTON_HOVERED.getImage(), 520, 20);
+            g.drawImage(REPEAT_BUTTON_HOVERED.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(), 0,
+                    0, REPEAT_BUTTON_HOVERED.getImage().getWidth(), REPEAT_BUTTON_HOVERED.getImage().getHeight());
         } else {
-            g.drawImage(REPEAT_BUTTON.getImage(), 520, 20);
+            g.drawImage(REPEAT_BUTTON.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(), 0,
+                    0, REPEAT_BUTTON.getImage().getWidth(), REPEAT_BUTTON.getImage().getHeight());
         }
+        unit.setX1(1350);
+        unit.setX2(1400);
+        unit.setY1(80);
+        unit.setY2(30);
         if (flags.get(HIGHLIGHT_HELP_BUTTON)) {
-            g.drawImage(HELP_BUTTON_HOVERED.getImage(), 1350, gc.getHeight() - 80);
+            g.drawImage(HELP_BUTTON_HOVERED.getImage(), unit.getX1(),  gc.getHeight() - unit.getY1(), unit.getX2(),
+                    gc.getHeight() - unit.getY2(), 0, 0, HELP_BUTTON_HOVERED.getImage().getWidth(),
+                    HELP_BUTTON_HOVERED.getImage().getHeight());
         } else {
-            g.drawImage(HELP_BUTTON.getImage(), 1350, gc.getHeight() - 80);
+            g.drawImage(HELP_BUTTON.getImage(), unit.getX1(),gc.getHeight() - unit.getY1(), unit.getX2(),
+                    gc.getHeight() - unit.getY2(), 0, 0, HELP_BUTTON.getImage().getWidth(),
+                    HELP_BUTTON.getImage().getHeight());
         }
 
         // Открытие правил
+        unit.setX1(550);
+        unit.setX2(1350);
+        unit.setY1(100);
+        unit.setY2(900);
         if (flags.get(OPEN_HELP_MENU)) {
-            g.drawImage(RULES_MENU.getImage(), 550, 100);
+            g.drawImage(RULES_MENU.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(), 0, 0,
+                    RULES_MENU.getImage().getWidth(), RULES_MENU.getImage().getHeight());
             String rules = """
                                                 RULES
 
@@ -716,7 +973,9 @@ public class Game extends BasicGame {
                     Players can use virus development strategies as well as
                     attack and defense tactics to achieve this goal.
                     """;
-            g.drawString(rules, 580, 130);
+            unit.setX1(580);
+            unit.setY1(130);
+            g.drawString(rules, unit.getX1(), unit.getY1());
         }
 
         if (flags.get(REPEAT_GAME)) {
