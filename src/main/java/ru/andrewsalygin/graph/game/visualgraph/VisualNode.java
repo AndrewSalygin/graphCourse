@@ -3,11 +3,10 @@ package ru.andrewsalygin.graph.game.visualgraph;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Ellipse;
 import ru.andrewsalygin.graph.core.Node;
+import ru.andrewsalygin.graph.game.utils.UI;
 
 import java.io.Serializable;
 import java.util.Objects;
-
-import static ru.andrewsalygin.graph.game.Game.nodeRadius;
 
 public class VisualNode extends Node implements Serializable {
     private static int counterName = 0;
@@ -64,7 +63,7 @@ public class VisualNode extends Node implements Serializable {
     public boolean contains(int mouseX, int mouseY) {
         // Проверяем, находится ли точка мыши внутри радиуса вершины
         double distance = Math.sqrt(Math.pow(mouseX - ellipse.getCenterX(), 2) + Math.pow(mouseY - ellipse.getCenterY(), 2));
-        return distance <= nodeRadius;
+        return distance <= UI.nodeRadius;
     }
 
     @Override

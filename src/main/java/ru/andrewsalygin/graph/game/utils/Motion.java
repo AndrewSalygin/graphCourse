@@ -1,6 +1,8 @@
 package ru.andrewsalygin.graph.game.utils;
 
-public enum Motion {
+import java.io.Serializable;
+
+public enum Motion implements Serializable {
     Green("Green move"),
     Blue("Blue move");
 

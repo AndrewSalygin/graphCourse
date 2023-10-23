@@ -1,11 +1,13 @@
 package ru.andrewsalygin.graph.game;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.GameContainer;
 import ru.andrewsalygin.graph.core.Connection;
 import ru.andrewsalygin.graph.core.Node;
-import ru.andrewsalygin.graph.game.utils.Motion;
-import ru.andrewsalygin.graph.game.utils.MotionError;
-import ru.andrewsalygin.graph.game.utils.MoveVirusPart;
+import ru.andrewsalygin.graph.game.utils.*;
+import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
 import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
 
 import java.util.HashMap;
@@ -18,47 +20,67 @@ import static ru.andrewsalygin.graph.game.utils.MotionError.*;
 /**
  * @author Andrew Salygin
  */
+@Getter
+@Setter
 public class GameLogic {
     private static final int MAX_VIRUS_HP = 300;
     private static final Random random = new Random();
-    static int[] virusNodes;
-    static int[] skillPoints;
-    static int[] powers;
-    static int[] protections;
-    static int[] replications;
-    static int protectionHealthNode;
-    static int replicationHealthNode;
-    static int powerDelta;
-    static int protectionDelta;
-    static int replicationDelta;
-    static Motion motion;
-    static int day;
+    public static MotionError errorMotion;
+    public static VisualNode highlightedNode;
+    public static VisualNode startVirusMove;
+    public static VisualNode endVirusMove;
+    public static RestartGame restartGame = RestartGame.NONE;
+    public static EndGameWin endGameWin = EndGameWin.NONE;
+    private Session session;
 
-    public static void startGame() {
-        virusNodes = new int[]{0, 0};
-        skillPoints = new int[]{0, 0};
-        powers = new int[]{10, 10};
-        protections = new int[]{10, 10};
-        replications = new int[]{10, 10};
-        powerDelta = 5;
-        protectionDelta = 5;
-        replicationDelta = 5;
-        motion = Motion.Green;
-        day = 1;
+    public void startGame(GameContainer gc) {
+        HashMap<Flag, Boolean> flags = new HashMap<>();
+        for (Flag flag : Flag.values()) {
+            flags.put(flag, false);
+        }
+
+        UI.xLeftCorner = (gc.getWidth() - UI.gridWidth) / 2;
+        UI.yLeftCorner = (gc.getHeight() - UI.gridHeight) / 2;
+
+        VisualGraph visualGraph = new VisualGraph();
+
+        // Распределяем компоненты случайным образом по игровому полю
+        visualGraph.randomizeComponentPlacements(UI.xLeftCorner, UI.yLeftCorner);
+        // Соедините компоненты связности между собой, добавив рёбра
+        visualGraph.connectComponents();
+
+        // Больше отдельные компоненты не нужны
+        visualGraph.setComponents(null);
 
         // Инициализация здоровых вершин
-        Game.redGraph = new HashMap<>();
-        for (Map.Entry<Node, HashMap<Node, Connection>> entry : Game.visualGraph.getGraph().entrySet()) {
+        HashMap<VisualNode, HashMap<Node, Connection>> redGraph = new HashMap<>();
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             VisualNode node = (VisualNode) entry.getKey();
             if (node.getEllipseColor() == Color.red ||
                     node.getEllipseColor().equals(new Color(163, 0, 0))) {
-                Game.redGraph.put(node, entry.getValue());
+                redGraph.put(node, entry.getValue());
             }
         }
+
+        session = new Session(new int[]{0, 0}, new int[]{0, 0}, new int[]{10, 10}, new int[]{10, 10},
+                new int[]{10, 10}, 5, 5, 5, Motion.Green, 1, flags,
+                new HashMap<>(),
+                new HashMap<>(),
+                redGraph, visualGraph);
     }
 
-    public static MotionError moveVirus(VisualNode startVirusMove, VisualNode endVirusMove, MoveVirusPart virusPart) {
-        HashMap<Node, HashMap<Node, Connection>> graph = Game.visualGraph.getGraph();
+    public MotionError moveVirus(VisualNode startVirusMove, VisualNode endVirusMove, MoveVirusPart virusPart) {
+        HashMap<Node, HashMap<Node, Connection>> graph = session.getVisualGraph().getGraph();
+        Motion motion = session.getMotion();
+        int[] powers = session.getPowers();
+        int[] protections = session.getProtections();
+        int[] skillPoints = session.getSkillPoints();
+
+        HashMap<VisualNode, HashMap<Node, Connection>> redGraph = session.getRedGraph();
+        HashMap<VisualNode, HashMap<Node, Connection>> greenGraph = session.getGreenGraph();
+        HashMap<VisualNode, HashMap<Node, Connection>> blueGraph = session.getBlueGraph();
+
+
         int valueToMove = 0;
         int hpToAdd;
         int virusAttack;
@@ -66,6 +88,7 @@ public class GameLogic {
         int healthNodeProtection;
         int firstValue;
         int secondValue;
+        int protectionHealthNode;
 
         // Пересылка вируса в ту же вершину невозможна
         if (startVirusMove.equals(endVirusMove)) {
@@ -114,16 +137,16 @@ public class GameLogic {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                             endVirusMove.setHp(0);
                             endVirusMove.setEllipseColor(new Color(163, 0, 0));
-                            Game.redGraph.put(endVirusMove, Game.blueGraph.get(endVirusMove));
-                            Game.blueGraph.remove(endVirusMove);
+                            redGraph.put(endVirusMove, blueGraph.get(endVirusMove));
+                            blueGraph.remove(endVirusMove);
                         }
                         // Зелёный сильнее
                         else if (firstValue > 0) {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                             endVirusMove.setHp(firstValue);
                             endVirusMove.setEllipseColor(Color.green);
-                            Game.greenGraph.put(endVirusMove, Game.blueGraph.get(endVirusMove));
-                            Game.blueGraph.remove(endVirusMove);
+                            greenGraph.put(endVirusMove, blueGraph.get(endVirusMove));
+                            blueGraph.remove(endVirusMove);
                         }
                         // Синий сильнее
                         else if (secondValue > 0) {
@@ -153,8 +176,8 @@ public class GameLogic {
                                 skillPoints[0]++;
                                 endVirusMove.setSkillPoint(false);
                             }
-                            Game.greenGraph.put(endVirusMove, Game.redGraph.get(endVirusMove));
-                            Game.redGraph.remove(endVirusMove);
+                            greenGraph.put(endVirusMove, redGraph.get(endVirusMove));
+                            redGraph.remove(endVirusMove);
                         }
                         else if (secondValue > 0) {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
@@ -197,15 +220,15 @@ public class GameLogic {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                              endVirusMove.setHp(0);
                              endVirusMove.setEllipseColor(new Color(163, 0, 0));
-                             Game.redGraph.put(endVirusMove, Game.blueGraph.get(endVirusMove));
-                             Game.blueGraph.remove(endVirusMove);
+                             redGraph.put(endVirusMove, blueGraph.get(endVirusMove));
+                             blueGraph.remove(endVirusMove);
                          }
                          else if (firstValue > 0) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
                              endVirusMove.setHp(firstValue);
                              endVirusMove.setEllipseColor(Color.blue);
-                             Game.blueGraph.put(endVirusMove, Game.greenGraph.get(endVirusMove));
-                             Game.greenGraph.remove(endVirusMove);
+                             blueGraph.put(endVirusMove, greenGraph.get(endVirusMove));
+                             greenGraph.remove(endVirusMove);
                          }
                          else if (secondValue > 0) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
@@ -232,8 +255,8 @@ public class GameLogic {
                                  skillPoints[1]++;
                                  endVirusMove.setSkillPoint(false);
                              }
-                             Game.blueGraph.put(endVirusMove, Game.redGraph.get(endVirusMove));
-                             Game.redGraph.remove(endVirusMove);
+                             blueGraph.put(endVirusMove, redGraph.get(endVirusMove));
+                             redGraph.remove(endVirusMove);
                          }
                          else if (secondValue > 0) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);

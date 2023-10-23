@@ -1,4 +1,4 @@
-package ru.andrewsalygin.graph.game;
+package ru.andrewsalygin.graph.game.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,11 +9,9 @@ import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.io.*;
 
-import static ru.andrewsalygin.graph.game.Game.visualGraph;
-
 public class GameSerialization {
     private final static Logger LOGGER = LogManager.getLogger();
-    public static void saveGameToFile(VisualGraph graph) {
+    public static void saveGameToFile(Session session) {
         JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
         fileChooser.setSelectedFile(new File("save.slg"));
@@ -27,7 +25,7 @@ public class GameSerialization {
             try {
                 FileOutputStream outputStream = new FileOutputStream(selectedFile);
                 ObjectOutputStream out = new ObjectOutputStream(outputStream);
-                out.writeObject(graph);
+                out.writeObject(session);
 
                 out.close();
                 outputStream.close();
@@ -40,13 +38,13 @@ public class GameSerialization {
         }
     }
 
-    public static VisualGraph openGameFromFile(GameContainer gc) {
+    public static Session openGameFromFile(GameContainer gc, Session session) {
         JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
         fileChooser.setDialogTitle("Choose a file to open");
 
         int returnValue = fileChooser.showOpenDialog(null);
 
-        VisualGraph graph = new VisualGraph();
+        Session openedSession = new Session();
         boolean isNotOpen = true;
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
@@ -55,7 +53,7 @@ public class GameSerialization {
                 FileInputStream fileIn = new FileInputStream(selectedFile);
                 ObjectInputStream in = new ObjectInputStream(fileIn);
 
-                graph = (VisualGraph) in.readObject();
+                openedSession = (Session) in.readObject();
                 isNotOpen = false;
                 in.close();
                 fileIn.close();
@@ -68,20 +66,8 @@ public class GameSerialization {
         }
 
         if (isNotOpen) {
-            // Берём левый верхний угол клетчатой сетки
-            int x = (gc.getWidth() - visualGraph.gridWidth) / 2;
-            int y = (gc.getHeight() - visualGraph.gridHeight) / 2;
-
-            // Распределяем компоненты случайным образом по игровому полю
-            visualGraph.randomizeComponentPlacements(x, y);
-
-            // Соедините компоненты связности между собой, добавив рёбра
-            visualGraph.connectComponents();
-
-            // Больше отдельные компоненты не нужны
-            visualGraph.setComponents(null);
+            return session;
         }
-
-        return graph;
+        return openedSession;
     }
 }

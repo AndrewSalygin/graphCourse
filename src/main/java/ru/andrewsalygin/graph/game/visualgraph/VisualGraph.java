@@ -3,7 +3,6 @@ package ru.andrewsalygin.graph.game.visualgraph;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Ellipse;
 import org.newdawn.slick.geom.Rectangle;
-import ru.andrewsalygin.graph.game.Game;
 import ru.andrewsalygin.graph.core.Connection;
 import ru.andrewsalygin.graph.core.Node;
 import ru.andrewsalygin.graph.core.UndirectedUnweightedGraph;
@@ -11,22 +10,16 @@ import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.game.utils.UI;
 
 import java.io.Serializable;
 import java.util.*;
-
-import static ru.andrewsalygin.graph.game.Game.nodeRadius;
 
 /**
  * @author Andrew Salygin
  */
 public class VisualGraph extends UndirectedUnweightedGraph implements Serializable {
-    // Размеры таблицы
-    public int rows;
-    public int cols;
-    public int gridWidth;
-    public int gridHeight;
-    private final Random random;
+    private final static Random RANDOM = new Random();
     private List<Component> components;
 
     private final Color[] connectionColors = new Color[] {
@@ -45,11 +38,6 @@ public class VisualGraph extends UndirectedUnweightedGraph implements Serializab
 
     public VisualGraph() {
         components = new ArrayList<>();
-        rows = 15;
-        cols = 15;
-        gridWidth = cols * Game.cellSize;
-        gridHeight = rows * Game.cellSize;
-        random = new Random();
         graph = new HashMap<>();
     }
 
@@ -118,9 +106,14 @@ public class VisualGraph extends UndirectedUnweightedGraph implements Serializab
     }
 
     public void randomizeComponentPlacements(int x, int y) {
+        int cellSize = UI.cellSize;
+        int cols = UI.cols;
+        int rows = UI.rows;
+
         // Магические числа :) На самом деле можно брать любые, взял такие.
         int numComponents = 25; // Количество компонент
         int maxAttempts = 30; // Максимальное количество попыток размещения компонент
+
 
         for (int i = 0; i < numComponents; i++) {
             // отвечает за перекрытие друг другом компонент
@@ -131,13 +124,13 @@ public class VisualGraph extends UndirectedUnweightedGraph implements Serializab
             do {
                 overlap = false;
                 // верхний левый угол будущего прямоугольника
-                componentX = x + random.nextInt(cols - 3) * Game.cellSize + Game.cellSize;
-                componentY = y + random.nextInt(rows - 3) * Game.cellSize + Game.cellSize;
+                componentX = x + RANDOM.nextInt(cols - 3) * cellSize + cellSize;
+                componentY = y + RANDOM.nextInt(rows - 3) * cellSize + cellSize;
 
                 // Проверяем, не пересекаются ли компоненты
                 for (Component existingComponent : components) {
                     for (VisualNode node : existingComponent.getNodes()) {
-                        if (node.getEllipse().intersects(new Rectangle(componentX, componentY, Game.cellSize * 3, Game.cellSize * 3))) {
+                        if (node.getEllipse().intersects(new Rectangle(componentX, componentY, cellSize * 3, cellSize * 3))) {
                             overlap = true;
                             break;
                         }
@@ -145,8 +138,8 @@ public class VisualGraph extends UndirectedUnweightedGraph implements Serializab
                 }
 
                 // Проверяем, не выходит ли компонент за границы поля
-                if (componentX < x || componentX + Game.cellSize > x + cols * Game.cellSize ||
-                        componentY < y || componentY + Game.cellSize > y + rows * Game.cellSize) {
+                if (componentX < x || componentX + cellSize > x + cols * cellSize ||
+                        componentY < y || componentY + cellSize > y + rows * cellSize) {
                     overlap = true;
                 }
 
@@ -163,6 +156,7 @@ public class VisualGraph extends UndirectedUnweightedGraph implements Serializab
                 case 1 -> components.add(createTemplateComponentTree(componentX, componentY));
             }
         }
+        System.out.println("Клёво");
     }
 
     public void connectComponents() {
@@ -247,16 +241,19 @@ public class VisualGraph extends UndirectedUnweightedGraph implements Serializab
     }
 
     private Component createTemplateComponentCross(int x, int y) {
+        int cellSize = UI.cellSize;
+        int nodeRadius = UI.nodeRadius;
+
         Component component = new Component();
         int maxValueHp = 100;
         int minValueHp = 50;
 
         Color ellipseColor = Color.red;
-        VisualNode centerNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
-        VisualNode topNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
-        VisualNode bottomNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
-        VisualNode leftNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
-        VisualNode rightNode = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode centerNode = new VisualNode(ellipseColor, new Ellipse(x + cellSize * 2, y + cellSize * 2, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode topNode = new VisualNode(ellipseColor, new Ellipse(x + cellSize * 2, y + cellSize, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode bottomNode = new VisualNode(ellipseColor, new Ellipse(x + cellSize * 2, y + cellSize * 3, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode leftNode = new VisualNode(ellipseColor, new Ellipse(x + cellSize, y + cellSize * 2, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode rightNode = new VisualNode(ellipseColor, new Ellipse(x + cellSize * 3, y + cellSize * 2, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
 
         component.addNode(centerNode);
         addNode(centerNode);
@@ -290,15 +287,18 @@ public class VisualGraph extends UndirectedUnweightedGraph implements Serializab
     }
 
     private Component createTemplateComponentTree(int x, int y) {
+        int cellSize = UI.cellSize;
+        int nodeRadius = UI.nodeRadius;
+
         Component component = new Component();
         int maxValueHp = 100;
         int minValueHp = 50;
 
         Color ellipseColor = Color.red;
-        VisualNode vertex1 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
-        VisualNode vertex2 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
-        VisualNode vertex3 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 2, y + Game.cellSize * 3, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
-        VisualNode vertex4 = new VisualNode(ellipseColor, new Ellipse(x + Game.cellSize * 3, y + Game.cellSize * 2, nodeRadius, nodeRadius), random.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode vertex1 = new VisualNode(ellipseColor, new Ellipse(x + cellSize, y + cellSize * 2, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode vertex2 = new VisualNode(ellipseColor, new Ellipse(x + cellSize * 2, y + cellSize, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode vertex3 = new VisualNode(ellipseColor, new Ellipse(x + cellSize * 2, y + cellSize * 3, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
+        VisualNode vertex4 = new VisualNode(ellipseColor, new Ellipse(x + cellSize * 3, y + cellSize * 2, nodeRadius, nodeRadius), RANDOM.nextInt(maxValueHp - minValueHp + 1) + minValueHp);
 
         component.addNode(vertex1);
         addNode(vertex1);

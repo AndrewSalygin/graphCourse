@@ -10,11 +10,9 @@ import ru.andrewsalygin.graph.game.visualgraph.VisualConnection;
 import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
 import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
 
-import java.io.IOException;
 import java.util.*;
 
 import static java.lang.System.exit;
-import static ru.andrewsalygin.graph.game.GameLogic.*;
 import static ru.andrewsalygin.graph.game.utils.Menu.*;
 import static ru.andrewsalygin.graph.game.utils.Button.*;
 import static ru.andrewsalygin.graph.game.utils.Flag.*;
@@ -24,32 +22,7 @@ public class Game extends BasicGame {
     final static int MAX_VALUE_REGENERATION_HEALTH_NODE = 25;
     private final Color HIGHLIGHT_NODE_COLOR = Color.yellow;
     private static final Random random = new Random();
-
-    private UnicodeFont font;
-    private UnicodeFont fontMessage;
-    private UnicodeFont fontBold;
-    private Image backgroundImage;
-    private int gridWidth;
-    private int gridHeight;
-    private int xLeftCorner;
-    private int yLeftCorner;
-    private RestartGame restartGame;
-    private EndGameWin endGameWin;
-    public static int cellSize; // Размер каждой ячейки
-    public static int nodeRadius; // Размер каждой ячейки
-    static float screenResolutionX;
-    static float screenResolutionY;
-    private MeasureUnit unit;
-    private HashMap<Flag, Boolean> flags;
-    static HashMap<VisualNode, HashMap<Node, Connection>> greenGraph;
-    static HashMap<VisualNode, HashMap<Node, Connection>> blueGraph;
-    static HashMap<Node, HashMap<Node, Connection>> redGraph;
-    static VisualGraph visualGraph;
-
-    private MotionError errorMotion;
-    private VisualNode highlightedNode;
-    private VisualNode startVirusMove;
-    private VisualNode endVirusMove;
+    GameLogic gameLogic;
 
     public Game() {
         super("Infection Graph");
@@ -59,78 +32,52 @@ public class Game extends BasicGame {
     public void init(GameContainer gc) throws SlickException {
         gc.setShowFPS(false); // Скрыть отображение FPS
 
-        backgroundImage = new Image("/src/main/resources/backgrounds/background4.png");
-
-        restartGame = RestartGame.NONE;
-        endGameWin = EndGameWin.NONE;
+        UI.backgroundImage = new Image("/src/main/resources/backgrounds/background4.png");
 
         // Размеры таблицы
         int tableScale = 25;
-        cellSize = gc.getHeight() / tableScale;
-        nodeRadius = cellSize / 3;
 
-        flags = new HashMap<>();
-        for (Flag flag : Flag.values()) {
-            flags.put(flag, false);
-        }
+        UI.rows = 15;
+        UI.cols = 15;
+        UI.cellSize = gc.getHeight() / tableScale;
+        UI.nodeRadius = UI.cellSize / 3;
+        UI.gridWidth = UI.cols * UI.cellSize;
+        UI.gridHeight = UI.rows * UI.cellSize;
 
-        greenGraph = new HashMap<>();
-        blueGraph = new HashMap<>();
-
-        visualGraph = new VisualGraph();
-
-        // Берём левый верхний угол клетчатой сетки
-        int x = (gc.getWidth() - visualGraph.gridWidth) / 2;
-        int y = (gc.getHeight() - visualGraph.gridHeight) / 2;
-
-        screenResolutionX = (float) gc.getWidth() / 1920;
-        screenResolutionY = (float) gc.getWidth() / 1920;
+        float screenResolutionX = (float) gc.getWidth() / 1920;
+        float screenResolutionY = (float) gc.getWidth() / 1920;
 
         // Единица измерения для правильного отображения на любых разрешениях экрана
-        unit = new MeasureUnit(0, 0, 0, 0, 0, 0, 0, 0, screenResolutionX, screenResolutionY);
+        UI.unit = new MeasureUnit(0, 0, 0, 0, 0, 0, 0, 0, screenResolutionX, screenResolutionY);
 
-        unit.setSize1(16);
-        unit.setSize2(10);
-        font = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", unit.getSize1(), false, false);
-        fontMessage = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", unit.getSize2(), false,
+        UI.unit.setSize1(16);
+        UI.unit.setSize2(10);
+        UI.font = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", UI.unit.getSize1(), false, false);
+        UI.fontMessage = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", UI.unit.getSize2(), false,
                 false);
-        fontBold = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", unit.getSize1(), true, false);
+        UI.fontBold = new UnicodeFont("src/main/resources/fonts/better-vcr.ttf", UI.unit.getSize1(), true, false);
 
         // Устанавливаем эффекты для шрифта
-        font.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
+        UI.font.getEffects().add(new ColorEffect(java.awt.Color.black));
+        UI.fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
+        UI.fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
 
         // Установка эффекта для сглаживания текста
-        font.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
-        fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
+        UI.font.getEffects().add(new ColorEffect(java.awt.Color.black));
+        UI.fontMessage.getEffects().add(new ColorEffect(java.awt.Color.black));
+        UI.fontBold.getEffects().add(new ColorEffect(java.awt.Color.black));
 
         // Инициализируем шрифт
-        font.addAsciiGlyphs();
-        font.loadGlyphs();
-        fontMessage.addAsciiGlyphs();
-        fontMessage.loadGlyphs();
-        fontBold.addAsciiGlyphs();
-        fontBold.loadGlyphs();
-
-        // Распределяем компоненты случайным образом по игровому полю
-        visualGraph.randomizeComponentPlacements(x, y);
-
-        // Соедините компоненты связности между собой, добавив рёбра
-        visualGraph.connectComponents();
-
-        // Больше отдельные компоненты не нужны
-        visualGraph.setComponents(null);
-
-        gridWidth = visualGraph.cols * cellSize;
-        gridHeight = visualGraph.rows * cellSize;
+        UI.font.addAsciiGlyphs();
+        UI.font.loadGlyphs();
+        UI.fontMessage.addAsciiGlyphs();
+        UI.fontMessage.loadGlyphs();
+        UI.fontBold.addAsciiGlyphs();
+        UI.fontBold.loadGlyphs();
 
         // Рассчитываем координаты начала отрисовки, чтобы разместить поле по центру экрана
-        xLeftCorner = (gc.getWidth() - gridWidth) / 2;
-        yLeftCorner = (gc.getHeight() - gridHeight) / 2;
-
-        GameLogic.startGame();
+        gameLogic = new GameLogic();
+        gameLogic.startGame(gc);
     }
 
     @Override
@@ -141,19 +88,26 @@ public class Game extends BasicGame {
         int mouseY = input.getMouseY();
 
         // Нахождение вершины, на которую навели мышкой
-        highlightedNode = null;
+        GameLogic.highlightedNode = null;
+        HashMap<Flag, Boolean> flags = gameLogic.getSession().getFlags();
+        VisualGraph visualGraph = gameLogic.getSession().getVisualGraph();
+        EndGameWin endGameWin = GameLogic.endGameWin;
+        MeasureUnit unit = UI.unit;
+        HashMap<VisualNode, HashMap<Node, Connection>> greenGraph = gameLogic.getSession().getGreenGraph();
+        HashMap<VisualNode, HashMap<Node, Connection>> blueGraph = gameLogic.getSession().getBlueGraph();
+
         flags.put(HIGHLIGHT_NODE, false);
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             VisualNode tmpNode = (VisualNode) entry.getKey();
             if (tmpNode.contains(mouseX, mouseY)) {
-                highlightedNode = tmpNode;
+                GameLogic.highlightedNode = tmpNode;
                 flags.put(HIGHLIGHT_NODE, true);
                 break;
             }
         }
 
         if (endGameWin == EndGameWin.NONE) {
-            if (motion == Motion.Green) { // Подсветка кнопок зелёных (меню слева)
+            if (gameLogic.getSession().getMotion() == Motion.Green) { // Подсветка кнопок зелёных (меню слева)
                 unit.setY1(255);
                 unit.setX2(200);
                 unit.setY2(25);
@@ -163,7 +117,7 @@ public class Game extends BasicGame {
                 } else {
                     flags.put(HIGHLIGHT_BUTTON, false);
                 }
-                if (skillPoints[0] > 0) {
+                if (gameLogic.getSession().getSkillPoints()[0] > 0) {
                     unit.setX1(438);
                     unit.setX2(8);
                     unit.setY1(123);
@@ -189,7 +143,7 @@ public class Game extends BasicGame {
                         flags.put(HIGHLIGHT_REPLICATION_INCREASE_BUTTON, false);
                     }
                 }
-            } else if (motion == Motion.Blue) { // Подсветка кнопок синих (меню справа)
+            } else if (gameLogic.getSession().getMotion() == Motion.Blue) { // Подсветка кнопок синих (меню справа)
                 unit.setX1(350);
                 unit.setX2(150);
                 unit.setY1(230);
@@ -200,7 +154,7 @@ public class Game extends BasicGame {
                 } else {
                     flags.put(HIGHLIGHT_BUTTON, false);
                 }
-                if (skillPoints[1] > 0) {
+                if (gameLogic.getSession().getSkillPoints()[1] > 0) {
                     unit.setX1(60);
                     unit.setX2(44);
                     unit.setY1(123);
@@ -294,13 +248,13 @@ public class Game extends BasicGame {
         }
 
         // Определение победителя в конце игры
-        if (day != 1) {
+        if (gameLogic.getSession().getDay() != 1) {
             if (blueGraph.size() == 0 && greenGraph.size() == 0) {
-                endGameWin = EndGameWin.RED;
+                GameLogic.endGameWin = EndGameWin.RED;
             } else if (blueGraph.size() == 0) {
-                endGameWin = EndGameWin.GREEN;
+                GameLogic.endGameWin = EndGameWin.GREEN;
             } else if (greenGraph.size() == 0) {
-                endGameWin = EndGameWin.BLUE;
+                GameLogic.endGameWin = EndGameWin.BLUE;
             }
         }
 
@@ -354,14 +308,36 @@ public class Game extends BasicGame {
         } else {
             flags.put(HIGHLIGHT_OPEN_BUTTON, false);
         }
-        virusNodes[0] = greenGraph.size();
-        virusNodes[1] = blueGraph.size();
+        gameLogic.getSession().getVirusNodes()[0] = greenGraph.size();
+        gameLogic.getSession().getVirusNodes()[1] = blueGraph.size();
+
+        gameLogic.getSession().setFlags(flags);
+        gameLogic.getSession().setVisualGraph(visualGraph);
+        gameLogic.getSession().setGreenGraph(greenGraph);
+        gameLogic.getSession().setBlueGraph(blueGraph);
     }
 
     @Override
     public void mousePressed(int button, int x, int y) {
+        Motion motion = gameLogic.getSession().getMotion();
+        HashMap<Flag, Boolean> flags = gameLogic.getSession().getFlags();
+        int day = gameLogic.getSession().getDay();
+        HashMap<VisualNode, HashMap<Node, Connection>> redGraph = gameLogic.getSession().getRedGraph();
+        HashMap<VisualNode, HashMap<Node, Connection>> greenGraph = gameLogic.getSession().getGreenGraph();
+        HashMap<VisualNode, HashMap<Node, Connection>> blueGraph = gameLogic.getSession().getBlueGraph();
+        VisualNode highlightedNode = GameLogic.highlightedNode;
+        VisualGraph visualGraph = gameLogic.getSession().getVisualGraph();
+        int[] skillPoints = gameLogic.getSession().getSkillPoints();
+        int[] powers = gameLogic.getSession().getPowers();
+        int[] protections = gameLogic.getSession().getProtections();
+        int[] replications = gameLogic.getSession().getReplications();
+        int powerDelta = gameLogic.getSession().getPowerDelta();
+        int protectionDelta = gameLogic.getSession().getProtectionDelta();
+        int replicationDelta = gameLogic.getSession().getReplicationDelta();
+
+        flags.put(ERROR_INIT_VIRUS, true);
         // События обрабатываемые, если игра не закончилась
-        if (endGameWin == EndGameWin.NONE) {
+        if (GameLogic.endGameWin == EndGameWin.NONE) {
             // Завершение хода
             if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_BUTTON)) {
                 // Меняем цвет
@@ -373,7 +349,7 @@ public class Game extends BasicGame {
                     List<VisualNode> nodesToDelete = new ArrayList<>();
                     // Красные вершины активируют иммунитет и пытаются убить зелёный вирус
                     for (Map.Entry<VisualNode, HashMap<Node, Connection>> entry : greenGraph.entrySet()) {
-                        protectionHealthNode =
+                        int protectionHealthNode =
                                 random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE
                                         - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                         int prev_hp = entry.getKey().getHp();
@@ -394,7 +370,7 @@ public class Game extends BasicGame {
                     // Красные вершины активируют иммунитет и пытаются убить синий вирус
                     nodesToDelete = new ArrayList<>();
                     for (Map.Entry<VisualNode, HashMap<Node, Connection>> entry : blueGraph.entrySet()) {
-                        protectionHealthNode =
+                        int protectionHealthNode =
                                 random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE
                                         - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                         int prev_hp = entry.getKey().getHp();
@@ -413,8 +389,8 @@ public class Game extends BasicGame {
                     }
 
                     // Регенерация хп у здоровых вершин
-                    for (Map.Entry<Node, HashMap<Node, Connection>> entry : redGraph.entrySet()) {
-                        replicationHealthNode =
+                    for (Map.Entry<VisualNode, HashMap<Node, Connection>> entry : redGraph.entrySet()) {
+                        int replicationHealthNode =
                                 random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE
                                         - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
                         VisualNode node = (VisualNode) entry.getKey();
@@ -460,42 +436,42 @@ public class Game extends BasicGame {
             } else if (flags.get(HIGHLIGHT_NODE) && flags.get(SELECTED_NODE_FROM_MOVE_VIRUS)
                     && button == Input.MOUSE_LEFT_BUTTON) {
                 flags.put(SELECTED_NODE_TO_MOVE_VIRUS, true);
-                endVirusMove = highlightedNode;
+                GameLogic.endVirusMove = highlightedNode;
             } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_NODE)) {
                 flags.put(SELECTED_NODE_FROM_MOVE_VIRUS, true);
-                startVirusMove = highlightedNode;
+                GameLogic.startVirusMove = highlightedNode;
                 // Прокачка навыков
             } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_POWER_INCREASE_BUTTON)) {
                 if (motion == Motion.Green && skillPoints[0] > 0) {
-                    GameLogic.powers[0] += powerDelta;
+                    powers[0] += powerDelta;
                     skillPoints[0]--;
                 } else if (skillPoints[1] > 0) {
-                    GameLogic.powers[1] += powerDelta;
+                    powers[1] += powerDelta;
                     skillPoints[1]--;
                 }
             } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_PROTECTION_INCREASE_BUTTON)) {
                 if (motion == Motion.Green && skillPoints[0] > 0) {
-                    GameLogic.protections[0] += protectionDelta;
+                    protections[0] += protectionDelta;
                     skillPoints[0]--;
                 } else if (skillPoints[1] > 0) {
-                    GameLogic.protections[1] += protectionDelta;
+                    protections[1] += protectionDelta;
                     skillPoints[1]--;
                 }
             } else if (button == Input.MOUSE_LEFT_BUTTON && flags.get(HIGHLIGHT_REPLICATION_INCREASE_BUTTON)) {
                 if (motion == Motion.Green && skillPoints[0] > 0) {
-                    GameLogic.replications[0] += replicationDelta;
+                    replications[0] += replicationDelta;
                     skillPoints[0]--;
                 } else if (skillPoints[1] > 0) {
-                    GameLogic.replications[1] += replicationDelta;
+                    replications[1] += replicationDelta;
                     skillPoints[1]--;
                 }
             }
         } else { // Если наступил конец игры, то обрабатываем нужно ли запустить её заново
             if (button == Input.MOUSE_LEFT_BUTTON) {
                 if (flags.get(HIGHLIGHT_YES_BUTTON)) {
-                    restartGame = RestartGame.YES;
+                    GameLogic.restartGame = RestartGame.YES;
                 } else if (flags.get(HIGHLIGHT_NO_BUTTON)) {
-                    restartGame = RestartGame.NO;
+                    GameLogic.restartGame = RestartGame.NO;
                 }
             }
         }
@@ -519,38 +495,65 @@ public class Game extends BasicGame {
         if (flags.get(HIGHLIGHT_HOME_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
             flags.put(EXIT_GAME, true);
         }
+
+        gameLogic.getSession().setMotion(motion);
+        gameLogic.getSession().setFlags(flags);
+        gameLogic.getSession().setDay(day);
+        gameLogic.getSession().setRedGraph(redGraph);
+        gameLogic.getSession().setGreenGraph(greenGraph);
+        gameLogic.getSession().setBlueGraph(blueGraph);
+        gameLogic.getSession().setVisualGraph(visualGraph);
+        gameLogic.getSession().setSkillPoints(skillPoints);
+        gameLogic.getSession().setPowers(powers);
+        gameLogic.getSession().setProtections(protections);
+        gameLogic.getSession().setReplications(replications);
+        gameLogic.getSession().setPowerDelta(powerDelta);
+        gameLogic.getSession().setProtectionDelta(protectionDelta);
+        gameLogic.getSession().setReplicationDelta(replicationDelta);
     }
 
     @Override
     public void render(GameContainer gc, Graphics g) throws SlickException {
+        Motion motion = gameLogic.getSession().getMotion();
+        MeasureUnit unit = UI.unit;
+        HashMap<Flag, Boolean> flags = gameLogic.getSession().getFlags();
+        int[] powers = gameLogic.getSession().getPowers();
+        int[] protections = gameLogic.getSession().getProtections();
+        int[] replications = gameLogic.getSession().getReplications();
+        int powerDelta = gameLogic.getSession().getPowerDelta();
+        int protectionDelta = gameLogic.getSession().getProtectionDelta();
+        int replicationDelta = gameLogic.getSession().getReplicationDelta();
+        int[] skillPoints = gameLogic.getSession().getSkillPoints();
+        int[] virusNodes = gameLogic.getSession().getVirusNodes();
+
         g.setColor(new Color(76, 96, 133));
         g.fillRect(0, 0, gc.getWidth(), gc.getHeight());
 
         unit.setX1(150);
-        g.drawImage(backgroundImage, (float) gc.getWidth() / 3 - unit.getX1(), 0,
+        g.drawImage(UI.backgroundImage, (float) gc.getWidth() / 3 - unit.getX1(), 0,
                 (float) (gc.getWidth() * 2) / 3 + unit.getX1(),
-                gc.getHeight(), 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+                gc.getHeight(), 0, 0, UI.backgroundImage.getWidth(), UI.backgroundImage.getHeight());
 
         g.setColor(Color.white);
 
         // Рисуем горизонтальные линии
-        for (int row = 0; row <= visualGraph.rows; row++) {
-            int lineY = yLeftCorner + row * cellSize;
-            g.drawLine(xLeftCorner, lineY, xLeftCorner + gridWidth, lineY);
+        for (int row = 0; row <= UI.rows; row++) {
+            int lineY = UI.yLeftCorner + row * UI.cellSize;
+            g.drawLine(UI.xLeftCorner, lineY, UI.xLeftCorner + UI.gridWidth, lineY);
         }
 
         // Рисуем вертикальные линии
-        for (int col = 0; col <= visualGraph.cols; col++) {
-            int lineX = xLeftCorner + col * cellSize;
-            g.drawLine(lineX, yLeftCorner, lineX, yLeftCorner + gridHeight);
+        for (int col = 0; col <= UI.cols; col++) {
+            int lineX = UI.xLeftCorner + col * UI.cellSize;
+            g.drawLine(lineX, UI.yLeftCorner, lineX, UI.yLeftCorner + UI.gridHeight);
         }
 
         // Отрисовка вершин
         g.setLineWidth(3.0f);
         unit.setY1(35);
-        for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : gameLogic.getSession().getVisualGraph().getGraph().entrySet()) {
             VisualNode visualNode = (VisualNode) entry.getKey();
-            if (visualNode.equals(highlightedNode)) {
+            if (visualNode.equals(GameLogic.highlightedNode)) {
                 g.setColor(HIGHLIGHT_NODE_COLOR); // Цвет подсветки
                 g.drawString(String.valueOf(visualNode.getHp()), visualNode.getEllipse().getCenterX(),
                         visualNode.getEllipse().getCenterY() - unit.getY1());
@@ -561,8 +564,9 @@ public class Game extends BasicGame {
             }
             g.fill(visualNode.getEllipse());
             g.setColor(Color.black);
-            g.drawOval(visualNode.getEllipse().getCenterX() - nodeRadius,
-                    visualNode.getEllipse().getCenterY() - nodeRadius, cellSize / 1.5f, cellSize / 1.5f);
+            g.drawOval(visualNode.getEllipse().getCenterX() - UI.nodeRadius,
+                    visualNode.getEllipse().getCenterY() - UI.nodeRadius, UI.cellSize / 1.5f,
+                    UI.cellSize / 1.5f);
         }
 
         // Отрисовка рёбер в компонентах
@@ -574,7 +578,7 @@ public class Game extends BasicGame {
         int startY;
         int endX;
         int endY;
-        for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : gameLogic.getSession().getVisualGraph().getGraph().entrySet()) {
             for (Map.Entry<Node, Connection> localEntry : entry.getValue().entrySet()) {
                 VisualConnection vc = (VisualConnection) localEntry.getValue();
                 g.setColor(vc.getColor());
@@ -611,7 +615,7 @@ public class Game extends BasicGame {
         g.drawImage(INFO_MENU.getImage(), gc.getWidth() - unit.getX1(), gc.getHeight() - unit.getY1(),
                 gc.getWidth() - unit.getX2(), gc.getHeight() - unit.getY2(), 0, 0, INFO_MENU.getImage().getWidth(),
                 INFO_MENU.getImage().getHeight());
-        g.setFont(fontBold);
+        g.setFont(UI.fontBold);
 
         // Дни
         unit.setX1(100);
@@ -623,11 +627,11 @@ public class Game extends BasicGame {
                 REGULAR_BUTTON_HOVERED.getImage().getHeight());
         unit.setX1(35);
         unit.setY1(37);
-        g.drawString("Day " + GameLogic.day, (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
+        g.drawString("Day " + gameLogic.getSession().getDay(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
 
         // Сообщение
-        g.setFont(fontMessage);
-        if (day == 1) {
+        g.setFont(UI.fontMessage);
+        if (gameLogic.getSession().getDay() == 1) {
             unit.setX1(150);
             unit.setY1(80);
             unit.setY2(105);
@@ -641,14 +645,14 @@ public class Game extends BasicGame {
                         unit.getY1());
             } else {
                 if (motion == Motion.Green) {
-                    switch (greenGraph.size()) {
+                    switch (gameLogic.getSession().getGreenGraph().size()) {
                         case 0 -> g.drawString("Select the initial node to infect",
                                 (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
                         case 1 -> g.drawString("Finish the move", (float) gc.getWidth() / 2 - unit.getX1(),
                                 unit.getY1());
                     }
                 } else {
-                    switch (blueGraph.size()) {
+                    switch (gameLogic.getSession().getBlueGraph().size()) {
                         case 0 -> g.drawString("Select the initial node to infect",
                                 (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
                         case 1 -> g.drawString("Finish the move", (float) gc.getWidth() / 2 - unit.getX1(),
@@ -667,8 +671,8 @@ public class Game extends BasicGame {
             unit.setY1(88);
             g.drawString("Select second node to transfer virus", (float) gc.getWidth() / 2 - unit.getX1(),
                     unit.getY1());
-            errorMotion = MotionError.OK;
-        } else if (errorMotion != null && errorMotion != MotionError.OK) {
+            GameLogic.errorMotion = MotionError.OK;
+        } else if (GameLogic.errorMotion != null && GameLogic.errorMotion != MotionError.OK) {
             unit.setX1(150);
             unit.setY1(80);
             unit.setY2(105);
@@ -677,7 +681,7 @@ public class Game extends BasicGame {
                     0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
             unit.setX1(140);
             unit.setY1(88);
-            switch (errorMotion) {
+            switch (GameLogic.errorMotion) {
                 case NOT_YOUR_MOTION -> g.drawString(motion + " now!", (float) gc.getWidth() / 2 - unit.getX1(),
                         unit.getY1());
                 case RED_NODE_SELECTED -> g.drawString("Red node cannot be selected!",
@@ -691,13 +695,13 @@ public class Game extends BasicGame {
             }
         } else if (flags.get(MOVE_VIRUS_MODE)) { // Отправка вируса в другую вершину
             if (flags.get(HIGHLIGHT_SEND_ALL_VIRUS)) {
-                errorMotion = GameLogic.moveVirus(startVirusMove, endVirusMove, MoveVirusPart.ALL);
+                GameLogic.errorMotion = gameLogic.moveVirus(GameLogic.startVirusMove, GameLogic.endVirusMove, MoveVirusPart.ALL);
                 flags.put(MOVE_VIRUS_DONE, true);
             } else if (flags.get(HIGHLIGHT_SEND_HALF_VIRUS)) {
-                errorMotion = GameLogic.moveVirus(startVirusMove, endVirusMove, MoveVirusPart.HALF);
+                GameLogic.errorMotion = gameLogic.moveVirus(GameLogic.startVirusMove, GameLogic.endVirusMove, MoveVirusPart.HALF);
                 flags.put(MOVE_VIRUS_DONE, true);
             } else if (flags.get(HIGHLIGHT_SEND_QUARTER_VIRUS)) {
-                errorMotion = GameLogic.moveVirus(startVirusMove, endVirusMove, MoveVirusPart.QUARTER);
+                GameLogic.errorMotion = gameLogic.moveVirus(GameLogic.startVirusMove, GameLogic.endVirusMove, MoveVirusPart.QUARTER);
                 flags.put(MOVE_VIRUS_DONE, true);
             }
 
@@ -767,10 +771,10 @@ public class Game extends BasicGame {
             }
         }
 
-        g.setFont(fontBold);
+        g.setFont(UI.fontBold);
         // Отрисовка кнопки завершения хода
-        if (endGameWin == EndGameWin.NONE) {
-            if (motion == Motion.Green && greenGraph.size() != 0) {
+        if (GameLogic.endGameWin == EndGameWin.NONE) {
+            if (motion == Motion.Green && gameLogic.getSession().getGreenGraph().size() != 0) {
                 unit.setY1(230);
                 unit.setX2(200);
                 unit.setY2(280);
@@ -786,7 +790,7 @@ public class Game extends BasicGame {
                 unit.setX1(31);
                 unit.setY1(247);
                 g.drawString("Finish move", (float) gc.getWidth() / 14 + unit.getX1(), unit.getY1());
-            } else if (motion == Motion.Blue && blueGraph.size() != 0) {
+            } else if (motion == Motion.Blue && gameLogic.getSession().getBlueGraph().size() != 0) {
                 unit.setX1(350);
                 unit.setX2(200);
                 unit.setY1(230);
@@ -808,22 +812,22 @@ public class Game extends BasicGame {
             unit.setX1(150);
             unit.setY1(80);
             unit.setY2(105);
-            g.setFont(fontMessage);
-            if (endGameWin == EndGameWin.RED) {
+            g.setFont(UI.fontMessage);
+            if (GameLogic.endGameWin == EndGameWin.RED) {
                 g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
                         (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
                         0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
                 unit.setX1(140);
                 unit.setY1(88);
                 g.drawString("Red wins! Restart Game?", (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
-            } else if (endGameWin == EndGameWin.GREEN) {
+            } else if (GameLogic.endGameWin == EndGameWin.GREEN) {
                 g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
                         (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
                         0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
                 unit.setX1(140);
                 unit.setY1(88);
                 g.drawString("Green wins! Restart Game?", (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1());
-            } else if (endGameWin == EndGameWin.BLUE) {
+            } else if (GameLogic.endGameWin == EndGameWin.BLUE) {
                 g.drawImage(MESSAGE_CLOUD.getImage(), (float) gc.getWidth() / 2 - unit.getX1(), unit.getY1(),
                         (float) gc.getWidth() / 2 + unit.getX1(), unit.getY2(),
                         0, 0, MESSAGE_CLOUD.getImage().getWidth(), MESSAGE_CLOUD.getImage().getHeight());
@@ -833,7 +837,7 @@ public class Game extends BasicGame {
             }
         }
 
-        g.setFont(fontBold);
+        g.setFont(UI.fontBold);
         unit.setX1(100);
         unit.setY1(80);
         unit.setX2(200);
@@ -853,17 +857,17 @@ public class Game extends BasicGame {
         unit.setY1(30);
         g.drawString("Green virus", unit.getX1(), unit.getY1());
 
-        g.setFont(font);
+        g.setFont(UI.font);
         unit.setY1(60);
-        g.drawString("Number of infected vertices: " + GameLogic.virusNodes[0], unit.getX1(), unit.getY1());
+        g.drawString("Number of infected vertices: " + virusNodes[0], unit.getX1(), unit.getY1());
         unit.setY1(90);
-        g.drawString("Skill points: " + GameLogic.skillPoints[0], unit.getX1(), unit.getY1());
+        g.drawString("Skill points: " + skillPoints[0], unit.getX1(), unit.getY1());
         unit.setY1(120);
-        g.drawString("Power: " + GameLogic.powers[0], unit.getX1(), unit.getY1());
+        g.drawString("Power: " + powers[0], unit.getX1(), unit.getY1());
         unit.setY1(150);
-        g.drawString("Protection: " + GameLogic.protections[0], unit.getX1(), unit.getY1());
+        g.drawString("Protection: " + protections[0], unit.getX1(), unit.getY1());
         unit.setY1(180);
-        g.drawString("Replication: " + GameLogic.replications[0], unit.getX1(), unit.getY1());
+        g.drawString("Replication: " + replications[0], unit.getX1(), unit.getY1());
 
         unit.setY1(130);
         g.drawString("Next power: " + (powers[0] + powerDelta), unit.getX1(), gc.getHeight() - unit.getY1());
@@ -874,23 +878,23 @@ public class Game extends BasicGame {
         g.drawString("Next replication: " + (replications[0] + replicationDelta), unit.getX1(),
                 gc.getHeight() - unit.getY1());
 
-        g.setFont(fontBold);
+        g.setFont(UI.fontBold);
         unit.setX1(450);
         unit.setY1(30);
         g.drawString("Blue virus", gc.getWidth() - unit.getX1(), unit.getY1());
 
-        g.setFont(font);
+        g.setFont(UI.font);
         unit.setY1(60);
-        g.drawString("Number of infected vertices: " + GameLogic.virusNodes[1], gc.getWidth() - unit.getX1(),
+        g.drawString("Number of infected vertices: " + virusNodes[1], gc.getWidth() - unit.getX1(),
                 unit.getY1());
         unit.setY1(90);
-        g.drawString("Skill points: " + GameLogic.skillPoints[1], gc.getWidth() - unit.getX1(), unit.getY1());
+        g.drawString("Skill points: " + skillPoints[1], gc.getWidth() - unit.getX1(), unit.getY1());
         unit.setY1(120);
-        g.drawString("Power: " + GameLogic.powers[1], gc.getWidth() - unit.getX1(), unit.getY1());
+        g.drawString("Power: " + powers[1], gc.getWidth() - unit.getX1(), unit.getY1());
         unit.setY1(150);
-        g.drawString("Protection: " + GameLogic.protections[1], gc.getWidth() - unit.getX1(), unit.getY1());
+        g.drawString("Protection: " + protections[1], gc.getWidth() - unit.getX1(), unit.getY1());
         unit.setY1(180);
-        g.drawString("Replication: " + GameLogic.replications[1], gc.getWidth() - unit.getX1(), unit.getY1());
+        g.drawString("Replication: " + replications[1], gc.getWidth() - unit.getX1(), unit.getY1());
 
         unit.setY1(130);
         g.drawString("Next power: " + (powers[1] + powerDelta), gc.getWidth() - unit.getX1(),
@@ -903,8 +907,8 @@ public class Game extends BasicGame {
                 gc.getHeight() - unit.getY1());
 
         // Отрисовка кнопок улучшений навыков (плюсики)
-        if (endGameWin == EndGameWin.NONE) {
-            if (motion == Motion.Green && greenGraph.size() != 0 && GameLogic.skillPoints[0] > 0) {
+        if (GameLogic.endGameWin == EndGameWin.NONE) {
+            if (motion == Motion.Green && gameLogic.getSession().getGreenGraph().size() != 0 && skillPoints[0] > 0) {
                 unit.setX1(430);
                 unit.setY1(119);
                 unit.setX2(446);
@@ -934,7 +938,7 @@ public class Game extends BasicGame {
                     g.drawImage(PLUS.getImage(), unit.getX1(), unit.getY1(), unit.getX2(), unit.getY2(),
                             0, 0, PLUS.getImage().getWidth(), PLUS.getImage().getHeight());
                 }
-            } else if (motion == Motion.Blue && blueGraph.size() != 0 && GameLogic.skillPoints[1] > 0) {
+            } else if (motion == Motion.Blue && gameLogic.getSession().getBlueGraph().size() != 0 && skillPoints[1] > 0) {
                 unit.setX1(60);
                 unit.setY1(119);
                 unit.setX2(44);
@@ -1008,9 +1012,9 @@ public class Game extends BasicGame {
                         (float) gc.getHeight() / 2 + unit.getY1(), 0, 0,
                         NO_BUTTON_HOVERED.getImage().getWidth(), NO_BUTTON_HOVERED.getImage().getHeight());
             }
-            if (restartGame == RestartGame.YES) {
+            if (GameLogic.restartGame == RestartGame.YES) {
                 init(gc);
-            } else if (restartGame == RestartGame.NO) {
+            } else if (GameLogic.restartGame == RestartGame.NO) {
                 exit(0);
             }
         }
@@ -1125,12 +1129,12 @@ public class Game extends BasicGame {
         }
 
         if (flags.get(SAVE_GAME)) {
-            GameSerialization.saveGameToFile(visualGraph);
+            GameSerialization.saveGameToFile(gameLogic.getSession());
             flags.put(SAVE_GAME, false);
         }
 
         if (flags.get(OPEN_GAME)) {
-            visualGraph = GameSerialization.openGameFromFile(gc);
+            gameLogic.setSession(GameSerialization.openGameFromFile(gc, gameLogic.getSession()));
             flags.put(OPEN_GAME, false);
         }
 
@@ -1142,5 +1146,17 @@ public class Game extends BasicGame {
         if (flags.get(EXIT_GAME)) {
             exit(0);
         }
+
+        gameLogic.getSession().setMotion(motion);
+
+        gameLogic.getSession().setFlags(flags);
+        gameLogic.getSession().setPowers(powers);
+        gameLogic.getSession().setProtections(protections);
+        gameLogic.getSession().setReplications(replications);
+        gameLogic.getSession().setPowerDelta(powerDelta);
+        gameLogic.getSession().setProtectionDelta(protectionDelta);
+        gameLogic.getSession().setReplicationDelta(replicationDelta);
+        gameLogic.getSession().setSkillPoints(skillPoints);
+        gameLogic.getSession().setVirusNodes(virusNodes);
     }
 }
