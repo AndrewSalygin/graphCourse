@@ -1,8 +1,9 @@
 package ru.andrewsalygin.graph.core;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Connection {
+public class Connection implements Serializable {
     protected Node srcNode;
     protected Node destNode;
     protected Integer weight;

@@ -1,11 +1,12 @@
 package ru.andrewsalygin.graph.core;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * @author Andrew Salygin
  */
-public class Node {
+public class Node implements Serializable {
     protected String nodeName;
 
     public Node(String nodeName) {

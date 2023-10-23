@@ -3,9 +3,10 @@ package ru.andrewsalygin.graph.game.visualgraph;
 import org.newdawn.slick.Color;
 import ru.andrewsalygin.graph.core.Connection;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class VisualConnection extends Connection {
+public class VisualConnection extends Connection implements Serializable {
     private Color color;
 
     public VisualConnection(VisualNode srcNode, VisualNode destNode, Color color) {

@@ -4,11 +4,12 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Ellipse;
 import ru.andrewsalygin.graph.core.Node;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import static ru.andrewsalygin.graph.game.Game.nodeRadius;
 
-public class VisualNode extends Node {
+public class VisualNode extends Node implements Serializable {
     private static int counterName = 0;
     private Color ellipseColor;
     private Ellipse ellipse;
@@ -20,6 +21,15 @@ public class VisualNode extends Node {
         this.ellipse = ellipse;
         this.hp = hp;
         skillPoint = true;
+        counterName++;
+    }
+
+    public VisualNode(Color ellipseColor, Ellipse ellipse, int hp, boolean skillPoint) {
+        super(String.valueOf(counterName));
+        this.ellipseColor = ellipseColor;
+        this.ellipse = ellipse;
+        this.hp = hp;
+        this.skillPoint = skillPoint;
         counterName++;
     }
 

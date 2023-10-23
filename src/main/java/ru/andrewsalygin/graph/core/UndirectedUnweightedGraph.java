@@ -4,12 +4,13 @@ import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  * @author Andrew Salygin
  */
-public class UndirectedUnweightedGraph extends OrientedUnweightedGraph {
+public class UndirectedUnweightedGraph extends OrientedUnweightedGraph implements Serializable {
     public UndirectedUnweightedGraph() {
         super();
     }

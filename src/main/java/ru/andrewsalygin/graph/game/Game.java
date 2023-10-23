@@ -10,6 +10,7 @@ import ru.andrewsalygin.graph.game.visualgraph.VisualConnection;
 import ru.andrewsalygin.graph.game.visualgraph.VisualGraph;
 import ru.andrewsalygin.graph.game.visualgraph.VisualNode;
 
+import java.io.IOException;
 import java.util.*;
 
 import static java.lang.System.exit;
@@ -331,6 +332,28 @@ public class Game extends BasicGame {
         } else {
             flags.put(HIGHLIGHT_HELP_BUTTON, false);
         }
+
+        unit.setX1(545);
+        unit.setY1(80);
+        unit.setY2(30);
+        if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                && mouseY >= gc.getHeight() - unit.getY1()
+                && mouseY <= gc.getHeight() - unit.getY2()) {
+            flags.put(HIGHLIGHT_SAVE_BUTTON, true);
+        } else {
+            flags.put(HIGHLIGHT_SAVE_BUTTON, false);
+        }
+
+        unit.setX1(605);
+        unit.setY1(80);
+        unit.setY2(30);
+        if (Math.abs(mouseX - unit.getX1()) <= unit.getX2()
+                && mouseY >= gc.getHeight() - unit.getY1()
+                && mouseY <= gc.getHeight() - unit.getY2()) {
+            flags.put(HIGHLIGHT_OPEN_BUTTON, true);
+        } else {
+            flags.put(HIGHLIGHT_OPEN_BUTTON, false);
+        }
         virusNodes[0] = greenGraph.size();
         virusNodes[1] = blueGraph.size();
     }
@@ -477,13 +500,18 @@ public class Game extends BasicGame {
             }
         }
 
-        // Обрабатываются ключевые кнопки (to do: добавить сюда кнопку сохранение)
         if (flags.get(HIGHLIGHT_HELP_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
             if (flags.get(OPEN_HELP_MENU)) {
                 flags.put(OPEN_HELP_MENU, false);
             } else {
                 flags.put(OPEN_HELP_MENU, true);
             }
+        }
+        if (flags.get(HIGHLIGHT_SAVE_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
+            flags.put(SAVE_GAME, true);
+        }
+        if (flags.get(HIGHLIGHT_OPEN_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
+            flags.put(OPEN_GAME, true);
         }
         if (flags.get(HIGHLIGHT_REPEAT_BUTTON) && button == Input.MOUSE_LEFT_BUTTON) {
             flags.put(REPEAT_GAME, true);
@@ -1022,6 +1050,37 @@ public class Game extends BasicGame {
                     HELP_BUTTON.getImage().getHeight());
         }
 
+        // Сохранение
+        unit.setX1(520);
+        unit.setX2(570);
+        unit.setY1(80);
+        unit.setY2(30);
+        if (flags.get(HIGHLIGHT_SAVE_BUTTON)) {
+            g.drawImage(HELP_BUTTON_HOVERED.getImage(), unit.getX1(),  gc.getHeight() - unit.getY1(), unit.getX2(),
+                    gc.getHeight() - unit.getY2(), 0, 0, HELP_BUTTON_HOVERED.getImage().getWidth(),
+                    HELP_BUTTON_HOVERED.getImage().getHeight());
+        } else {
+            g.drawImage(HELP_BUTTON.getImage(), unit.getX1(),gc.getHeight() - unit.getY1(), unit.getX2(),
+                    gc.getHeight() - unit.getY2(), 0, 0, HELP_BUTTON.getImage().getWidth(),
+                    HELP_BUTTON.getImage().getHeight());
+        }
+
+        // Открытие
+        unit.setX1(580);
+        unit.setX2(630);
+        unit.setY1(80);
+        unit.setY2(30);
+        if (flags.get(HIGHLIGHT_OPEN_BUTTON)) {
+            g.drawImage(HELP_BUTTON_HOVERED.getImage(), unit.getX1(),  gc.getHeight() - unit.getY1(), unit.getX2(),
+                    gc.getHeight() - unit.getY2(), 0, 0, HELP_BUTTON_HOVERED.getImage().getWidth(),
+                    HELP_BUTTON_HOVERED.getImage().getHeight());
+        } else {
+            g.drawImage(HELP_BUTTON.getImage(), unit.getX1(),gc.getHeight() - unit.getY1(), unit.getX2(),
+                    gc.getHeight() - unit.getY2(), 0, 0, HELP_BUTTON.getImage().getWidth(),
+                    HELP_BUTTON.getImage().getHeight());
+        }
+
+
         // Открытие правил
         unit.setX1(550);
         unit.setX2(1350);
@@ -1063,6 +1122,16 @@ public class Game extends BasicGame {
             unit.setX1(580);
             unit.setY1(130);
             g.drawString(rules, unit.getX1(), unit.getY1());
+        }
+
+        if (flags.get(SAVE_GAME)) {
+            GameSerialization.saveGameToFile(visualGraph);
+            flags.put(SAVE_GAME, false);
+        }
+
+        if (flags.get(OPEN_GAME)) {
+            visualGraph = GameSerialization.openGameFromFile(gc);
+            flags.put(OPEN_GAME, false);
         }
 
         if (flags.get(REPEAT_GAME)) {

@@ -1,7 +1,6 @@
 package ru.andrewsalygin;
 
 import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.SlickException;
 import ru.andrewsalygin.graph.game.Game;
 
@@ -16,7 +15,7 @@ public class Main {
 
         try {
             AppGameContainer app = new AppGameContainer(new Game());
-            app.setDisplayMode(1920, 1080, true);
+            app.setDisplayMode(1270, 720, false);
             app.setTargetFrameRate(60); // Устанавливаем желаемый FPS
             app.setVSync(true); // Включаем вертикальную синхронизацию
             app.start();

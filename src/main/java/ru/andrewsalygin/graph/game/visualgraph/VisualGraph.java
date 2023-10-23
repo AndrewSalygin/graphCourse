@@ -11,8 +11,8 @@ import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
 import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
-import ru.andrewsalygin.graph.game.Game;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static ru.andrewsalygin.graph.game.Game.nodeRadius;
@@ -20,7 +20,7 @@ import static ru.andrewsalygin.graph.game.Game.nodeRadius;
 /**
  * @author Andrew Salygin
  */
-public class VisualGraph extends UndirectedUnweightedGraph {
+public class VisualGraph extends UndirectedUnweightedGraph implements Serializable {
     // Размеры таблицы
     public int rows;
     public int cols;

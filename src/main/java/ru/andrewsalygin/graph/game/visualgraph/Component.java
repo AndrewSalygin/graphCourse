@@ -2,6 +2,7 @@ package ru.andrewsalygin.graph.game.visualgraph;
 
 import org.newdawn.slick.geom.Ellipse;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Random;
 /**
  * @author Andrew Salygin
  */
-public class Component {
+public class Component implements Serializable {
     private List<VisualNode> nodes = new ArrayList<>();
     private List<VisualConnection> componentConnections = new ArrayList<>();
 

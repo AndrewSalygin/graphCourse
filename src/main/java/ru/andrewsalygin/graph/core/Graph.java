@@ -1,12 +1,13 @@
 package ru.andrewsalygin.graph.core;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  * @author Andrew Salygin
  */
 
-public abstract class Graph {
+public abstract class Graph implements Serializable {
     protected HashMap<Node, HashMap<Node, Connection>> graph;
     public abstract void addNode(String nodeName);
     public abstract void deleteNode(String nodeName);
