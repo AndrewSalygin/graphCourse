@@ -225,10 +225,23 @@ public class OrientedUnweightedGraph extends Graph {
             if (countOfNotVisited > 0) {
                 return false;
             }
+            // Если не удовлетворяет свойству дерева
+            if (graph.size() - 1 != countConnections()) {
+                return false;
+            }
+
             // Если вершин, которые входят во все циклы несколько, то тем более можно удалить какую-то из них и получить
             // дерево
             return intersectionNodes.size() >= 1;
         }
+    }
+
+    private int countConnections() {
+        int count = 0;
+        for (var entry : graph.values()) {
+            count += entry.size();
+        }
+        return count;
     }
 
     private UndirectedUnweightedGraph toUndirectedGraph() {
