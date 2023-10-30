@@ -142,6 +142,7 @@ public class GameLogic {
                             endVirusMove.setEllipseColor(new Color(163, 0, 0));
                             redGraph.put(endVirusMove, blueGraph.get(endVirusMove));
                             blueGraph.remove(endVirusMove);
+                            session.getVirusNodes()[1]--;
                         }
                         // Зелёный сильнее
                         else if (firstValue > 0) {
@@ -150,6 +151,8 @@ public class GameLogic {
                             endVirusMove.setEllipseColor(Color.green);
                             greenGraph.put(endVirusMove, blueGraph.get(endVirusMove));
                             blueGraph.remove(endVirusMove);
+                            session.getVirusNodes()[0]++;
+                            session.getVirusNodes()[1]--;
                         }
                         // Синий сильнее
                         else if (secondValue > 0) {
@@ -181,6 +184,7 @@ public class GameLogic {
                             }
                             greenGraph.put(endVirusMove, redGraph.get(endVirusMove));
                             redGraph.remove(endVirusMove);
+                            session.getVirusNodes()[0]++;
                         }
                         else if (secondValue > 0) {
                             startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
@@ -225,6 +229,7 @@ public class GameLogic {
                              endVirusMove.setEllipseColor(new Color(163, 0, 0));
                              redGraph.put(endVirusMove, blueGraph.get(endVirusMove));
                              blueGraph.remove(endVirusMove);
+                             session.getVirusNodes()[1]--;
                          }
                          else if (firstValue > 0) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
@@ -232,6 +237,8 @@ public class GameLogic {
                              endVirusMove.setEllipseColor(Color.blue);
                              blueGraph.put(endVirusMove, greenGraph.get(endVirusMove));
                              greenGraph.remove(endVirusMove);
+                             session.getVirusNodes()[1]++;
+                             session.getVirusNodes()[0]--;
                          }
                          else if (secondValue > 0) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);
@@ -260,6 +267,7 @@ public class GameLogic {
                              }
                              blueGraph.put(endVirusMove, redGraph.get(endVirusMove));
                              redGraph.remove(endVirusMove);
+                             session.getVirusNodes()[1]++;
                          }
                          else if (secondValue > 0) {
                              startVirusMove.setHp(startVirusMove.getHp() - valueToMove);

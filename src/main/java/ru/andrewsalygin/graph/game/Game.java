@@ -388,6 +388,7 @@ public class Game extends BasicGame {
                         highlightedNode.setHp(100);
                         highlightedNode.setSkillPoint(false);
                         gameLogic.getSession().getFlags().put(ERROR_INIT_VIRUS, false);
+                        gameLogic.getSession().getVirusNodes()[0]++;
                     }
                 } else if (gameLogic.getSession().getMotion() == Motion.Blue && gameLogic.getSession().getBlueGraph().size() == 0) {
                     if (gameLogic.getSession().getGreenGraph().containsKey(highlightedNode)) {
@@ -404,6 +405,7 @@ public class Game extends BasicGame {
                         highlightedNode.setHp(100);
                         highlightedNode.setSkillPoint(false);
                         gameLogic.getSession().getFlags().put(ERROR_INIT_VIRUS, false);
+                        gameLogic.getSession().getVirusNodes()[1]++;
                     }
                 }
                 // Процесс перекидывания вируса с вершин на вершины
@@ -1118,6 +1120,7 @@ public class Game extends BasicGame {
         if (gameLogic.getSession().getFlags().get(OPEN_GAME)) {
             gameLogic.getSession().getFlags().put(OPEN_GAME, false);
             gameLogic.setSession(GameSerialization.openGameFromFile(gc, gameLogic.getSession()));
+            gameLogic.getSession().getFlags().put(SELECTED_NODE_FROM_MOVE_VIRUS, false);
         }
 
         if (gameLogic.getSession().getFlags().get(REPEAT_GAME)) {
