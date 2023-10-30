@@ -65,9 +65,11 @@ public class UndirectedWeightedGraph extends UndirectedUnweightedGraph {
         checkExistTwoNodes(srcNode, destNode);
 
         // Получаю все ноды, с которыми имеет связь источник
-        HashMap<Node, Connection> connectedNodes = graph.get(srcNode);
-        if (connectedNodes.containsKey(destNode)) {
-            connectedNodes.put(destNode, new Connection(weight));
+        HashMap<Node, Connection> connectedNodesSrc = graph.get(srcNode);
+        HashMap<Node, Connection> connectedNodesDest = graph.get(destNode);
+        if (connectedNodesSrc.containsKey(destNode)) {
+            connectedNodesSrc.put(destNode, new Connection(weight));
+            connectedNodesDest.put(srcNode, new Connection(weight));
         } else {
             throw new ConnectionNotExistException("Данного ребра между вершинами не существует.");
         }
