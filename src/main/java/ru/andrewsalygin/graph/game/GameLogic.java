@@ -56,11 +56,14 @@ public class GameLogic {
         HashMap<VisualNode, HashMap<Node, Connection>> redGraph = new HashMap<>();
         for (Map.Entry<Node, HashMap<Node, Connection>> entry : visualGraph.getGraph().entrySet()) {
             VisualNode node = (VisualNode) entry.getKey();
-            if (node.getEllipseColor() == Color.red ||
+            if (node.getEllipseColor().equals(Color.red) ||
                     node.getEllipseColor().equals(new Color(163, 0, 0))) {
                 redGraph.put(node, entry.getValue());
             }
         }
+
+        restartGame = RestartGame.NONE;
+        endGameWin = EndGameWin.NONE;
 
         session = new Session(new int[]{0, 0}, new int[]{0, 0}, new int[]{10, 10}, new int[]{10, 10},
                 new int[]{10, 10}, 5, 5, 5, Motion.Green, 1, flags,
@@ -109,8 +112,8 @@ public class GameLogic {
         if (graph.get(startVirusMove).containsKey(endVirusMove)) {
             if (motion == Motion.Green) {
                 // Конечная вершина тот же вирус
-                if (startVirusMove.getEllipseColor() == Color.green) {
-                    if (endVirusMove.getEllipseColor() == Color.green) {
+                if (startVirusMove.getEllipseColor().equals(Color.green)) {
+                    if (endVirusMove.getEllipseColor().equals(Color.green)) {
                         if (endVirusMove.getHp() < MAX_VIRUS_HP) {
                             // Количество переданного будет меньше максимального
                             if (endVirusMove.getHp() + valueToMove <= MAX_VIRUS_HP) {
@@ -126,7 +129,7 @@ public class GameLogic {
                             return MAX_VALUE_OF_VIRUS;
                         }
                         // Конечная вершина другой вирус
-                    } else if (endVirusMove.getEllipseColor() == Color.blue) {
+                    } else if (endVirusMove.getEllipseColor().equals(Color.blue)) {
                         virusAttack = valueToMove * powers[0];
                         virusProtectionOther = endVirusMove.getHp() * protections[1];
                         firstValue = (virusAttack - virusProtectionOther) / powers[0];
@@ -155,7 +158,7 @@ public class GameLogic {
                         }
 
                         // Конечная вершина здоровая
-                    } else if (endVirusMove.getEllipseColor() == Color.red ||
+                    } else if (endVirusMove.getEllipseColor().equals(Color.red) ||
                             endVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                         virusAttack = valueToMove * powers[0];
                         protectionHealthNode = random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
@@ -186,7 +189,7 @@ public class GameLogic {
                     }
 
                     // В качестве начальной выбрана здоровая вершина, что недопустимо
-                } else if (startVirusMove.getEllipseColor() == Color.red ||
+                } else if (startVirusMove.getEllipseColor().equals(Color.red) ||
                         startVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                     return RED_NODE_SELECTED;
                 }
@@ -195,8 +198,8 @@ public class GameLogic {
                 }
             }
             else if (motion == Motion.Blue) { // Аналогично ситуациям выше, только для синих
-                 if (startVirusMove.getEllipseColor() == Color.blue) {
-                     if (endVirusMove.getEllipseColor() == Color.blue) {
+                 if (startVirusMove.getEllipseColor().equals(Color.blue)) {
+                     if (endVirusMove.getEllipseColor().equals(Color.blue)) {
                          if (endVirusMove.getHp() < MAX_VIRUS_HP) {
                              if (endVirusMove.getHp() + valueToMove <= MAX_VIRUS_HP) {
                                  endVirusMove.setHp(endVirusMove.getHp() + valueToMove);
@@ -210,7 +213,7 @@ public class GameLogic {
                          } else {
                              return MAX_VALUE_OF_VIRUS;
                          }
-                     } else if (endVirusMove.getEllipseColor() == Color.green) {
+                     } else if (endVirusMove.getEllipseColor().equals(Color.green)) {
                          virusAttack = valueToMove * powers[0];
                          virusProtectionOther = endVirusMove.getHp() * protections[1];
                          firstValue = (virusAttack - virusProtectionOther) / powers[0];
@@ -235,7 +238,7 @@ public class GameLogic {
                              endVirusMove.setHp(secondValue);
                          }
                      }
-                     else if (endVirusMove.getEllipseColor() == Color.red ||
+                     else if (endVirusMove.getEllipseColor().equals(Color.red) ||
                              endVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                          virusAttack = valueToMove * powers[1];
                          protectionHealthNode = random.nextInt(MAX_VALUE_REGENERATION_HEALTH_NODE - MIN_VALUE_REGENERATION_HEALTH_NODE + 1) + MIN_VALUE_REGENERATION_HEALTH_NODE;
@@ -264,7 +267,7 @@ public class GameLogic {
                          }
                      }
                  }
-                 else if (startVirusMove.getEllipseColor() == Color.red ||
+                 else if (startVirusMove.getEllipseColor().equals(Color.red) ||
                          startVirusMove.getEllipseColor().equals(new Color(163, 0, 0))) {
                      return RED_NODE_SELECTED;
                  }

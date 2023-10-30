@@ -15,6 +15,10 @@ public enum Button {
     HOME_BUTTON_HOVERED("src/main/resources/UI/HOME_BUTTON_HOVERED.png"),
     REPEAT_BUTTON("src/main/resources/UI/REPEAT_BUTTON.png"),
     REPEAT_BUTTON_HOVERED("src/main/resources/UI/REPEAT_BUTTON_HOVERED.png"),
+    SAVE_BUTTON("src/main/resources/UI/SAVE_BUTTON.png"),
+    SAVE_BUTTON_HOVERED("src/main/resources/UI/SAVE_BUTTON_HOVERED.png"),
+    OPEN_SAVING_BUTTON("src/main/resources/UI/OPEN_SAVING_BUTTON.png"),
+    OPEN_SAVING_BUTTON_HOVERED("src/main/resources/UI/OPEN_SAVING_BUTTON_HOVERED.png"),
     REGULAR_BUTTON("src/main/resources/UI/REGULAR_BUTTON.png"), // 200x50
     REGULAR_BUTTON_HOVERED("src/main/resources/UI/REGULAR_BUTTON_HOVERED.png"),
     BUTTON_ALL_VIRUS_MOVE("src/main/resources/UI/BUTTON_ALL_VIRUS_MOVE.png"),
