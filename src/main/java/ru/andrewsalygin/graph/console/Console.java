@@ -1,13 +1,12 @@
 package ru.andrewsalygin.graph.console;
+
 import ru.andrewsalygin.graph.console.utils.*;
 import ru.andrewsalygin.graph.core.*;
 import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
 
 
 // TO DO: Если ребро уже существует: может вы хотите поменять вес?
@@ -74,7 +73,7 @@ public class Console {
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
                 }
-            } catch (InputMismatchException|NumberFormatException ex) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Введите цифру пункта меню.");
                 option = scanner.nextLine();
             }
@@ -116,6 +115,7 @@ public class Console {
         // Никогда не вернётся null
         return graph;
     }
+
     public static void launchApplication() {
         Graph graph;
         Scanner scanner = new Scanner(System.in);
@@ -131,8 +131,7 @@ public class Console {
                         try {
                             graph = inputGraphFromFile(scanner.nextLine());
                             workWithGraph(graph);
-                        }
-                        catch (FileNotFoundException e) {
+                        } catch (FileNotFoundException e) {
                             System.out.println("Ошибка: указанный файл не найден.");
                         } catch (NotCorrectGraphNameException e) {
                             System.out.println("Ошибка:" + e.getMessage());
@@ -193,11 +192,12 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            System.out.println("8. Вывести кратчайшие пути до вершины u из всех остальных вершин.");
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -334,8 +334,7 @@ public class Console {
                                 GraphSerializer.saveGraphToFile(path, graph);
                             } catch (NameFileNotSpecifiedException e) {
                                 System.out.println("Ошибка: " + e.getMessage());
-                            }
-                            catch (FileNotFoundException e) {
+                            } catch (FileNotFoundException e) {
                                 System.out.println("Ошибка: указанный файл не найден.");
                             } catch (IOException e) {
                                 try {
@@ -349,11 +348,42 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            if (graph instanceof UndirectedWeightedGraph) {
+                                System.out.println("Введите название вершины u:");
+                                String nodeU = scanner.nextLine();
+                                if (nodeU.equals("выход")) {
+                                    continue;
+                                }
+
+                                try {
+                                    Pair<Map<Node, List<Node>>, Map<Node, Integer>> result = ((UndirectedWeightedGraph) graph).shortestPathsToNode(nodeU);
+
+                                    boolean firstElement;
+                                    for (Map.Entry<Node, List<Node>> entry : result.t1().entrySet()) {
+                                        System.out.print(entry.getKey().getNodeName() + ": ");
+                                        firstElement = true;
+                                        for (Node node : entry.getValue()) {
+                                            if (!firstElement) {
+                                                System.out.print(" -> ");
+                                            }
+                                            firstElement = false;
+                                            System.out.print(node.getNodeName());
+                                        }
+                                        System.out.println(" (" + result.t2().get(entry.getKey()) + ")");
+                                    }
+                                } catch (ConnectionNotExistException ex) {
+                                    System.out.println("Ошибка: " + ex.getMessage());
+                                }
+                            } else {
+                                System.out.println("Введите одну из цифр пункта меню.");
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
                 }
-            } catch (InputMismatchException|NumberFormatException ex) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Введите цифру пункта меню.");
             } catch (ConnectionAlreadyExistException | ConnectionNotExistException | NodeNotExistException |
                      NodeAlreadyExistException ex) {
