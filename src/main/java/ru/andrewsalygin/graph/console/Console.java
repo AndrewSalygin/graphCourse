@@ -359,7 +359,7 @@ public class Console {
                                 }
 
                                 try {
-                                    Pair<Map<Node, List<Node>>, Map<Node, Integer>> result = ((OrientedUnweightedGraph) graph).shortestPathsToNode(nodeU);
+                                    Pair<Map<Node, List<Node>>, Map<Node, Connection>> result = ((OrientedUnweightedGraph) graph).shortestPathsToNode(nodeU);
 
                                     boolean firstElement;
                                     for (Map.Entry<Node, List<Node>> entry : result.t1().entrySet()) {
@@ -372,7 +372,7 @@ public class Console {
                                             firstElement = false;
                                             System.out.print(node.getNodeName());
                                         }
-                                        System.out.println(" (" + result.t2().get(entry.getKey()) + ")");
+                                        System.out.println(" (" + result.t2().get(entry.getKey()).getWeight() + ")");
                                     }
                                 } catch (ConnectionNotExistException ex) {
                                     System.out.println("Ошибка: " + ex.getMessage());

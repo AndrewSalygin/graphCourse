@@ -187,12 +187,12 @@ public class OrientedUnweightedGraph extends Graph {
         return tmpGraph;
     }
 
-    public Pair<Map<Node, List<Node>>, Map<Node, Integer>> shortestPathsToNode(String u) {
+    public Pair<Map<Node, List<Node>>, Map<Node, Connection>> shortestPathsToNode(String u) {
         // Разворачиваю дуги графа
         graph = expandArcs().getGraph();
 
         // Ищу кратчайшие пути от вершины u <(Путь до вершины, вес), список предков для каждой вершины>
-        Pair<Map<Node, Integer>, Map<Node, Node>> dijkstraResult = dijkstra(u);
+        Pair<Map<Node, Connection>, Map<Node, Node>> dijkstraResult = dijkstra(u);
 
         // Вершина, путь
         Map<Node, List<Node>> result = new HashMap<>();
@@ -222,14 +222,14 @@ public class OrientedUnweightedGraph extends Graph {
         }
     }
 
-    public Pair<Map<Node, Integer>, Map<Node, Node>> dijkstra(String u) {
+    public Pair<Map<Node, Connection>, Map<Node, Node>> dijkstra(String u) {
         // Проверка корректности ноды
         Node nodeU = getObjectNodeByName(u);
         if (!isExistNode(nodeU))
             throw new NodeNotExistException("Вершины u не существует в текущем графе.");
 
         // Наикратчайшие расстояния
-        Map<Node, Integer> shortestDistances = new HashMap<>(graph.size());
+        Map<Node, Connection> shortestDistances = new HashMap<>(graph.size());
 
         // Список предков
         Map<Node, Node> parents = new HashMap<>(graph.size());
@@ -239,12 +239,12 @@ public class OrientedUnweightedGraph extends Graph {
 
         // Инициализация алгоритма
         for (Node node : graph.keySet()) {
-            shortestDistances.put(node, Integer.MAX_VALUE);
+            shortestDistances.put(node, new Connection(Integer.MAX_VALUE));
             parents.put(node, node); // node (второй параметр) значение по умолчанию (*)
             visited.put(node, false);
         }
         // для стартовой вершины расстояние 0
-        shortestDistances.put(nodeU, 0);
+        shortestDistances.put(nodeU, new Connection(0));
 
         Node currentNode = nodeU;
         int minValue;
@@ -254,7 +254,7 @@ public class OrientedUnweightedGraph extends Graph {
             // Выбираем вершину до которой наикратчайший путь среди всех непросмотренных вершин
             for (Node node : shortestDistances.keySet()) {
                 if (!visited.get(node)) {
-                    localMinValue = shortestDistances.get(node);
+                    localMinValue = shortestDistances.get(node).getWeight();
                     if (localMinValue < minValue) {
                         currentNode = node;
                         minValue = localMinValue;
@@ -267,8 +267,8 @@ public class OrientedUnweightedGraph extends Graph {
             // Проходимся по непросмотренным соседям и обновляем расстояние, если оно получилось короче прежнего
             for (Map.Entry<Node, Connection> neighbour : graph.get(currentNode).entrySet()) {
                 if (!visited.get(neighbour.getKey())
-                        && shortestDistances.get(currentNode) + neighbour.getValue().getWeight() < shortestDistances.get(neighbour.getKey())) {
-                    shortestDistances.put(neighbour.getKey(), shortestDistances.get(currentNode) + neighbour.getValue().getWeight());
+                        && shortestDistances.get(currentNode).getWeight() + neighbour.getValue().getWeight() < shortestDistances.get(neighbour.getKey()).getWeight()) {
+                    shortestDistances.put(neighbour.getKey(), new Connection(shortestDistances.get(currentNode).getWeight() + neighbour.getValue().getWeight()));
                     parents.put(neighbour.getKey(), currentNode);
                 }
             }
