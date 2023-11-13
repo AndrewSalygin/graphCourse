@@ -192,7 +192,9 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
-            System.out.println("8. Вывести кратчайшие пути до вершины u из всех остальных вершин.");
+            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
+                System.out.println("8. Вывести кратчайшие пути до вершины u из всех остальных вершин.");
+            }
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
@@ -349,7 +351,7 @@ public class Console {
                         }
                         case "7" -> System.exit(0);
                         case "8" -> {
-                            if (graph instanceof UndirectedWeightedGraph) {
+                            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
                                 System.out.println("Введите название вершины u:");
                                 String nodeU = scanner.nextLine();
                                 if (nodeU.equals("выход")) {
@@ -357,7 +359,7 @@ public class Console {
                                 }
 
                                 try {
-                                    Pair<Map<Node, List<Node>>, Map<Node, Integer>> result = ((UndirectedWeightedGraph) graph).shortestPathsToNode(nodeU);
+                                    Pair<Map<Node, List<Node>>, Map<Node, Integer>> result = ((OrientedUnweightedGraph) graph).shortestPathsToNode(nodeU);
 
                                     boolean firstElement;
                                     for (Map.Entry<Node, List<Node>> entry : result.t1().entrySet()) {

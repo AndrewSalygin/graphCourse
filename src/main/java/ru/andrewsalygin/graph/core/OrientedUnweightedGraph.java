@@ -1,13 +1,11 @@
 package ru.andrewsalygin.graph.core;
 
-import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
-import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -167,6 +165,115 @@ public class OrientedUnweightedGraph extends Graph {
             throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
         if (!isExistNode(destNode))
             throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
+    }
+
+    @Override
+    public final Graph expandArcs() {
+        Graph tmpGraph = new OrientedUnweightedGraph();
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : graph.entrySet()) {
+            // Добавляю ноду в которую пойду
+            if (!tmpGraph.graph.containsKey(entry.getKey())) {
+                tmpGraph.graph.put(entry.getKey(), new HashMap<>());
+            }
+            for (Map.Entry<Node, Connection> localEntry : entry.getValue().entrySet()) {
+                // Если не ходили от этой ноды, то добавляю новую ноду во временный граф
+                if (!tmpGraph.graph.containsKey(localEntry.getKey())) {
+                    tmpGraph.graph.put(localEntry.getKey(), new HashMap<>());
+                }
+                // Меняю направление дуги
+                tmpGraph.graph.get(localEntry.getKey()).put(entry.getKey(), localEntry.getValue());
+            }
+        }
+        return tmpGraph;
+    }
+
+    public Pair<Map<Node, List<Node>>, Map<Node, Integer>> shortestPathsToNode(String u) {
+        // Разворачиваю дуги графа
+        graph = expandArcs().getGraph();
+
+        // Ищу кратчайшие пути от вершины u <(Путь до вершины, вес), список предков для каждой вершины>
+        Pair<Map<Node, Integer>, Map<Node, Node>> dijkstraResult = dijkstra(u);
+
+        // Вершина, путь
+        Map<Node, List<Node>> result = new HashMap<>();
+        LinkedList<Node> path;
+
+        // Восстанавливаем путь от всех вершин, до вершины u
+        for (Node node : graph.keySet()) {
+            path = new LinkedList<>();
+            shortestPathToNode(node, dijkstraResult.t2(), path);
+            if (path.peekLast().equals(new Node(u))) {
+                result.put(node, path);
+            }
+        }
+
+        // Разворачиваю граф обратно
+        graph = expandArcs().getGraph();
+
+        return new Pair<>(result, dijkstraResult.t1());
+    }
+
+    private void shortestPathToNode(Node currentNode, Map<Node, Node> parents, LinkedList<Node> path) {
+        path.addLast(currentNode);
+
+        // Идём рекурсивно до тех пор, пока родителем вершины не окажется сама вершина (*)
+        if (!parents.get(currentNode).equals(currentNode)) {
+            shortestPathToNode(parents.get(currentNode), parents, path);
+        }
+    }
+
+    public Pair<Map<Node, Integer>, Map<Node, Node>> dijkstra(String u) {
+        // Проверка корректности ноды
+        Node nodeU = getObjectNodeByName(u);
+        if (!isExistNode(nodeU))
+            throw new NodeNotExistException("Вершины u не существует в текущем графе.");
+
+        // Наикратчайшие расстояния
+        Map<Node, Integer> shortestDistances = new HashMap<>(graph.size());
+
+        // Список предков
+        Map<Node, Node> parents = new HashMap<>(graph.size());
+
+        // Список посещенных вершин
+        Map<Node, Boolean> visited = new HashMap<>(graph.size());
+
+        // Инициализация алгоритма
+        for (Node node : graph.keySet()) {
+            shortestDistances.put(node, Integer.MAX_VALUE);
+            parents.put(node, node); // node (второй параметр) значение по умолчанию (*)
+            visited.put(node, false);
+        }
+        // для стартовой вершины расстояние 0
+        shortestDistances.put(nodeU, 0);
+
+        Node currentNode = nodeU;
+        int minValue;
+        int localMinValue;
+        for (int i = 0; i < graph.size() - 1; i++) {
+            minValue = Integer.MAX_VALUE;
+            // Выбираем вершину до которой наикратчайший путь среди всех непросмотренных вершин
+            for (Node node : shortestDistances.keySet()) {
+                if (!visited.get(node)) {
+                    localMinValue = shortestDistances.get(node);
+                    if (localMinValue < minValue) {
+                        currentNode = node;
+                        minValue = localMinValue;
+                    }
+                }
+            }
+            // Просматриваем эту вершину
+            visited.put(currentNode, true);
+
+            // Проходимся по непросмотренным соседям и обновляем расстояние, если оно получилось короче прежнего
+            for (Map.Entry<Node, Connection> neighbour : graph.get(currentNode).entrySet()) {
+                if (!visited.get(neighbour.getKey())
+                        && shortestDistances.get(currentNode) + neighbour.getValue().getWeight() < shortestDistances.get(neighbour.getKey())) {
+                    shortestDistances.put(neighbour.getKey(), shortestDistances.get(currentNode) + neighbour.getValue().getWeight());
+                    parents.put(neighbour.getKey(), currentNode);
+                }
+            }
+        }
+        return new Pair<>(shortestDistances, parents);
     }
 }
 
