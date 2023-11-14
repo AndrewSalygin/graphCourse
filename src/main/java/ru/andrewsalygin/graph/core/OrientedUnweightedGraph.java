@@ -1,14 +1,9 @@
 package ru.andrewsalygin.graph.core;
 
-import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
-import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrew Salygin
@@ -167,6 +162,118 @@ public class OrientedUnweightedGraph extends Graph {
             throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
         if (!isExistNode(destNode))
             throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
+    }
+
+    public LinkedHashMap<ArrayList<Node>, Integer> shortestPathsForAllPairs() {
+        Pair<Map<Node, HashMap<Node, Connection>>, Map<Node, HashMap<Node, Node>>> resultPair = floydWarshall();
+
+        LinkedHashMap<ArrayList<Node>, Integer> shortestPaths = new LinkedHashMap<>();
+        ArrayList<Node> tmpList;
+        Node tmpNode;
+        Node tmpMainNode;
+        int index;
+        for (Node lineNode : graph.keySet()) {
+            for (Node columnNode : graph.keySet()) {
+                // Петли это не кратчайший путь, и учитывается несвязный граф
+                if (!lineNode.equals(columnNode) && resultPair.t1().get(lineNode).get(columnNode).getWeight() != Integer.MAX_VALUE) {
+                    tmpList = new ArrayList<>();
+                    // Получил следующую ноду в пути
+                    tmpNode = resultPair.t2().get(lineNode).get(columnNode);
+
+                    // Добавляю начальную ноду
+                    tmpList.add(lineNode);
+                    // Случай, если ноды соединены напрямую
+                    if (tmpNode == null) {
+                        tmpList.add(columnNode);
+                        shortestPaths.put(tmpList, resultPair.t1().get(lineNode).get(columnNode).getWeight());
+                    } else {
+                        tmpList.add(tmpList.size(), columnNode);
+                        index = 0;
+                        tmpMainNode = tmpList.get(0);
+                        while (!tmpNode.equals(columnNode)) {
+                            if (!tmpList.contains(tmpNode)) {
+                                tmpList.add(index + 1, tmpNode);
+                            }
+                            // Если текущая вершина итератора и следующая соединены напрямую
+                            if (resultPair.t2().get(tmpMainNode).get(tmpNode) == null) {
+                                tmpMainNode = tmpList.get(++index);
+                                if (index + 1 < tmpList.size()) {
+                                    if (resultPair.t2().get(tmpMainNode).get(tmpList.get(index + 1)) == null) {
+                                        tmpNode = tmpList.get(index + 1);
+                                    } else {
+                                        tmpNode = resultPair.t2().get(tmpMainNode).get(tmpList.get(index + 1));
+                                    }
+                                }
+                            } else {
+                                // Берём следующую ноду в качестве временной
+                                tmpNode = resultPair.t2().get(tmpMainNode).get(tmpNode);
+                            }
+                        }
+                        // Добавляем вес последней ноды
+                        shortestPaths.put(tmpList, resultPair.t1().get(lineNode).get(columnNode).getWeight());
+                    }
+                }
+            }
+        }
+        return shortestPaths;
+    }
+
+    public Pair<Map<Node, HashMap<Node, Connection>>, Map<Node, HashMap<Node, Node>>> floydWarshall() {
+        HashMap<Node, HashMap<Node, Connection>> distanceMatrix = new HashMap<>();
+        HashMap<Node, HashMap<Node, Node>> passages = new HashMap<>();
+
+        // Инициализация матриц
+        for (Node lineNode : graph.keySet()) {
+            HashMap<Node, Connection> tmpMap = new HashMap<>();
+            passages.put(lineNode, new HashMap<>());
+            for (Node columnNode : graph.keySet()) {
+                // Инициализируем проходы
+                // Элементы на главной диагонали
+                if (lineNode.equals(columnNode)) {
+                    tmpMap.put(columnNode, new Connection(0));
+                    passages.get(lineNode).put(columnNode, null);
+                } else {
+                    // 0 шаг алгоритма (инициализация матрицы)
+                    if (graph.get(lineNode).containsKey(columnNode)) {
+                        tmpMap.put(columnNode, graph.get(lineNode).get(columnNode));
+                    } else {
+                        tmpMap.put(columnNode, new Connection(Integer.MAX_VALUE));
+                    }
+                    // Инициализируем изначально всё null-ами
+                    passages.get(lineNode).put(columnNode, null);
+                }
+            }
+            distanceMatrix.put(lineNode, tmpMap);
+        }
+
+        int firstSummand;
+        int secondSummand;
+        int tmpValue;
+        for (int i = 0; i < graph.size(); i++) {
+            for (Node mainNode : graph.keySet()) {
+                for (Node lineNode : graph.keySet()) {
+                    for (Node columnNode : graph.keySet()) {
+                        if (!lineNode.equals(columnNode)) {
+                            firstSummand = distanceMatrix.get(lineNode).get(mainNode).getWeight();
+                            secondSummand = distanceMatrix.get(mainNode).get(columnNode).getWeight();
+
+                            // Проверка на то, что одно из слагаемых является inf
+                            if (firstSummand != Integer.MAX_VALUE && secondSummand != Integer.MAX_VALUE) {
+                                tmpValue = firstSummand + secondSummand;
+                                if (tmpValue < distanceMatrix.get(lineNode).get(columnNode).getWeight()) {
+                                    // Обновляю расстояние между lineNode и columnNode
+                                    distanceMatrix.get(lineNode).put(columnNode, new Connection(tmpValue));
+                                    // Кладу ноду между lineNode и columnNode
+                                    passages.get(lineNode).put(columnNode, mainNode);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new Pair<>(distanceMatrix, passages);
     }
 }
 

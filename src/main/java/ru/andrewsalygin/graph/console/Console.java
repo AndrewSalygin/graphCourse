@@ -5,9 +5,7 @@ import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
 
 
 // TO DO: Если ребро уже существует: может вы хотите поменять вес?
@@ -193,11 +191,12 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            System.out.println("8. Вывести кратчайшие пути для всех пар вершин");
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -349,6 +348,22 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
+                                LinkedHashMap<ArrayList<Node>, Integer> result = ((OrientedUnweightedGraph) graph).shortestPathsForAllPairs();
+                                for (Map.Entry<ArrayList<Node>, Integer> entry : result.entrySet()) {
+                                    System.out.print(entry.getKey().get(0).getNodeName());
+                                    ArrayList<Node> tmpList = entry.getKey();
+                                    for (int i = 1; i < tmpList.size(); i++) {
+                                        System.out.print(" -> " + tmpList.get(i));
+                                    }
+                                    System.out.print(" (" + entry.getValue() + ")");
+                                    System.out.println();
+                                }
+                            } else {
+                                System.out.println("Введите одну из цифр пункта меню.");
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
