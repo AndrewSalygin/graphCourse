@@ -236,6 +236,7 @@ public class OrientedUnweightedGraph extends Graph {
                     // 0 шаг алгоритма (инициализация матрицы)
                     if (graph.get(lineNode).containsKey(columnNode)) {
                         tmpMap.put(columnNode, graph.get(lineNode).get(columnNode));
+                        passages.get(lineNode).put(columnNode, columnNode);
                     } else {
                         tmpMap.put(columnNode, new Connection(Integer.MAX_VALUE));
                     }
