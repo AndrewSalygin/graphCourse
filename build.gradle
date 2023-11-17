@@ -1,6 +1,8 @@
 plugins {
-    id 'java'
+    id 'application'
 }
+
+mainClassName = 'ru.andrewsalygin.Main'
 
 group = 'ru.andrewsalygin'
 version = '1.0-SNAPSHOT'
@@ -13,11 +15,18 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
     implementation('org.junit.jupiter:junit-jupiter:5.9.1')
-
 }
 
 test {
     useJUnitPlatform()
+}
+
+application {
+    mainClassName = 'ru.andrewsalygin.Main'
+}
+
+run {
+    standardInput = System.in
 }
 
 jar {
