@@ -1,14 +1,9 @@
 package ru.andrewsalygin.graph.core;
 
-import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
-import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrew Salygin
@@ -19,6 +14,8 @@ public final void addNode(T srcNodeName, List<String> destNodeNames);
 public final void addArcs(T srcNodeName, List<String> destNodeName);
  */
 public class OrientedUnweightedGraph extends Graph {
+
+    Algorithms algorithms;
     // Пустой граф
     public OrientedUnweightedGraph() {
         graph = new HashMap<>();
@@ -167,6 +164,95 @@ public class OrientedUnweightedGraph extends Graph {
             throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
         if (!isExistNode(destNode))
             throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
+    }
+
+    public Pair<List<Node>, Integer> shortestPathToV(String uName, String vName) {
+        Node u = getObjectNodeByName(uName);
+        if (!isExistNode(u))
+            throw new NodeNotExistException("Вершины u не существует в текущем графе.");
+        Node v = getObjectNodeByName(vName);
+        if (!isExistNode(v))
+            throw new NodeNotExistException("Вершины v не существует в текущем графе.");
+
+        // Проверяем, нужно ли пересчитать Форда-Беллмана (первый раз, или от той же вершины)
+        if (Algorithms.FordBellman.nodeU == null || !Algorithms.FordBellman.nodeU.equals(u)) {
+            getParentsAndDForUNode(uName, Algorithms.FordBellman.d, Algorithms.FordBellman.parents);
+        }
+
+        LinkedList<Node> pathToV = new LinkedList<>();
+        try {
+            // Проверяем, что вершина достижима и не находится в отрицательном цикле
+            checkCorrectPathToNode(Algorithms.FordBellman.d.get(v));
+        } catch (RuntimeException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+
+        // Получаем путь и вес пути
+        shortestPathToNode(v, u, Algorithms.FordBellman.parents, pathToV);
+        return new Pair<>(pathToV, Algorithms.FordBellman.d.get(v));
+    }
+
+    private void getParentsAndDForUNode(String uName, HashMap<Node, Integer> d, HashMap<Node, Node> parents) {
+        Node u = getObjectNodeByName(uName);
+        if (!isExistNode(u))
+            throw new NodeNotExistException("Вершины u не существует в текущем графе.");
+        fordBellman(u, d, parents);
+    }
+
+    private void checkCorrectPathToNode(Integer vDist) {
+        if (vDist == Integer.MAX_VALUE) {
+            throw new RuntimeException("Вершина недостижима");
+        }
+        if (vDist == Integer.MIN_VALUE) {
+            throw new RuntimeException("Вершина находится в отрицательном цикле");
+        }
+    }
+
+    private void shortestPathToNode(Node currentNode, Node startNode, Map<Node, Node> parents, LinkedList<Node> path) {
+        path.addLast(currentNode);
+
+        // Идём рекурсивно до тех пор, пока родителем вершины не окажется сама вершина (*)
+        if (!parents.get(currentNode).equals(startNode)) {
+            shortestPathToNode(parents.get(currentNode), startNode, parents, path);
+        } else {
+            path.addLast(startNode);
+        }
+    }
+
+    private void fordBellman(Node u, HashMap<Node, Integer> d, HashMap<Node, Node> parents) {
+        for (Node node : graph.keySet()) {
+            d.put(node, Integer.MAX_VALUE);
+            parents.put(node, node);
+        }
+        d.put(u, 0);
+
+        Set<Node> negativeCyclesNodes = new HashSet<>();
+
+        for (int i = 0; i < 2 * graph.size() - 2; i++) {
+            boolean flag = false;
+            for (Node mainNode : graph.keySet() ) {
+                for (Map.Entry<Node, Connection> adjacentNode : graph.get(mainNode).entrySet()) {
+                    if (d.get(mainNode) != Integer.MAX_VALUE) {
+                        if (d.get(mainNode) + adjacentNode.getValue().weight < d.get(adjacentNode.getKey())) {
+                            d.put(adjacentNode.getKey(), d.get(mainNode) + adjacentNode.getValue().weight);
+                            parents.put(adjacentNode.getKey(), mainNode);
+                            flag = true;
+                            // На итерациях больше n-ой смотрим какие вершины изменились
+                            if (i >= graph.size()) {
+                                negativeCyclesNodes.add(adjacentNode.getKey());
+                            }
+                        }
+                    }
+                }
+            }
+            if (!flag) {
+                break;
+            }
+        }
+        for (Node negativeNode : negativeCyclesNodes) {
+            d.put(negativeNode, Integer.MIN_VALUE);
+            parents.put(negativeNode, negativeNode);
+        }
     }
 }
 

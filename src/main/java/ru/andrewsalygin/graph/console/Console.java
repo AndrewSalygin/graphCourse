@@ -5,9 +5,7 @@ import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
 
 
 // TO DO: Если ребро уже существует: может вы хотите поменять вес?
@@ -193,11 +191,11 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            System.out.println("8. Вывести кратчайшие пути из вершины u до v1 и v2");
             String option = scanner.nextLine();
 
-            // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -349,6 +347,73 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
+                                System.out.println("Введите название вершины u (или 'выход' для выхода из действия):");
+                                String uName = scanner.nextLine();
+                                if (uName.equals("выход")) {
+                                    continue;
+                                }
+
+                                System.out.println("Введите название вершины v1 (или 'выход' для выхода из действия):");
+                                String v1Name = scanner.nextLine();
+                                if (v1Name.equals("выход")) {
+                                    continue;
+                                }
+
+                                System.out.println("Введите название вершины v2 (или 'выход' для выхода из действия):");
+                                String v2Name = scanner.nextLine();
+                                if (v2Name.equals("выход")) {
+                                    continue;
+                                }
+
+                                Pair<List<Node>, Integer> result;
+                                int weight;
+                                boolean firstElement;
+                                try {
+                                    result = ((OrientedUnweightedGraph) graph).shortestPathToV(uName, v1Name);
+                                    List<Node> pathV1 = result.t1();
+                                    weight = result.t2();
+
+                                    firstElement = true;
+                                    System.out.println("Путь от вершины u до v1:");
+                                    for (Node node : pathV1) {
+                                        if (!firstElement) {
+                                            System.out.print(" <- ");
+                                        }
+                                        firstElement = false;
+                                        System.out.print(node.getNodeName());
+                                    }
+                                    System.out.print(" (" + weight + ")");
+                                    System.out.println();
+                                    System.out.println();
+                                } catch (RuntimeException ex) {
+                                    System.out.println("Ошибка: " + ex.getMessage());
+                                }
+
+                                try {
+                                    result = ((OrientedUnweightedGraph) graph).shortestPathToV(uName, v2Name);
+                                    List<Node> pathV2 = result.t1();
+                                    weight = result.t2();
+                                    firstElement = true;
+                                    System.out.println("Путь от вершины u до v2:");
+                                    for (Node node : pathV2) {
+                                        if (!firstElement) {
+                                            System.out.print(" <- ");
+                                        }
+                                        firstElement = false;
+                                        System.out.print(node.getNodeName());
+                                    }
+                                    System.out.print(" (" + weight + ")");
+                                    System.out.println();
+                                    System.out.println();
+                                } catch (RuntimeException ex) {
+                                    System.out.println("Ошибка: " + ex.getMessage());
+                                }
+                            } else {
+                                System.out.println("Введите одну из цифр пункта меню.");
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
