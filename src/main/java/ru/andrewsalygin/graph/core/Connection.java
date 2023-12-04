@@ -4,9 +4,14 @@ import java.util.Objects;
 
 class Connection {
     Integer weight;
+    Integer flow;
 
     public Connection(Integer weight) {
         this.weight = weight;
+    }
+
+    public Integer getCapacity() {
+        return weight - flow;
     }
 
     public Integer getWeight() {
@@ -15,6 +20,14 @@ class Connection {
 
     public void setWeight(Integer weight) {
         this.weight = weight;
+    }
+
+    public Integer getFlow() {
+        return flow;
+    }
+
+    public void setFlow(Integer flow) {
+        this.flow = flow;
     }
 
     @Override

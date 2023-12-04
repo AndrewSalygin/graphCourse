@@ -1,4 +1,5 @@
 package ru.andrewsalygin.graph.console;
+
 import ru.andrewsalygin.graph.console.utils.*;
 import ru.andrewsalygin.graph.core.*;
 import ru.andrewsalygin.graph.core.utils.*;
@@ -74,7 +75,7 @@ public class Console {
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
                 }
-            } catch (InputMismatchException|NumberFormatException ex) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Введите цифру пункта меню.");
                 option = scanner.nextLine();
             }
@@ -116,6 +117,7 @@ public class Console {
         // Никогда не вернётся null
         return graph;
     }
+
     public static void launchApplication() {
         Graph graph;
         Scanner scanner = new Scanner(System.in);
@@ -131,8 +133,7 @@ public class Console {
                         try {
                             graph = inputGraphFromFile(scanner.nextLine());
                             workWithGraph(graph);
-                        }
-                        catch (FileNotFoundException e) {
+                        } catch (FileNotFoundException e) {
                             System.out.println("Ошибка: указанный файл не найден.");
                         } catch (NotCorrectGraphNameException e) {
                             System.out.println("Ошибка:" + e.getMessage());
@@ -193,11 +194,12 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
+            System.out.println("8. Найти максимальный поток");
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
             try {
-                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 7) {
+                if (Integer.parseInt(option) >= 0 && Integer.parseInt(option) <= 8) {
                     switch (option) {
                         case "0" -> {
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
@@ -334,8 +336,7 @@ public class Console {
                                 GraphSerializer.saveGraphToFile(path, graph);
                             } catch (NameFileNotSpecifiedException e) {
                                 System.out.println("Ошибка: " + e.getMessage());
-                            }
-                            catch (FileNotFoundException e) {
+                            } catch (FileNotFoundException e) {
                                 System.out.println("Ошибка: указанный файл не найден.");
                             } catch (IOException e) {
                                 try {
@@ -349,11 +350,27 @@ public class Console {
                             return;
                         }
                         case "7" -> System.exit(0);
+                        case "8" -> {
+                            System.out.println("Введите название вершины истока (или 'выход' для выхода из действия):");
+                            String nodeSrc = scanner.nextLine();
+                            if (nodeSrc.equals("выход")) {
+                                continue;
+                            }
+
+                            System.out.println("Введите название вершины стока (или 'выход' для выхода из действия):");
+                            String nodeSink = scanner.nextLine();
+                            if (nodeSink.equals("выход")) {
+                                continue;
+                            }
+                            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
+                                System.out.println("Максимальный поток: " + ((OrientedUnweightedGraph) graph).fordFulkerson(nodeSrc, nodeSink));
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Введите одну из цифр пункта меню.");
                 }
-            } catch (InputMismatchException|NumberFormatException ex) {
+            } catch (InputMismatchException | NumberFormatException ex) {
                 System.out.println("Введите цифру пункта меню.");
             } catch (ConnectionAlreadyExistException | ConnectionNotExistException | NodeNotExistException |
                      NodeAlreadyExistException ex) {

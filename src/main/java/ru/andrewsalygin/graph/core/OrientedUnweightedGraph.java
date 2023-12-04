@@ -6,9 +6,7 @@ import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
 import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrew Salygin
@@ -167,6 +165,108 @@ public class OrientedUnweightedGraph extends Graph {
             throw new NodeNotExistException("Исходного узла не существует в текущем графе.");
         if (!isExistNode(destNode))
             throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
+    }
+
+    public int fordFulkerson(String sourceNodeName, String sinkNodeName) {
+        Node sourceNode = getObjectNodeByName(sourceNodeName);
+        Node sinkNode = getObjectNodeByName(sinkNodeName);
+
+        // Создаем остаточную сеть
+        HashMap<Node, HashMap<Node, Connection>> residualGraph = new HashMap<>(graph);
+
+        // Начально устанавливаем поток на каждом ребре в 0
+        for (Map.Entry<Node, HashMap<Node, Connection>> entry : residualGraph.entrySet()) {
+            for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
+                innerEntry.getValue().setFlow(0);
+            }
+        }
+
+        int maxFlow = 0;
+
+        // Находим увеличивающий путь в остаточной сети
+        List<Node> augmentingPath = findAugmentingPath(residualGraph, sourceNode, sinkNode);
+
+        // Пока увеличивающий путь существует
+        while (augmentingPath != null) {
+            // Находим минимальную пропускную способность на увеличивающем пути
+            int minCapacity = findMinCapacity(residualGraph, augmentingPath);
+
+            // Обновляем поток вдоль увеличивающего пути
+            updateFlow(residualGraph, augmentingPath, minCapacity);
+
+            // Находим следующий увеличивающий путь
+            augmentingPath = findAugmentingPath(residualGraph, sourceNode, sinkNode);
+
+            // Увеличиваем общий поток
+            maxFlow += minCapacity;
+        }
+
+        return maxFlow;
+    }
+
+    private void updateFlow(HashMap<Node, HashMap<Node, Connection>> residualGraph, List<Node> augmentingPath, int minCapacity) {
+        for (int i = 0; i < augmentingPath.size() - 1; i++) {
+            Node current = augmentingPath.get(i);
+            Node next = augmentingPath.get(i + 1);
+
+            Connection connection = residualGraph.get(current).get(next);
+
+            connection.setFlow(connection.getFlow() + minCapacity);
+        }
+    }
+
+    private int findMinCapacity(HashMap<Node, HashMap<Node, Connection>> residualGraph, List<Node> augmentingPath) {
+        int minCapacity = Integer.MAX_VALUE;
+
+        for (int i = 0; i < augmentingPath.size() - 1; i++) {
+            Node current = augmentingPath.get(i);
+            Node next = augmentingPath.get(i + 1);
+
+            Connection connection = residualGraph.get(current).get(next);
+
+            int capacity = connection.getCapacity();
+            minCapacity = Math.min(minCapacity, capacity);
+        }
+
+        return minCapacity;
+    }
+
+    private List<Node> findAugmentingPath(HashMap<Node, HashMap<Node, Connection>> residualGraph, Node sourceNode, Node sinkNode) {
+        Queue<Node> queue = new LinkedList<>();
+        HashMap<Node, Node> parents = new HashMap<>();
+
+        queue.add(sourceNode);
+        parents.put(sourceNode, sourceNode);
+
+        while (!queue.isEmpty()) {
+            Node current = queue.poll();
+
+            // Перебираем всех соседей текущей вершины в остаточной сети
+            for (Node neighbour : residualGraph.getOrDefault(current, new HashMap<>()).keySet()) {
+                Connection connection = residualGraph.get(current).get(neighbour);
+                // Проверяем, что сосед еще не посещен и есть пропускная способность
+                if (!parents.containsKey(neighbour) && connection.getCapacity() > 0) {
+                    queue.add(neighbour);
+                    parents.put(neighbour, current);
+
+                    // Если сосед - целевая вершина, значит, нашли увеличивающий путь
+                    if (neighbour.equals(sinkNode)) {
+                        // Найден увеличивающий путь, восстанавливаем его
+                        LinkedList<Node> path = new LinkedList<>();
+                        Node node = sinkNode;
+                        while (node != sourceNode) {
+                            path.addFirst(node);
+                            node = parents.get(node);
+                        }
+                        path.addFirst(sourceNode);
+                        return path;
+                    }
+                }
+            }
+        }
+
+        // Увеличивающий путь не найден
+        return null;
     }
 }
 
