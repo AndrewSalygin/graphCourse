@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -351,19 +352,33 @@ public class Console {
                         }
                         case "7" -> System.exit(0);
                         case "8" -> {
-                            System.out.println("Введите название вершины истока (или 'выход' для выхода из действия):");
-                            String nodeSrc = scanner.nextLine();
-                            if (nodeSrc.equals("выход")) {
-                                continue;
-                            }
-
-                            System.out.println("Введите название вершины стока (или 'выход' для выхода из действия):");
-                            String nodeSink = scanner.nextLine();
-                            if (nodeSink.equals("выход")) {
-                                continue;
-                            }
                             if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
-                                System.out.println("Максимальный поток: " + ((OrientedUnweightedGraph) graph).fordFulkerson(nodeSrc, nodeSink));
+                                System.out.println("Введите название вершины истока (или 'выход' для выхода из действия):");
+                                String nodeSrc = scanner.nextLine();
+                                if (nodeSrc.equals("выход")) {
+                                    continue;
+                                }
+
+                                System.out.println("Введите название вершины стока (или 'выход' для выхода из действия):");
+                                String nodeSink = scanner.nextLine();
+                                if (nodeSink.equals("выход")) {
+                                    continue;
+                                }
+
+                                Pair<HashMap<Node, HashMap<Node, Connection>>, Integer> result = ((OrientedUnweightedGraph) graph).fordFulkerson(nodeSrc, nodeSink);
+                                System.out.println("Максимальный поток: " + result.t2());
+
+                                StringBuilder resultString = new StringBuilder();
+                                for (Map.Entry<Node, HashMap<Node, Connection>> entry : result.t1().entrySet()) {
+                                    resultString.append("(").append(entry.getKey()).append("):");
+                                    for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
+                                        resultString.append("(").append(innerEntry.getKey()).append(")[")
+                                                .append(innerEntry.getValue().getFlow()).append("/")
+                                                .append(innerEntry.getValue().getWeight()).append("];");
+                                    }
+                                    resultString.append('\n');
+                                }
+                                System.out.println(resultString);
                             }
                         }
                     }

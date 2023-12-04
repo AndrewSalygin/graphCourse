@@ -1,9 +1,6 @@
 package ru.andrewsalygin.graph.core;
 
-import ru.andrewsalygin.graph.core.utils.ConnectionAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.ConnectionNotExistException;
-import ru.andrewsalygin.graph.core.utils.NodeAlreadyExistException;
-import ru.andrewsalygin.graph.core.utils.NodeNotExistException;
+import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -167,9 +164,10 @@ public class OrientedUnweightedGraph extends Graph {
             throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
     }
 
-    public int fordFulkerson(String sourceNodeName, String sinkNodeName) {
+    public Pair<HashMap<Node, HashMap<Node, Connection>>, Integer> fordFulkerson(String sourceNodeName, String sinkNodeName) {
         Node sourceNode = getObjectNodeByName(sourceNodeName);
         Node sinkNode = getObjectNodeByName(sinkNodeName);
+        checkExistTwoNodes(sourceNode, sinkNode);
 
         // Создаем остаточную сеть
         HashMap<Node, HashMap<Node, Connection>> residualGraph = new HashMap<>(graph);
@@ -201,7 +199,7 @@ public class OrientedUnweightedGraph extends Graph {
             maxFlow += minCapacity;
         }
 
-        return maxFlow;
+        return new Pair<>(residualGraph, maxFlow);
     }
 
     private void updateFlow(HashMap<Node, HashMap<Node, Connection>> residualGraph, List<Node> augmentingPath, int minCapacity) {
