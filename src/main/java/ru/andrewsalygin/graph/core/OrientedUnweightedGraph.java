@@ -249,9 +249,26 @@ public class OrientedUnweightedGraph extends Graph {
                 break;
             }
         }
+        findAllNegativeNodes(negativeCyclesNodes);
         for (Node negativeNode : negativeCyclesNodes) {
             d.put(negativeNode, Integer.MIN_VALUE);
             parents.put(negativeNode, negativeNode);
+        }
+    }
+
+    private void findAllNegativeNodes(Set<Node> negativeNodes) {
+        Queue<Node> negativeNodesTempQueue = new LinkedList<>(negativeNodes);
+        while (!negativeNodesTempQueue.isEmpty()) {
+            Node tmpNode = negativeNodesTempQueue.poll();
+            if (!negativeNodes.contains(tmpNode)) {
+                negativeNodes.add(tmpNode);
+            }
+            for (Map.Entry<Node, Connection> entry : graph.get(tmpNode).entrySet()) {
+                if (!negativeNodes.contains(entry.getKey())) {
+                    negativeNodesTempQueue.add(entry.getKey());
+                    negativeNodes.add(entry.getKey());
+                }
+            }
         }
     }
 }
