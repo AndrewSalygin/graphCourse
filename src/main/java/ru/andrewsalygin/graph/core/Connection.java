@@ -8,6 +8,7 @@ public class Connection {
 
     public Connection(Integer weight) {
         this.weight = weight;
+        flow = 0;
     }
 
     public Integer getCapacity() {

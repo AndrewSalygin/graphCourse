@@ -164,28 +164,23 @@ public class OrientedUnweightedGraph extends Graph {
             throw new NodeNotExistException("Узла назначения не существует в текущем графе.");
     }
 
-    public Pair<HashMap<Node, HashMap<Node, Connection>>, Integer> fordFulkerson(String sourceNodeName, String sinkNodeName) {
+    public Triple<List<List<Node>>, HashMap<Node, HashMap<Node, Connection>>, Integer> fordFulkerson(String sourceNodeName, String sinkNodeName) {
         Node sourceNode = getObjectNodeByName(sourceNodeName);
         Node sinkNode = getObjectNodeByName(sinkNodeName);
         checkExistTwoNodes(sourceNode, sinkNode);
 
-        // Создаем остаточную сеть
-        HashMap<Node, HashMap<Node, Connection>> residualGraph = new HashMap<>(graph);
-
-        // Начально устанавливаем поток на каждом ребре в 0
-        for (Map.Entry<Node, HashMap<Node, Connection>> entry : residualGraph.entrySet()) {
-            for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
-                innerEntry.getValue().setFlow(0);
-            }
-        }
+        // Создаем копию графа
+        HashMap<Node, HashMap<Node, Connection>> residualGraph = new OrientedUnweightedGraph(this).graph;
 
         int maxFlow = 0;
+        List<List<Node>> augmentingPaths = new ArrayList<>();
 
         // Находим увеличивающий путь в остаточной сети
         List<Node> augmentingPath = findAugmentingPath(residualGraph, sourceNode, sinkNode);
 
         // Пока увеличивающий путь существует
         while (augmentingPath != null) {
+            augmentingPaths.add(augmentingPath);
             // Находим минимальную пропускную способность на увеличивающем пути
             int minCapacity = findMinCapacity(residualGraph, augmentingPath);
 
@@ -199,7 +194,7 @@ public class OrientedUnweightedGraph extends Graph {
             maxFlow += minCapacity;
         }
 
-        return new Pair<>(residualGraph, maxFlow);
+        return new Triple<>(augmentingPaths, residualGraph, maxFlow);
     }
 
     private void updateFlow(HashMap<Node, HashMap<Node, Connection>> residualGraph, List<Node> augmentingPath, int minCapacity) {
@@ -208,7 +203,11 @@ public class OrientedUnweightedGraph extends Graph {
             Node next = augmentingPath.get(i + 1);
 
             Connection connection = residualGraph.get(current).get(next);
-
+            if (residualGraph.get(next).get(current) == null) {
+                HashMap<Node, Connection> tmpHM = residualGraph.getOrDefault(next, new HashMap<>());
+                tmpHM.put(current, new Connection(connection.weight));
+                residualGraph.put(next, tmpHM);
+            }
             connection.setFlow(connection.getFlow() + minCapacity);
         }
     }
@@ -265,6 +264,33 @@ public class OrientedUnweightedGraph extends Graph {
 
         // Увеличивающий путь не найден
         return null;
+    }
+
+    private static HashMap<Node, HashMap<Node, Connection>> toUndirectedGraph(HashMap<Node, HashMap<Node, Connection>> graph) {
+        HashMap<Node, HashMap<Node, Connection>> undirectedGraph = new HashMap<>();
+        for (var entry : graph.entrySet()) {
+            for (var innerEntry : entry.getValue().entrySet()) {
+                if (!undirectedGraph.containsKey(entry.getKey())) {
+                    undirectedGraph.put(entry.getKey(), new HashMap<>());
+                }
+                if (!undirectedGraph.containsKey(innerEntry.getKey())) {
+                    undirectedGraph.put(innerEntry.getKey(), new HashMap<>());
+                }
+                HashMap<Node, Connection> tmpHM1 = undirectedGraph.get(entry.getKey());
+                if (!tmpHM1.containsKey(innerEntry.getKey())) {
+                    tmpHM1.put(innerEntry.getKey(), innerEntry.getValue());
+                }
+
+                if (!undirectedGraph.containsKey(innerEntry.getKey())) {
+                    undirectedGraph.put(innerEntry.getKey(), new HashMap<>());
+                }
+                HashMap<Node, Connection> tmpHM2 = undirectedGraph.get(innerEntry.getKey());
+                if (!tmpHM2.containsKey(entry.getKey())) {
+                    tmpHM2.put(entry.getKey(), new Connection(innerEntry.getValue().weight));
+                }
+            }
+        }
+        return undirectedGraph;
     }
 }
 

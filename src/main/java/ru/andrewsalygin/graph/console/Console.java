@@ -6,10 +6,7 @@ import ru.andrewsalygin.graph.core.utils.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 
 // TO DO: Если ребро уже существует: может вы хотите поменять вес?
@@ -195,7 +192,9 @@ public class Console {
             System.out.println("5. Сохранить граф в файл");
             System.out.println("6. Вернуться назад");
             System.out.println("7. Выйти из программы");
-            System.out.println("8. Найти максимальный поток");
+            if (graph instanceof OrientedWeightedGraph || graph instanceof UndirectedWeightedGraph) {
+                System.out.println("8. Найти максимальный поток");
+            }
             String option = scanner.nextLine();
 
             // TO DO: Перенести в отдельный метод повторение кода для двух вершин
@@ -365,11 +364,25 @@ public class Console {
                                     continue;
                                 }
 
-                                Pair<HashMap<Node, HashMap<Node, Connection>>, Integer> result = ((OrientedUnweightedGraph) graph).fordFulkerson(nodeSrc, nodeSink);
-                                System.out.println("Максимальный поток: " + result.t2());
+                                Triple<List<List<Node>>, HashMap<Node, HashMap<Node, Connection>>, Integer> result = ((OrientedUnweightedGraph) graph).fordFulkerson(nodeSrc, nodeSink);
+                                System.out.println("Максимальный поток: " + result.t3());
+
+                                boolean firstElement;
+                                for (var list : result.t1()) {
+                                    firstElement = true;
+                                    for (var element : list) {
+                                        if (firstElement) {
+                                            System.out.print(element);
+                                            firstElement = false;
+                                            continue;
+                                        }
+                                        System.out.print(" -> " + element);
+                                    }
+                                    System.out.println();
+                                }
 
                                 StringBuilder resultString = new StringBuilder();
-                                for (Map.Entry<Node, HashMap<Node, Connection>> entry : result.t1().entrySet()) {
+                                for (Map.Entry<Node, HashMap<Node, Connection>> entry : result.t2().entrySet()) {
                                     resultString.append("(").append(entry.getKey()).append("):");
                                     for (Map.Entry<Node, Connection> innerEntry : entry.getValue().entrySet()) {
                                         resultString.append("(").append(innerEntry.getKey()).append(")[")
@@ -379,6 +392,8 @@ public class Console {
                                     resultString.append('\n');
                                 }
                                 System.out.println(resultString);
+                            } else {
+                                System.out.println("Введите одну из цифр пункта меню.");
                             }
                         }
                     }
