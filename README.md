@@ -1,3 +1,4 @@
+**Screenshots:**
 ![1](https://github.com/AndrewSalygin/graphCourse/assets/46914821/81445ead-12c7-4659-912c-8c98d1e63d6a)
 ![0](https://github.com/AndrewSalygin/graphCourse/assets/46914821/e0238ee4-175a-4c53-81da-6cdd811bd275)
 ![2](https://github.com/AndrewSalygin/graphCourse/assets/46914821/196b4ed4-34ed-486a-820a-d534729287c8)
